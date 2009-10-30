@@ -188,38 +188,45 @@ DxFBSet(struct rhdCrtc *Crtc, CARD16 Pitch, CARD16 Width, CARD16 Height,
 {
     RHDPtr rhdPtr = RHDPTRI(Crtc);
     CARD16 RegOff;
-
+	
     LOG("FUNCTION: %s: %s (%d[%d]x%d@%dbpp)  +0x%x )\n",
-	     __func__, Crtc->Name, Width, Pitch, Height, bpp, Offset);
-
+		__func__, Crtc->Name, Width, Pitch, Height, bpp, Offset);
+	
     if (Crtc->Id == RHD_CRTC_1)
-	RegOff = D1_REG_OFFSET;
+		RegOff = D1_REG_OFFSET;
     else
-	RegOff = D2_REG_OFFSET;
-
+		RegOff = D2_REG_OFFSET;
+	
     RHDRegMask(Crtc, RegOff + D1GRPH_ENABLE, 1, 0x00000001);
-
+	
     /* disable R/B swap, disable tiling, disable 16bit alpha, etc. */
     RHDRegWrite(Crtc, RegOff + D1GRPH_CONTROL, 0);
-
+	
     switch (bpp) {
-    case 8:
-	RHDRegMask(Crtc, RegOff + D1GRPH_CONTROL, 0, 0x00000703);
-	break;
-    case 15:
-	RHDRegMask(Crtc, RegOff + D1GRPH_CONTROL, 0x000001, 0x00000703);
-	break;
-    case 16:
-	RHDRegMask(Crtc, RegOff + D1GRPH_CONTROL, 0x000101, 0x00000703);
-	break;
-    case 24:
-    case 32:
-    default:
-	RHDRegMask(Crtc, RegOff + D1GRPH_CONTROL, 0x000002, 0x00000703);
-	break;
-    /* TODO: 64bpp ;p */
+		case 8:
+			RHDRegMask(Crtc, RegOff + D1GRPH_CONTROL, 0, 0x00000703);
+			break;
+		case 15:
+			RHDRegMask(Crtc, RegOff + D1GRPH_CONTROL, 0x000001, 0x00000703);
+			break;
+		case 16:
+			RHDRegMask(Crtc, RegOff + D1GRPH_CONTROL, 0x000101, 0x00000703);
+			break;
+		case 32:
+			if (xf86Screens[0]->bitsPerComponent == 10)
+				RHDRegMask(Crtc, RegOff + D1GRPH_CONTROL, 0x000102, 0x00000703);
+			else
+				RHDRegMask(Crtc, RegOff + D1GRPH_CONTROL, 0x000002, 0x00000703);
+			break;
+		case 64:
+			RHDRegMask(Crtc, RegOff + D1GRPH_CONTROL, 0x000003, 0x00000703);
+			break;
+		default:
+			RHDRegMask(Crtc, RegOff + D1GRPH_CONTROL, 0x000002, 0x00000703);
+			break;
+			/* TODO: 64bpp ;p */
     }
-
+	
     /* Make sure that we are not swapping colours around */
     if (rhdPtr->ChipSet > RHD_R600)
 	RHDRegWrite(Crtc, RegOff + D1GRPH_SWAP_CNTL, 0);

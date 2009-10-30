@@ -40,28 +40,27 @@
  *  - for those with access to the VESA DMT standard; review please.
  *  - swap M_T_DEFAULT for M_T_EDID_...
  */
-//#define MODEPREFIX(name) NULL, NULL, name, 0,M_T_DRIVER
-#define MODEPREFIX(name) NULL, NULL, 0, name, 0,M_T_DRIVER
+#define MODEPREFIX(name) NULL, NULL, name, 0,M_T_DRIVER, 0
 #define MODESUFFIX   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,FALSE,FALSE,0,NULL,0,0.0,0.0
 
 static DisplayModeRec EDIDEstablishedModes[17] = {
-    { MODEPREFIX("800x600"),    40000,  800,  840,  968, 1056, 0,  600,  601,  605,  628, 0, V_PHSYNC | V_PVSYNC, MODESUFFIX }, /* 800x600@60Hz */
-    { MODEPREFIX("800x600"),    36000,  800,  824,  896, 1024, 0,  600,  601,  603,  625, 0, V_PHSYNC | V_PVSYNC, MODESUFFIX }, /* 800x600@56Hz */
-    { MODEPREFIX("640x480"),    31500,  640,  656,  720,  840, 0,  480,  481,  484,  500, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX }, /* 640x480@75Hz */
-    { MODEPREFIX("640x480"),    31500,  640,  664,  704,  832, 0,  480,  489,  491,  520, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX }, /* 640x480@72Hz */
-    { MODEPREFIX("640x480"),    30240,  640,  704,  768,  864, 0,  480,  483,  486,  525, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX }, /* 640x480@67Hz */
-    { MODEPREFIX("640x480"),    25200,  640,  656,  752,  800, 0,  480,  490,  492,  525, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX }, /* 640x480@60Hz */
-    { MODEPREFIX("720x400"),    35500,  720,  738,  846,  900, 0,  400,  421,  423,  449, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX }, /* 720x400@88Hz */
-    { MODEPREFIX("720x400"),    28320,  720,  738,  846,  900, 0,  400,  412,  414,  449, 0, V_NHSYNC | V_PVSYNC, MODESUFFIX }, /* 720x400@70Hz */
-    { MODEPREFIX("1280x1024"), 135000, 1280, 1296, 1440, 1688, 0, 1024, 1025, 1028, 1066, 0, V_PHSYNC | V_PVSYNC, MODESUFFIX }, /* 1280x1024@75Hz */
-    { MODEPREFIX("1024x768"),   78800, 1024, 1040, 1136, 1312, 0,  768,  769,  772,  800, 0, V_PHSYNC | V_PVSYNC, MODESUFFIX }, /* 1024x768@75Hz */
-    { MODEPREFIX("1024x768"),   75000, 1024, 1048, 1184, 1328, 0,  768,  771,  777,  806, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX }, /* 1024x768@70Hz */
-    { MODEPREFIX("1024x768"),   65000, 1024, 1048, 1184, 1344, 0,  768,  771,  777,  806, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX }, /* 1024x768@60Hz */
-    { MODEPREFIX("1024x768"),   44900, 1024, 1032, 1208, 1264, 0,  768,  768,  776,  817, 0, V_PHSYNC | V_PVSYNC | V_INTERLACE, MODESUFFIX }, /* 1024x768@43Hz */
-    { MODEPREFIX("832x624"),    57284,  832,  864,  928, 1152, 0,  624,  625,  628,  667, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX }, /* 832x624@75Hz */
-    { MODEPREFIX("800x600"),    49500,  800,  816,  896, 1056, 0,  600,  601,  604,  625, 0, V_PHSYNC | V_PVSYNC, MODESUFFIX }, /* 800x600@75Hz */
-    { MODEPREFIX("800x600"),    50000,  800,  856,  976, 1040, 0,  600,  637,  643,  666, 0, V_PHSYNC | V_PVSYNC, MODESUFFIX }, /* 800x600@72Hz */
-    { MODEPREFIX("1152x864"),  108000, 1152, 1216, 1344, 1600, 0,  864,  865,  868,  900, 0, V_PHSYNC | V_PVSYNC, MODESUFFIX }, /* 1152x864@75Hz */
+    { MODEPREFIX("800x600"),    40000,  800,  840,  968, 1056, 0,  600,  601,  605,  628, 0, V_PHSYNC | V_PVSYNC, MODESUFFIX }, // 800x600@60Hz
+    { MODEPREFIX("800x600"),    36000,  800,  824,  896, 1024, 0,  600,  601,  603,  625, 0, V_PHSYNC | V_PVSYNC, MODESUFFIX }, // 800x600@56Hz
+    { MODEPREFIX("640x480"),    31500,  640,  656,  720,  840, 0,  480,  481,  484,  500, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX }, // 640x480@75Hz
+    { MODEPREFIX("640x480"),    31500,  640,  664,  704,  832, 0,  480,  489,  491,  520, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX }, // 640x480@72Hz
+    { MODEPREFIX("640x480"),    30240,  640,  704,  768,  864, 0,  480,  483,  486,  525, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX }, // 640x480@67Hz
+    { MODEPREFIX("640x480"),    25200,  640,  656,  752,  800, 0,  480,  490,  492,  525, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX }, // 640x480@60Hz
+    { MODEPREFIX("720x400"),    35500,  720,  738,  846,  900, 0,  400,  421,  423,  449, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX }, // 720x400@88Hz
+    { MODEPREFIX("720x400"),    28320,  720,  738,  846,  900, 0,  400,  412,  414,  449, 0, V_NHSYNC | V_PVSYNC, MODESUFFIX }, // 720x400@70Hz
+    { MODEPREFIX("1280x1024"), 135000, 1280, 1296, 1440, 1688, 0, 1024, 1025, 1028, 1066, 0, V_PHSYNC | V_PVSYNC, MODESUFFIX }, // 1280x1024@75Hz
+    { MODEPREFIX("1024x768"),   78800, 1024, 1040, 1136, 1312, 0,  768,  769,  772,  800, 0, V_PHSYNC | V_PVSYNC, MODESUFFIX }, // 1024x768@75Hz
+    { MODEPREFIX("1024x768"),   75000, 1024, 1048, 1184, 1328, 0,  768,  771,  777,  806, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX }, // 1024x768@70Hz
+    { MODEPREFIX("1024x768"),   65000, 1024, 1048, 1184, 1344, 0,  768,  771,  777,  806, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX }, // 1024x768@60Hz
+    { MODEPREFIX("1024x768"),   44900, 1024, 1032, 1208, 1264, 0,  768,  768,  776,  817, 0, V_PHSYNC | V_PVSYNC | V_INTERLACE, MODESUFFIX }, // 1024x768@43Hz
+    { MODEPREFIX("832x624"),    57284,  832,  864,  928, 1152, 0,  624,  625,  628,  667, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX }, // 832x624@75Hz
+    { MODEPREFIX("800x600"),    49500,  800,  816,  896, 1056, 0,  600,  601,  604,  625, 0, V_PHSYNC | V_PVSYNC, MODESUFFIX }, // 800x600@75Hz
+    { MODEPREFIX("800x600"),    50000,  800,  856,  976, 1040, 0,  600,  637,  643,  666, 0, V_PHSYNC | V_PVSYNC, MODESUFFIX }, // 800x600@72Hz
+    { MODEPREFIX("1152x864"),  108000, 1152, 1216, 1344, 1600, 0,  864,  865,  868,  900, 0, V_PHSYNC | V_PVSYNC, MODESUFFIX }, // 1152x864@75Hz
 };
 
 static DisplayModePtr
@@ -128,12 +127,7 @@ EDIDModeFromDetailedTiming(int scrnIndex, struct detailed_timings *timing)
 	bzero(Mode, sizeof(DisplayModeRec));
 	//memset(Mode, 0, sizeof(DisplayModeRec));
 
-    Mode->name = (char *)IOMalloc(10); /* "1234x1234" */
-  	if (!Mode->name) {
-		IODelete(Mode, DisplayModeRec, 1);
-		return NULL;
-	}
-	snprintf(Mode->name, 20, "%dx%d", timing->h_active, timing->v_active);
+	snprintf(Mode->name, 10, "%dx%d", timing->h_active, timing->v_active);
 
     Mode->type = M_T_DRIVER;
 
@@ -258,9 +252,8 @@ RHDMonitorEDIDSet(struct rhdMonitor *Monitor, xf86MonPtr EDID)
         return;
 
     /* We don't parse the detailed name yet, so use ABC-0123 */
-    Monitor->Name = (char *)IOMalloc(9);
-	bzero(Monitor->Name, 9);
-    snprintf(Monitor->Name, 9, "%s-%04X", EDID->vendor.name,
+ 	bzero(Monitor->Name, MONITOR_NAME_SIZE);
+    snprintf(Monitor->Name, MONITOR_NAME_SIZE, "%s-%04X", EDID->vendor.name,
              EDID->vendor.prod_id);
 
     /* Add established timings */
@@ -325,10 +318,8 @@ RHDMonitorEDIDSet(struct rhdMonitor *Monitor, xf86MonPtr EDID)
 				Modes = RHDModesAdd(Modes, Mode);
 				break;
 			case DS_NAME:
-				IOFree(Monitor->Name, strlen(Monitor->Name) + 1);
-				Monitor->Name = (char *)IOMalloc(13);
-				bzero(Monitor->Name, 13);
-				memcpy(Monitor->Name, EDID->det_mon[i].section.name, 13);
+				bzero(Monitor->Name, MONITOR_NAME_SIZE);
+				memcpy(Monitor->Name, EDID->det_mon[i].section.name, MONITOR_NAME_SIZE);
 				break;
 			default:
 				break;

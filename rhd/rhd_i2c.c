@@ -23,12 +23,17 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include <IOKit/graphics/IOGraphicsTypes.h>
+#include <IOKit/ndrvsupport/IOMacOSVideo.h>
+
 #include "xf86.h"
 #include "xf86i2c.h"
 
 #include "rhd.h"
 #include "rhd_i2c.h"
 #include "rhd_regs.h"
+#include "rhd_connector.h"
+#include "rhd_output.h"
 
 #ifdef ATOM_BIOS
 #include "rhd_atombios.h"
@@ -37,6 +42,8 @@
 #define MAX_I2C_LINES 6
 
 #define RHD_I2C_STATUS_LOOPS 5000
+
+#define BUS_NAME_SIZE 18
 
 enum rhdDDClines {
     rhdDdc1data = 0,
@@ -62,13 +69,13 @@ typedef struct _rhdI2CRec
 {
     CARD16 prescale;
     union {
-	CARD8 line;
-	struct i2cGpio {
-	    enum rhdDDClines Sda;
-	    enum rhdDDClines Scl;
-	    CARD32 SdaReg;
-	    CARD32 SclReg;
-	} Gpio;
+		CARD8 line;
+		struct i2cGpio {
+			enum rhdDDClines Sda;
+			enum rhdDDClines Scl;
+			CARD32 SdaReg;
+			CARD32 SclReg;
+		} Gpio;
     } u;
     int scrnIndex;
 } rhdI2CRec;
@@ -438,6 +445,7 @@ rhd5xxI2CStatus(I2CBusPtr I2CPtr)
     RHDRegMask(I2CPtr, R5_DC_I2C_RESET, R5_DC_I2C_ABORT, 0xff00);
     return FALSE;
 }
+
 
 Bool
 rhd5xxWriteReadChunk(I2CDevPtr i2cDevPtr, int line, I2CByte *WriteBuffer,
@@ -1107,13 +1115,13 @@ rhdTearDownI2C(I2CBusPtr *I2C)
      * So we cannot use it. How bad!
      */
     for (i = 0; i < MAX_I2C_LINES; i++) {
-	char *name;
-	if (!I2C[i])
-	    break;
-	name = I2C[i]->BusName;
-	xfree(I2C[i]->DriverPrivate.ptr);
-	xf86DestroyI2CBusRec(I2C[i], TRUE, TRUE);
-	xfree(name);
+		char *name;
+		if (!I2C[i])
+			break;
+		name = I2C[i]->BusName;
+	    IODelete(I2C[i]->DriverPrivate.ptr, rhdI2CRec, 1);
+		xf86DestroyI2CBusRec(I2C[i], TRUE, TRUE);
+		IOFree(name, BUS_NAME_SIZE);
     }
     IODelete(I2C, I2CBusPtr, MAX_I2C_LINES);
 }
@@ -1206,7 +1214,8 @@ rhdInitI2C(int scrnIndex)
 
 	I2CList = IONew(I2CBusPtr, MAX_I2C_LINES);
     if (!I2CList) {
-	LOG("%s: Out of memory.\n",__func__);
+		LOG("%s: Out of memory.\n",__func__);
+		return NULL;
     } else bzero(I2CList, sizeof(I2CBusPtr) * MAX_I2C_LINES);
     /* We have 4 I2C lines */
     for (i = 0; i < numLines; i++) {
@@ -1303,7 +1312,7 @@ rhdInitI2C(int scrnIndex)
 	    goto error;
 	}
 	I2CPtr->DriverPrivate.ptr = (pointer)I2C;
-	if (!(I2CPtr->BusName = (char *)IOMalloc(18))) {
+	if (!(I2CPtr->BusName = (char *)IOMalloc(BUS_NAME_SIZE))) {
 	    LOG("%s: Cannot allocate memory.\n",__func__);
 	    IODelete(I2C, rhdI2CRec, 1);
 	    xf86DestroyI2CBusRec(I2CPtr, TRUE, FALSE);
@@ -1324,7 +1333,7 @@ rhdInitI2C(int scrnIndex)
 
 	if (!(xf86I2CBusInit(I2CPtr))) {
 	    LOG("I2C BusInit failed for bus %d\n",i);
-	    xfree(I2CPtr->BusName);
+	    IOFree(I2CPtr->BusName, BUS_NAME_SIZE);
 	    IODelete(I2C, rhdI2CRec, 1);
 	    xf86DestroyI2CBusRec(I2CPtr, TRUE, FALSE);
 	    goto error;
@@ -1420,3 +1429,400 @@ RHDI2CFunc(int scrnIndex, I2CBusPtr *I2CList, RHDi2cFunc func,
     return RHD_I2C_FAILED;
 }
 
+//reversed code by Dong
+struct SenseDataInfo {
+	UInt32			regEnable;		//0
+	UInt32			regMask;		//4
+	UInt32			regA;			//8
+	UInt32			regY;			//C
+	UInt32			bitsMask1;		//10	clock 1	data 2
+	UInt32			bitsMask2;		//14
+	UInt32			bitsEnable1;	//18
+	UInt32			bitsY1;			//1C
+	UInt32			bitsEnable2;	//20
+	UInt32			bitsY2;			//24
+};
+
+static Bool hwGetSenseConfig(int line, struct SenseDataInfo *info) {
+	info->bitsEnable1 = 1;
+	info->bitsEnable2 = 0x100;
+	info->bitsY1 = 1;
+	info->bitsY2 = 0x100;
+	info->bitsMask1 = 0x101;
+	info->bitsMask2 = 0;
+	
+	switch (line) {
+		case 0:
+			info->regEnable = 0x7E48;
+			info->regMask = 0x7E40;
+			info->regA = 0x7E44;
+			info->regY = 0x7E4C;
+			break;
+		case 1:
+			info->regEnable = 0x7E58;
+			info->regMask = 0x7E50;
+			info->regA = 0x7E54;
+			info->regY = 0x7E5C;
+			break;
+		case 2:
+			info->regEnable = 0x7E68;
+			info->regMask = 0x7E60;
+			info->regA = 0x7E64;
+			info->regY = 0x7E6C;
+			break;
+		case 6:
+			info->regEnable = 0x0C5C;
+			info->regMask = 0x0C54;
+			info->regA = 0x0C58;
+			info->regY = 0x0C60;
+			info->bitsEnable1 = 1;
+			info->bitsEnable2 = 2;
+			info->bitsY1 = 1;
+			info->bitsY2 = 2;
+			info->bitsMask1 = 3;
+			info->bitsMask2 = 0;
+			break;
+		default:
+			return FALSE;
+	}
+	return TRUE;
+}
+
+static Bool setSenseManual(I2CBusPtr I2CPtr, int line , Bool on) {
+	struct SenseDataInfo info;
+	if (!hwGetSenseConfig(line, &info)) return FALSE;
+	UInt32 mask = RHDRegRead(I2CPtr, info.regMask);
+	mask &= ~(info.bitsMask1 | info.bitsMask2);
+	if (on) mask |= info.bitsMask1;
+	RHDRegWrite(I2CPtr, info.regEnable, 0);
+	RHDRegWrite(I2CPtr, info.regA, 0);
+	RHDRegWrite(I2CPtr, info.regMask, mask);
+	return TRUE;
+}
+
+static UInt8 DDCGetSense(I2CBusPtr I2CPtr, int line) {
+	UInt32 En, Y;
+	UInt8 sense;
+	struct SenseDataInfo info;
+	
+	if (!hwGetSenseConfig(line, &info)) return 0;
+	
+	En = RHDRegRead(I2CPtr, info.regEnable);
+	Y = RHDRegRead(I2CPtr, info.regY);
+	
+	sense = 0;
+	if (En & info.bitsEnable2) sense |= 0x20;
+	if (Y & info.bitsY2) sense |= 4;
+	if (En & info.bitsEnable1) sense |= 0x10;
+	if (Y & info.bitsY1) sense |= 2;
+	
+	return sense;
+}
+
+static void DDCSetSense(I2CBusPtr I2CPtr, int line, UInt8 sense) {
+	UInt32 En;
+	struct SenseDataInfo info;
+	
+	if (!hwGetSenseConfig(line, &info)) return;
+	
+	En = 0;
+	if ((sense & 0x24) == 0x20) En |= info.bitsEnable2;
+	if ((sense & 0x12) == 0x10) En |= info.bitsEnable1;
+	
+	RHDRegWrite(I2CPtr, info.regMask, info.bitsMask1);
+	RHDRegWrite(I2CPtr, info.regA, 0);
+	RHDRegWrite(I2CPtr, info.regEnable, En);
+}
+
+static UInt8 clockData;
+
+static void DDCSetClock(I2CBusPtr I2CPtr, int line, UInt8 data) {	
+	UInt8 outByte = clockData | 0x10;
+	if (data) outByte |= 2;
+	else outByte &= 0xFD;
+	DDCSetSense(I2CPtr, line, outByte);
+	IODelay(5);
+	clockData = outByte;
+}
+
+static UInt8 DDCGetClock(I2CBusPtr I2CPtr, int line) {
+	return ((DDCGetSense(I2CPtr, line) >> 1) & 1);
+}
+
+static void DDCSetData(I2CBusPtr I2CPtr, int line, UInt8 data) {
+	UInt8 outByte = clockData | 0x20;
+	if (data) outByte |= 4;
+	else outByte &= 0xFB;
+	DDCSetSense(I2CPtr, line, outByte);
+	IODelay(5);
+	clockData = outByte;
+}
+
+static UInt8 DDCGetData(I2CBusPtr I2CPtr, int line) {
+	return ((DDCGetSense(I2CPtr, line) >> 2) & 1);
+}
+
+static void DDCFreeClock(I2CBusPtr I2CPtr, int line) {
+	UInt8 data = clockData & 0xDF;
+	DDCSetSense(I2CPtr, line, data);
+	IODelay(5);
+	clockData = data;
+}
+
+static void DDCFreeData(I2CBusPtr I2CPtr, int line) {
+	UInt8 data = clockData & 0xEF;
+	DDCSetSense(I2CPtr, line, data);
+	IODelay(5);
+	clockData = data;
+}
+
+static void DDCInit(I2CBusPtr I2CPtr, int line) {
+	DDCSetClock(I2CPtr, line, 1);
+	DDCSetData(I2CPtr, line, 1);
+	DDCFreeClock(I2CPtr, line);
+	DDCFreeData(I2CPtr, line);
+	clockData = 0;
+}
+
+static Bool areBothDataAndClock(I2CBusPtr I2CPtr, int line, UInt8 value) {
+	UInt8 data = DDCGetSense(I2CPtr, line);
+	if (value != ((data >> 2) & 1)) return FALSE;
+	data = DDCGetSense(I2CPtr, line);
+	return (value == ((data >> 1) & 1));
+}
+
+static UInt8 DDCWaitClockHigh(I2CBusPtr I2CPtr, int line) {
+	DDCSetClock(I2CPtr, line, 1);
+	int i;
+	for (i = 0;i < 500;i++) {
+		if (DDCGetClock(I2CPtr, line)) break;
+		IODelay(10);
+	}
+	return DDCGetClock(I2CPtr, line);
+}
+
+static Bool DDCSetStart(I2CBusPtr I2CPtr, int line) {
+	//if (!setSenseManual(I2CPtr, line, 1)) return FALSE;
+	DDCSetData(I2CPtr, line, 1);
+	IODelay(5);
+	if (!DDCWaitClockHigh(I2CPtr, line)) return FALSE;
+	IODelay(5);
+	DDCSetData(I2CPtr, line, 0);
+	IODelay(15);
+	DDCSetClock(I2CPtr, line, 0);
+	IODelay(5);
+	return TRUE;
+}
+
+static Bool DDCSetStop(I2CBusPtr I2CPtr, int line) {
+	DDCSetClock(I2CPtr, line, 0);
+	IODelay(5);
+	DDCSetData(I2CPtr, line, 0);
+	IODelay(5);
+	if (!DDCWaitClockHigh(I2CPtr, line)) return FALSE;
+	IODelay(5);
+	DDCSetData(I2CPtr, line, 1);
+	IODelay(15);
+	//setSenseManual(I2CPtr, line, 0);
+	return TRUE;
+}
+/*
+static Bool DDCSense(I2CBusPtr I2CPtr, int line, UInt8 a2) {
+	clockData = 0;
+	if (!setSenseManual(I2CPtr, line, 1)) return FALSE;
+	if ((DDCGetSense(I2CPtr, line) & 2) && !(DDCGetSense(I2CPtr, line) & 4))
+		DDCSetStop(I2CPtr, line, a2);
+	UInt32 delayTime = (5 << a2) & 0xFF;
+	DDCSetSense(I2CPtr, line, clockData & 0xDF);
+	clockData = clockData & 0xDF;
+	DDCSetSense(I2CPtr, line, clockData & 0xEF);
+	clockData = clockData & 0xEF;
+	IODelay(delayTime);
+	if (areBothDataAndClock(I2CPtr, line, 1)) {
+		DDCSetSense(I2CPtr, line, (clockData | 0x10) & 0xFD);
+		clockData = (clockData | 0x10) & 0xFD;
+		DDCSetSense(I2CPtr, line, (clockData | 0x20) & 0xFB);
+		clockData = (clockData | 0x20) & 0xFB;
+		IODelay(delayTime);
+		Bool bothZero = areBothDataAndClock(I2CPtr, line, 0);
+		DDCSetSense(I2CPtr, line, clockData & 0xEF);
+		clockData = clockData & 0xEF;
+		DDCSetSense(I2CPtr, line, clockData & 0xDF);
+		clockData = clockData & 0xDF;
+		IODelay(delayTime);
+		if (bothZero && areBothDataAndClock(I2CPtr, line, 1)) return TRUE;
+	}
+	setSenseManual(I2CPtr, line, 0);
+	return FALSE;
+}
+*/
+static Bool ErrorRecovery(I2CBusPtr I2CPtr, int line) {
+	Bool ret = TRUE;
+	int i;
+	for (i = 0;i < 9;i++) {
+		if (DDCGetData(I2CPtr, line) && DDCGetClock(I2CPtr, line)) break;
+		ret = DDCSetStop(I2CPtr, line);
+	}
+	return ret;	
+}
+
+static UInt8 DDCReceiveBit(I2CBusPtr I2CPtr, int line) {
+	DDCSetClock(I2CPtr, line, 0);
+	IODelay(5);
+	DDCSetData(I2CPtr, line, 1);
+	IODelay(5);
+	DDCWaitClockHigh(I2CPtr, line);
+	IODelay(10);
+	IODelay(15);
+	UInt8 getBit = DDCGetData(I2CPtr, line);
+	DDCSetClock(I2CPtr, line, 0);
+	IODelay(5);
+	return getBit;
+}
+
+static Bool DDCSendBit(I2CBusPtr I2CPtr, int line, UInt8 data) {
+	DDCSetClock(I2CPtr, line, 0);
+	IODelay(5);
+	DDCSetData(I2CPtr, line, data);
+	IODelay(5);
+	if (!DDCWaitClockHigh(I2CPtr, line)) return FALSE;
+	IODelay(10);
+	DDCSetClock(I2CPtr, line, 0);
+	IODelay(5);
+	return TRUE;
+}
+
+static Bool DDCReceiveByte(I2CBusPtr I2CPtr, int line, UInt8* rBuff, UInt8 ack) {
+	UInt8 getByte = 0;
+	int i;
+	for (i = 0;i < 8;i++)
+		if (DDCReceiveBit(I2CPtr, line)) getByte |= 1 << (7 - i);
+	*rBuff = getByte;
+	return DDCSendBit(I2CPtr, line, ack);
+}
+
+static Bool DDCSendByte(I2CBusPtr I2CPtr, int line, UInt8 data) {
+	int i;
+	for (i = 0;i < 8;i++)
+		if (!DDCSendBit(I2CPtr, line, (data >> (7 - i)) & 1)) return FALSE;
+	if (DDCReceiveBit(I2CPtr, line)) return FALSE;
+	return TRUE;
+}
+
+static Bool DDCReadBlock(I2CBusPtr I2CPtr, int line, UInt32 size, UInt8* data) {
+	int i;
+	for (i = 0;(size - 1) > i;i++)
+		if (!DDCReceiveByte(I2CPtr, line, &data[i], 0)) return FALSE;
+	return DDCReceiveByte(I2CPtr, line, &data[i], 1);
+}
+
+static Bool DDCSendBlock(I2CBusPtr I2CPtr, int line, UInt32 size, UInt8* data) {
+	int i;
+	for (i = 0;i < size;i++)
+		if (!DDCSendByte(I2CPtr, line, data[i])) return FALSE;
+	return TRUE;
+}
+
+static Bool TransferBYDDCci(UInt16 addr, UInt8* data, UInt32 size, I2CBusPtr I2CPtr, int line) {
+	Bool ret = TRUE;
+	UInt32 blockSize;
+	
+	DDCInit(I2CPtr, line);
+	do {
+		if (!DDCSetStart(I2CPtr, line)) break;
+		if (!DDCSendByte(I2CPtr, line, addr & 0xFF)) break;
+		if (!DDCReceiveByte(I2CPtr, line, &data[0], 0)) break;
+		if (!DDCReceiveByte(I2CPtr, line, &data[1], 0)) break;
+		blockSize = data[1] & 0x7F + 1;
+		if ((size - 2) < blockSize)
+			ret = DDCReadBlock(I2CPtr, line, size - 2, &data[2]);
+		else
+			ret = DDCReadBlock(I2CPtr, line, blockSize, &data[2]);
+	} while (0);
+	DDCSetStop(I2CPtr, line);
+	if (!ret) ErrorRecovery(I2CPtr, line);
+	return ret;
+}
+
+static Bool TransferI2C(UInt16 addr, UInt8* data, UInt32 size, Bool isCombined, Bool useSubAddr, I2CBusPtr I2CPtr, int line) {
+	Bool ret = TRUE;
+	UInt8 mask = (isCombined)?0xFE:0xFF;
+	UInt8 mainAddr, subAddr;
+	if (useSubAddr) {
+		subAddr = addr & 0xFF;
+		mainAddr = addr >> 8;
+	} else {
+		subAddr = 0;
+		mainAddr = addr & 0xFF;
+	}
+
+	do {
+		DDCInit(I2CPtr, line);
+	} while (!DDCSetStart(I2CPtr, line));
+	if (DDCSendByte(I2CPtr, line, mask & mainAddr)) {
+		if (useSubAddr)
+			ret = DDCSendByte(I2CPtr, line, subAddr);
+		if (ret == TRUE) {
+			if (isCombined && DDCSetStart(I2CPtr, line))
+				ret = DDCSendByte(I2CPtr, line, mainAddr);
+			if (ret == TRUE) {
+				if (mainAddr & 1) ret = DDCReadBlock(I2CPtr, line, size, data);
+				else ret = DDCSendBlock(I2CPtr, line, size, data);
+			}
+		}
+	}
+	if (ret) ret = DDCSetStop(I2CPtr, line);
+	else ErrorRecovery(I2CPtr, line);
+	return ret;
+}
+
+Bool RadeonHDDoCommunication(VDCommunicationRec * info) {
+	Bool ret = FALSE;
+	RHDPtr rhdPtr = RHDPTR(xf86Screens[0]);
+	struct rhdOutput *Output = rhdPtr->Outputs;
+	I2CBusPtr I2CPtr = NULL;
+	int line;
+	
+	if (info->csBusID != 0) return FALSE;
+	Bool isSendCombined = (info->csSendType == kVideoCombinedI2CType)?TRUE:FALSE;
+	Bool useSubAddr = (info->csCommFlags & kVideoUsageAddrSubAddrMask)?TRUE:FALSE;
+	Bool isReplyCombined = (info->csReplyType == kVideoCombinedI2CType)?TRUE:FALSE;
+	
+	while (Output && Output->Active) {
+		I2CPtr = Output->Connector->DDC;
+		if (!I2CPtr) continue;
+		line = ((rhdI2CPtr)(I2CPtr->DriverPrivate.ptr))->u.line;
+		
+		//send
+		if (info->csSendType != kVideoNoTransactionType) {
+			if (info->csSendBuffer == NULL) return FALSE;
+			if (useSubAddr) info->csSendAddress &= 0xFEFF;		//clear bit 8 and higher 16 bits
+			else info->csSendAddress &= 0xFE;					//clear bit 1 and higher 24 bits
+			ret = TransferI2C(info->csSendAddress & 0xFFFF, info->csSendBuffer,
+							  info->csSendSize, isSendCombined, useSubAddr, I2CPtr, line);
+		}
+		
+		if ((info->csSendType != kVideoNoTransactionType) && (info->csReplyType != kVideoNoTransactionType))
+			IODelay(40);
+		
+		//reply			
+		if (ret && (info->csReplyType != kVideoNoTransactionType)) {
+			if (info->csReplyBuffer == NULL) return FALSE;
+			if (useSubAddr) {
+				info->csReplyAddress &= 0xFEFF;			//clear bit 8 and higher 16 bits
+				info->csReplyAddress |= 0x100;			//set bit 8
+			} else {
+				info->csReplyAddress &= 0xFE;			//clear bit 1 and higher 24 bits
+				info->csReplyAddress |= 1;				//set bit 1
+			}
+			if (info->csReplyType == kVideoDDCciReplyTypeMask)
+				ret = TransferBYDDCci(info->csReplyAddress & 0xFF, info->csReplyBuffer, info->csReplySize, I2CPtr, line);
+			else 
+				ret = TransferI2C(info->csReplyAddress & 0xFFFF, info->csReplyBuffer,
+								  info->csReplySize, isReplyCombined, useSubAddr, I2CPtr, line);
+		}
+		if (!ret) LOG("DDC communication failed with Output: %s\n", Output->Name);
+		Output = Output->Next;
+	}
+	return ret;
+}

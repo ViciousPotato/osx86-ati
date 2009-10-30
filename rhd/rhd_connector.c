@@ -184,7 +184,7 @@ rhdConnectorSynthName(struct rhdConnectorInfo *ConnectorInfo,
 	    str2 = strchr(str1, ' ');
 	    if (str2) *(str2) = '\0';
 	    snprintf(str, 20, "TV %s",str1);
-	    IOFree(str1, 20);
+	    IOFree(str1, strlen(str1) + 1);
 	    return str;
 
 	case RHD_CONNECTOR_PCIE: /* should never get here */

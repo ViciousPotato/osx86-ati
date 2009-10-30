@@ -32,9 +32,13 @@ private:
     UInt32	fWidth;
     UInt32	fHeight;
     UInt32	fBitsPerPixel;
+	UInt32	fBitsPerComponent;
+	IOIndex	fDepth;
 	
 	IODisplayModeID	fMode;
 	Fixed	fRefreshRate;
+	
+	GammaTbl		*gTable;
 	
 	IOService		*fNub;
     IOMemoryMap		*IOMap;
@@ -105,13 +109,38 @@ public:
 	
     //virtual IOReturn setCursorState( SInt32 x, SInt32 y, bool visible );
 	
-    //// Controller attributes
+    // Controller attributes
 	
     virtual IOReturn setAttribute( IOSelect attribute, uintptr_t value );
     virtual IOReturn getAttribute( IOSelect attribute, uintptr_t * value );
 	
     virtual IOReturn doDriverIO( UInt32 commandID, void * contents,
 								UInt32 commandCode, UInt32 commandKind );
+	
+	/*! @function setAttributeForConnection
+	 @abstract Generic method to set some attribute of the framebuffer device, specific to one display connection.
+	 @discussion IOFramebuffer subclasses may implement this method to allow arbitrary attribute/value pairs to be set, specific to one display connection. 
+	 @param attribute Defines the attribute to be set. Some defined attributes are:<br> 
+	 kIOCapturedAttribute If the device supports hotplugging displays, it should disable the generation of hot plug interrupts when the attribute kIOCapturedAttribute is set to true.
+	 @param value The new value for the attribute.
+	 @result an IOReturn code.
+	 */
+	
+    virtual IOReturn setAttributeForConnection( IOIndex connectIndex,
+											   IOSelect attribute, UInt32 value );
+
+	/*! @function getAttributeForConnection
+	 @abstract Generic method to retrieve some attribute of the framebuffer device, specific to one display connection.
+	 @discussion IOFramebuffer subclasses may implement this method to allow arbitrary attribute/value pairs to be returned, specific to one display connection. 
+	 @param attribute Defines the attribute to be returned. Some defined attributes are:<br> 
+	 kConnectionSupportsHLDDCSense If the framebuffer supports the DDC methods hasDDCConnect() and getDDCBlock() it should return success (and no value) for this attribute.<br>
+	 kConnectionSupportsLLDDCSense If the framebuffer wishes to make use of IOFramebuffer::doI2CRequest software implementation of I2C it should implement the I2C methods setDDCClock(), setDDCData(), readDDCClock(), readDDCData(), and it should return success (and no value) for this attribute.<br>
+	 @param value Returns the value for the attribute.
+	 @result an IOReturn code.
+	 */
+	
+    virtual IOReturn getAttributeForConnection( IOIndex connectIndex,
+											   IOSelect attribute, UInt32 * value );
 };
 
 #endif /* ! _RADEONHD_H */

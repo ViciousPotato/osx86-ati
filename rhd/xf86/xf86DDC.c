@@ -217,7 +217,7 @@ FetchEDID_DDC1(register ScrnInfoPtr pScrn,
     int count = NUM;
     unsigned int *ptr, *xp;
 
-    ptr=xp=(unsigned int *)xalloc(sizeof(int)*NUM); 
+    ptr=xp=(unsigned int *)IOMalloc(sizeof(int)*NUM); 
 
     if (!ptr)  return NULL;
     do {
@@ -268,7 +268,7 @@ DDCRead_DDC2(int scrnIndex, I2CBusPtr pBus, int start, int len)
 	W_Buffer[0] = start & 0xFF;
 	W_Buffer[1] = (start & 0xFF00) >> 8;
     }
-    R_Buffer = (unsigned char *)xalloc(sizeof(unsigned char) * len);
+    R_Buffer = (unsigned char *)IOMalloc(sizeof(unsigned char) * len);
 	if (!R_Buffer) return NULL;
 	bzero(R_Buffer, sizeof(unsigned char) * len);
     for (i=0; i<RETRIES; i++) {
@@ -281,6 +281,6 @@ DDCRead_DDC2(int scrnIndex, I2CBusPtr pBus, int start, int len)
     }
     
     xf86DestroyI2CDevRec(dev,TRUE);
-    xfree(R_Buffer);
+    IOFree(R_Buffer, sizeof(unsigned char) * len);
     return NULL;
 }

@@ -1527,6 +1527,7 @@ RHDPLLsRestore(RHDPtr rhdPtr)
 	PLL->Restore(PLL);
 }
 
+extern void atompllFreePrivate(struct rhdPLL *PLL);
 /*
  *
  */
@@ -1535,10 +1536,8 @@ RHDPLLsDestroy(RHDPtr rhdPtr)
 {
     RHDFUNC(rhdPtr);
 
-    if (rhdPtr->PLLs[0] && rhdPtr->PLLs[0]->Private)
-	xfree(rhdPtr->PLLs[0]->Private);
+	atompllFreePrivate(rhdPtr->PLLs[0]);
     IODelete(rhdPtr->PLLs[0], struct rhdPLL, 1);
-    if (rhdPtr->PLLs[1] && rhdPtr->PLLs[1]->Private)
-	xfree(rhdPtr->PLLs[1]->Private);
+	atompllFreePrivate(rhdPtr->PLLs[1]);
     IODelete(rhdPtr->PLLs[1], struct rhdPLL, 1);
 }

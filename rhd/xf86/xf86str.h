@@ -140,7 +140,8 @@ typedef enum {
     V_BCAST	= 0x0400,
     V_PIXMUX	= 0x1000,
     V_DBLCLK	= 0x2000,
-    V_CLKDIV2	= 0x4000
+    V_CLKDIV2	= 0x4000,
+	V_STRETCH	= 0x8000
 } ModeFlags;
 
 typedef enum {
@@ -207,7 +208,7 @@ typedef enum {
 # define M_T_EDID     0x040	/* Mode from EDID detailed timings data. */
 # define M_T_PREFER   0x080	/* Preferred mode from EDID data. */
 # define M_T_LOWPREF  0x100	/* A low preference mode. */
-
+	
 	//|---------------------------		CrtcHTotal	------------------------------->|
 	//|--------------------------	CrtcHBlankEnd	------------------------------->|
 	//|---------------------	CrtcHSyncEnd	-------------------->|				|
@@ -224,11 +225,12 @@ typedef enum {
 typedef struct _DisplayModeRec {
     struct _DisplayModeRec *	prev;
     struct _DisplayModeRec *	next;
-	unsigned long	modeID;
-    char *			name;		/* identifier for the mode */
+#define MODE_NAME_LEN 20
+    char			name[MODE_NAME_LEN];		/* identifier for the mode */
     ModeStatus			status;
     int				type;
     
+	SInt32			modeID;
     /* These are the values that the user sees/provides */
     int				Clock;		/* pixel clock freq */
     int				HDisplay;	/* horizontal timing */
@@ -316,6 +318,8 @@ typedef struct _MemoryMap {
 	unsigned char		*EDID_Block;
 	int					EDID_Length;
 	int					bitsPerPixel;
+	int					bitsPerComponent;
+	int					colorFormat;
 } RHDMemoryMap;
 
 typedef struct {
@@ -331,6 +335,9 @@ typedef struct {
 } PciChipsets;
 
 	typedef struct {
+		Bool		enableOSXI2C;
+		Bool		enableGammaTable;
+		Bool		setCLUTAtSetEntries;
 		Bool		enableBacklight;
 		Bool		UseAtomBIOS;	//need initialize it to be true, then overwrote by user
 		Bool		SetIGPMemory;
@@ -365,6 +372,8 @@ typedef struct _ScrnInfoRec {
     int			scrnIndex;		/* Number of this screen */
 
     int			bitsPerPixel;		/* fb bpp */
+	int			bitsPerComponent;
+	int			colorFormat;
     int			depth;			/* depth of default visual */
 	unsigned long	memPhysBase;		/* Physical address of FB */
 	unsigned long 	fbOffset;		/* Offset of FB in the above */
@@ -377,7 +386,7 @@ typedef struct _ScrnInfoRec {
     int			frameY1;
 		
     DisplayModePtr	modes;			/* list of actual modes */
-    DisplayModePtr	NativeMode;
+    //DisplayModePtr	NativeMode;
 	
     int			widthmm;		/* physical display dimensions
 								 * in mm */
@@ -413,7 +422,13 @@ typedef struct {
 
 /* For DPMS */
 typedef void (*DPMSSetProcPtr)(ScrnInfoPtr, int, int);
-
+	
+	//helper functions Dong
+	extern UInt32 getPitch(UInt32 width, UInt32 bytesPerPixel);
+	extern UInt32 HALPixelSize(SInt32 depth);
+	extern UInt32 HALColorBits(SInt32 depth);
+	extern UInt32 HALColorFormat(SInt32 depth);
+	
 #ifdef __cplusplus
 }
 #endif

@@ -79,6 +79,6 @@ int RHDRRModeFixup(ScrnInfoPtr pScrn, DisplayModePtr Mode, struct rhdCrtc *Crtc,
 		   RHDMonitorPtr Monitor, Bool ScaledMode);
 int RHDValidateScaledToMode(struct rhdCrtc *Crtc, DisplayModePtr Mode);
 int RHDRRValidateScaledToMode(struct rhdOutput *Output, DisplayModePtr Mode);
-void RHDSynthModes(int scrnIndex, DisplayModePtr Mode);
+void RHDSynthModes(int scrnIndex, DisplayModePtr Mode, DisplayModePtr NativeMode);
 
 #endif /* _RHD_MODES_H */

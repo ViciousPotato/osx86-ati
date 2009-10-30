@@ -752,14 +752,16 @@ rhdAtomOutputDestroy(struct rhdOutput *Output)
 {
     struct rhdAtomOutputPrivate *Private = (struct rhdAtomOutputPrivate *) Output->Private;
     RHDFUNC(Output);
-    if (Private->Save)
-	xfree(Private->Save);
+    if (Private->Save) {
+		CARD32 len = ((struct atomSaveListRecord *)Private->Save)->Length - 1;
+		IOFree(Private->Save, sizeof(struct atomSaveListRecord) + sizeof(struct atomRegisterList) * len);
+	}
     RHDHdmiDestroy(Private->Hdmi);
 
     if (Private)
 	IODelete(Private, struct rhdAtomOutputPrivate, 1);
     Output->Private = NULL;
-    xfree(Output->Name);
+    IOFree(Output->Name, strlen(Output->Name) + 1);
 }
 
 /*
@@ -1271,7 +1273,7 @@ void
 RhdAtomDestroyBacklightControlProperty(struct rhdOutput *Output, void *PrivatePtr)
 {
     if (PrivatePtr)
-	xfree(PrivatePtr);
+	IODelete(PrivatePtr, struct rhdAtomOutputPrivate, 1);
 }
 
 #endif /* ATOM_BIOS && ATOM_BIOS_PARSER */

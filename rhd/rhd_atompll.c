@@ -48,6 +48,11 @@ struct atomPLLPrivate {
     int StoreCrtc;
 };
 
+void atompllFreePrivate(struct rhdPLL *PLL) {
+    if (PLL && PLL->Private)
+		IODelete(PLL->Private, struct atomPLLPrivate, 1);
+}
+
 /*
  *
  */

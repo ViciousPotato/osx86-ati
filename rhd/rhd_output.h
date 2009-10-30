@@ -69,6 +69,18 @@ enum rhdOutputAllocation {
 
 extern char rhdPowerString[4][15];
 
+#ifdef ATOM_BIOS
+#include "rhd_atombios.h"
+
+struct BIOSScratchOutputPrivate {
+    void (*Mode) (struct rhdOutput *Output, DisplayModePtr Mode);
+    void (*Power) (struct rhdOutput *Output, int Power);
+    void (*Destroy) (struct rhdOutput *Output);
+    struct rhdOutputDevices *OutputDevices;
+	CARD32 devicesCount;
+    enum atomDevice Device;
+};
+#endif
 /*
  *
  * This structure should deal with everything output related.

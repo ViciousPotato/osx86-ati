@@ -11,7 +11,7 @@
 char * xstrdup(const char *s)
 {
 	int len = strlen(s) +1;
-	char * ret = IONew(char, len);
+	char * ret = IOMalloc(sizeof(char) * len);
 	if (ret) bcopy(s, ret, len);
 	return ret;
 }

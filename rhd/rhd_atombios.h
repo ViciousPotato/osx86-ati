@@ -215,12 +215,31 @@ typedef struct AtomChipConfigs
     struct rhdPowerState *Settings;
 } AtomChipConfigs;
 
+enum atomRegisterType {
+    atomRegisterMMIO,
+    atomRegisterMC,
+    atomRegisterPLL,
+    atomRegisterPCICFG
+};
+
+struct atomSaveListRecord
+{
+    /* header */
+    int Length;
+    int Last;
+    struct atomRegisterList{
+		enum atomRegisterType Type;
+		CARD32 Address;
+		CARD32 Value;
+    } RegisterList[1];
+};
 
 typedef union AtomBiosArg
 {
     CARD32 val;
     struct rhdConnectorInfo	*ConnectorInfo;
     struct rhdAtomOutputDeviceList  *OutputDeviceList;
+	CARD32 deviceListCount;
     enum RHD_CHIPSETS		chipset;
     struct AtomGoldenSettings	GoldenSettings;
     unsigned char*		EDIDBlock;

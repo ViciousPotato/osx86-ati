@@ -721,7 +721,7 @@ rhdBIOSScratchDestroyOutputDriverPrivate(struct rhdOutput *Output)
     if (Output->OutputDriverPrivate) {
 	void (*Destroy) (struct rhdOutput *Output) = Output->OutputDriverPrivate->Destroy;
 
-	xfree(Output->OutputDriverPrivate->OutputDevices);
+	IOFree(Output->OutputDriverPrivate->OutputDevices, sizeof(struct rhdOutputDevices) * Output->OutputDriverPrivate->devicesCount);
 	IODelete(Output->OutputDriverPrivate, struct BIOSScratchOutputPrivate, 1);
 	Output->OutputDriverPrivate = NULL;
 	if (Destroy)
@@ -740,49 +740,51 @@ RHDAtomSetupOutputDriverPrivate(struct rhdAtomOutputDeviceList *Devices, struct 
     struct rhdOutputDevices *od = NULL;
     struct BIOSScratchOutputPrivate *OutputDriverPrivate;
     int i = 0, cnt = 0;
-
+	
     RHDFUNC(Output);
-
+	
     if (!Devices) {
-	LOG("Device list doesn't exist.\n");
-	return FALSE;
+		LOG("Device list doesn't exist.\n");
+		return FALSE;
     }
-
+	
     LOG(" Output: %s[0x%2.2x] - adding devices:\n", Output->Name, Output->Id);
-
+	
     while (Devices[i].DeviceId != atomNone) {
-	LOGV(" Looking at DeviceID: 0x%2.2x OutputType: 0x%2.2x ConnectorType: 0x%2.2x\n",
+		LOGV(" Looking at DeviceID: 0x%2.2x OutputType: 0x%2.2x ConnectorType: 0x%2.2x\n",
 		     Devices[i].DeviceId,Devices[i].OutputType,Devices[i].ConnectorType);
-	if (Devices[i].OutputType == Output->Id) {
-	    //if (!(od = (struct rhdOutputDevices *)xrealloc(od, sizeof(struct rhdOutputDevices) * (cnt + 1))))
-		struct rhdOutputDevices *temp = (struct rhdOutputDevices *)xalloc(sizeof(struct rhdOutputDevices) * (cnt + 1));
-		if (temp == NULL) return FALSE;
-		bzero(temp, sizeof(struct rhdOutputDevices) * (cnt + 1));
-		bcopy(od, temp, sizeof(struct rhdOutputDevices) * cnt);
-		xfree(od);
-		od = temp;
-	    LOGV("  >> 0x%2.2x\n", Devices[i].DeviceId);
-	    od[cnt].DeviceId = Devices[i].DeviceId;
-	    od[cnt].ConnectorType = Devices[i].ConnectorType;
-	    cnt++;
-	}
-	i++;
+		if (Devices[i].OutputType == Output->Id) {
+			//if (!(od = (struct rhdOutputDevices *)xrealloc(od, sizeof(struct rhdOutputDevices) * (cnt + 1))))
+			struct rhdOutputDevices *temp = (struct rhdOutputDevices *)IOMalloc(sizeof(struct rhdOutputDevices) * (cnt + 1));
+			if (temp == NULL) return FALSE;
+			bzero(temp, sizeof(struct rhdOutputDevices) * (cnt + 1));
+			bcopy(od, temp, sizeof(struct rhdOutputDevices) * cnt);
+			IOFree(od, sizeof(struct rhdOutputDevices) * cnt);
+			od = temp;
+			LOGV("  >> 0x%2.2x\n", Devices[i].DeviceId);
+			od[cnt].DeviceId = Devices[i].DeviceId;
+			od[cnt].ConnectorType = Devices[i].ConnectorType;
+			cnt++;
+		}
+		i++;
     }
     //if (!(od = (struct rhdOutputDevices *)xrealloc(od, sizeof(struct rhdOutputDevices) * (cnt + 1))))
-	struct rhdOutputDevices *temp = (struct rhdOutputDevices *)xalloc(sizeof(struct rhdOutputDevices) * (cnt + 1));
+	struct rhdOutputDevices *temp = (struct rhdOutputDevices *)IOMalloc(sizeof(struct rhdOutputDevices) * (cnt + 1));
 	if (temp == NULL) return FALSE;
 	bzero(temp, sizeof(struct rhdOutputDevices) * (cnt + 1));
 	bcopy(od, temp, sizeof(struct rhdOutputDevices) * cnt);
-	xfree(od);
+	IOFree(od, sizeof(struct rhdOutputDevices) * cnt);
 	od = temp;
 	od[cnt].DeviceId = atomNone;
-
+	cnt++;
+	
 	OutputDriverPrivate = IONew(struct BIOSScratchOutputPrivate, 1);
     if (!(OutputDriverPrivate)) {
-	xfree(od);
-	return FALSE;
+		IOFree(od, sizeof(struct rhdOutputDevices) * cnt);
+		return FALSE;
     }
     OutputDriverPrivate->OutputDevices = od;
+	OutputDriverPrivate->devicesCount = cnt;
     OutputDriverPrivate->Destroy = Output->Destroy;
     Output->Destroy = rhdBIOSScratchDestroyOutputDriverPrivate;
     OutputDriverPrivate->Power = Output->Power;
@@ -790,7 +792,7 @@ RHDAtomSetupOutputDriverPrivate(struct rhdAtomOutputDeviceList *Devices, struct 
     OutputDriverPrivate->Mode = Output->Mode;
     Output->Mode = rhdBIOSScratchMode;
     Output->OutputDriverPrivate = OutputDriverPrivate;
-
+	
     return TRUE;
 }
 

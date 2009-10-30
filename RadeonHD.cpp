@@ -21,6 +21,14 @@ extern "C" Bool RadeonHDPreInit(ScrnInfoPtr pScrn, RegEntryIDPtr pciTag, RHDMemo
 extern "C" void RadeonHDFreeScrn(ScrnInfoPtr pScrn);
 extern "C" Bool RadeonHDSetMode(ScrnInfoPtr pScrn, UInt32 modeID, UInt16 depth);
 extern "C" Bool RadeonHDGetSetBKSV(UInt32 *value, Bool set);
+extern "C" Bool RadeonHDDoCommunication(VDCommunicationRec *info);
+extern "C" void HALGrayPage(UInt16 depth);
+extern "C" void CreateLinearGamma(GammaTbl *gTable);
+extern "C" void RadeonHDSetGamma(GammaTbl *gTable, GammaTbl *gTableNew);
+extern "C" void RadeonHDSetEntries(GammaTbl *gTable, ColorSpec *cTable, SInt16 offset, UInt16 length);
+extern "C" Bool RadeonHDSetHardwareCursor(void *cursorRef, GammaTbl *gTable);
+extern "C" Bool RadeonHDDrawHardwareCursor(SInt32 x, SInt32 y, Bool visible);
+extern "C" void RadeonHDGetHardwareCursorState(SInt32 *x, SInt32 *y, UInt32 *set, UInt32 *visible);
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -59,9 +67,10 @@ IONDRV * NDRVHD::fromRegistryEntry( IORegistryEntry * regEntry, IOService * prov
 	OSDictionary *dict = OSDynamicCast(OSDictionary, provider->getProperty("UserOptions"));
 	
 	bzero(&inst->options, sizeof(UserOptions));
-	//inst->options.HWCursorSupport = false;
-	//inst->options.modeNameByUser[0] = 0;
-
+	inst->options.HWCursorSupport = FALSE;
+	inst->options.enableGammaTable = FALSE;
+	inst->options.enableOSXI2C = FALSE;
+	
 	inst->debugMode = false;
 	inst->options.enableBacklight = true;
 	if (dict) {
@@ -69,6 +78,10 @@ IONDRV * NDRVHD::fromRegistryEntry( IORegistryEntry * regEntry, IOService * prov
 		if (prop) inst->debugMode = prop->getValue();
 		prop = OSDynamicCast(OSBoolean, dict->getObject("enableBacklight"));
 		if (prop) inst->options.enableBacklight = prop->getValue();
+		prop = OSDynamicCast(OSBoolean, dict->getObject("enableHWCursor"));
+		if (prop) inst->options.HWCursorSupport = prop->getValue();
+		prop = OSDynamicCast(OSBoolean, dict->getObject("enableGammaTable"));
+		if (prop) inst->options.enableGammaTable = prop->getValue();
 	}
 #ifndef USEIOLOG && defined DEBUG
 	xf86Msg.mVerbose = 1;
@@ -86,7 +99,7 @@ IONDRV * NDRVHD::fromRegistryEntry( IORegistryEntry * regEntry, IOService * prov
 	xf86Msg.mMessageLock = IOLockAlloc();
 	xf86Msg.mMsgBuffer = (char *) IOMalloc(xf86Msg.mMsgBufferSize);
 	if (!xf86Msg.mMsgBuffer) {
-		errorMsg("error: couldn't allocate message buffer (%ld bytes)\n", xf86Msg.mMsgBufferSize);
+		IOLog("error: couldn't allocate message buffer (%ld bytes)\n", xf86Msg.mMsgBufferSize);
 		return false;
 	}
 	enableMsgBuffer(true);
@@ -96,7 +109,7 @@ IONDRV * NDRVHD::fromRegistryEntry( IORegistryEntry * regEntry, IOService * prov
 	if (dict) {
 		OSData *edidData = OSDynamicCast(OSData, dict->getObject("EDID"));
 		if (edidData) {
-			inst->memoryMap.EDID_Block = (unsigned char *)xalloc(edidData->getLength());
+			inst->memoryMap.EDID_Block = (unsigned char *)IOMalloc(edidData->getLength());
 			if (inst->memoryMap.EDID_Block) {
 				bcopy(edidData->getBytesNoCopy(), inst->memoryMap.EDID_Block, edidData->getLength());
 				inst->memoryMap.EDID_Length = edidData->getLength();
@@ -125,7 +138,7 @@ IONDRV * NDRVHD::fromRegistryEntry( IORegistryEntry * regEntry, IOService * prov
 	IOMemoryDescriptor * mem;
 	mem = IOMemoryDescriptor::withPhysicalAddress((IOPhysicalAddress) RHD_VBIOS_BASE, RHD_VBIOS_SIZE, kIODirectionOut);
 	if (mem) {
-		inst->memoryMap.BIOSCopy = (unsigned char *)xalloc(RHD_VBIOS_SIZE);
+		inst->memoryMap.BIOSCopy = (unsigned char *)IOMalloc(RHD_VBIOS_SIZE);
 		if (inst->memoryMap.BIOSCopy) {
 			mem->prepare(kIODirectionOut);
 			if (!(inst->memoryMap.BIOSLength = mem->readBytes(0, inst->memoryMap.BIOSCopy, RHD_VBIOS_SIZE))) {
@@ -143,27 +156,44 @@ IONDRV * NDRVHD::fromRegistryEntry( IORegistryEntry * regEntry, IOService * prov
 	inst->PciInfo.subsysCard = pciDevice->configRead16(kIOPCIConfigSubSystemID);
 	inst->PciInfo.biosSize = 16;	//RHD_VBIOS_SIZE = 1 << 16
 	
-	//if (inst->debugMode) {	//in debugMode, VESA mode is used
-        PE_Video	bootDisplay;
-        UInt32		bpp;
-		
-        IOService::getPlatform()->getConsoleInfo( &bootDisplay);
-	    inst->fAddress	    = (void *) bootDisplay.v_baseAddr;
-	    inst->fRowBytes	    = bootDisplay.v_rowBytes;
-	    inst->fWidth	    = bootDisplay.v_width;
-	    inst->fHeight	    = bootDisplay.v_height;
-	    bpp = bootDisplay.v_depth;
-	    if (bpp == 15)
-			bpp = 16;
-	    else if (bpp == 24)
-			bpp = 32;
-		
-	    inst->fBitsPerPixel = bpp;
-	/*
-	} else {
-		inst->fAddress = (void *)inst->FBMap->getPhysicalAddress();
-		inst->fBitsPerPixel = 32;
-	} */
+	PE_Video	bootDisplay;
+	UInt32		bpp;
+	
+	IOService::getPlatform()->getConsoleInfo( &bootDisplay);
+	inst->fAddress	    = (void *) bootDisplay.v_baseAddr;
+	inst->fRowBytes	    = bootDisplay.v_rowBytes;
+	inst->fWidth	    = bootDisplay.v_width;
+	inst->fHeight	    = bootDisplay.v_height;
+	bpp = bootDisplay.v_depth;
+	if (bpp == 15)
+		bpp = 16;
+	else if (bpp == 24)
+		bpp = 32;
+	
+	inst->fBitsPerPixel = bpp;
+	
+	switch (bpp) {
+		case 8:
+			inst->fBitsPerComponent = 8;
+			inst->fDepth = kDepthMode1;
+			break;
+		case 16:
+			inst->fBitsPerComponent = 5;
+			inst->fDepth = kDepthMode2;
+			break;
+		case 32:
+			inst->fBitsPerComponent = 8;
+			inst->fDepth = kDepthMode3;
+			break;
+		default:
+			inst->fBitsPerComponent = 0;
+			inst->fDepth = kDepthMode1;
+			break;
+	}
+	if (inst->debugMode) {	//in debugMode, VESA mode is used
+		inst->fBitsPerComponent = 8;
+		inst->fDepth = kDepthMode1;
+	}
 	if (inst->fAddress != (void *)inst->FBMap->getPhysicalAddress()) {
 		LOG("Different FBPhyAddr detected: 0x%p (VESA), 0x%p\n", inst->fAddress, (void *)inst->FBMap->getPhysicalAddress());
 		inst->fAddress = (void *)inst->FBMap->getPhysicalAddress();
@@ -172,6 +202,8 @@ IONDRV * NDRVHD::fromRegistryEntry( IORegistryEntry * regEntry, IOService * prov
 	inst->fRefreshRate = 0 << 16;
 	inst->memoryMap.FbPhysBase = (unsigned long)inst->fAddress;
 	inst->memoryMap.bitsPerPixel = inst->fBitsPerPixel;
+	inst->memoryMap.bitsPerComponent = inst->fBitsPerComponent;
+	inst->memoryMap.colorFormat = 0;	//0 for non-64 bit
 	
 	//now initialize RHD
 	inst->RHDReady = false;
@@ -189,13 +221,8 @@ IONDRV * NDRVHD::fromRegistryEntry( IORegistryEntry * regEntry, IOService * prov
 			while (mode)	//no longer a circular list, so won't be trapped here
 			{
 				if ((mode->HDisplay == inst->fWidth) && (mode->VDisplay == inst->fHeight))
-					inst->startMode = mode;
+					inst->startMode = mode;	//using the vesa mode as start mode will avoid display of garbage
 				
-				if (pScrn->NativeMode && (mode->HDisplay == pScrn->NativeMode->HDisplay)
-					&& (mode->VDisplay == pScrn->NativeMode->VDisplay)) {
-					pScrn->NativeMode = mode;	//refered back to mode with modeID
-					LOG("%d X %d @ %dHz (Native mode)\n", mode->HDisplay, mode->VDisplay, (int) mode->VRefresh);
-				}
 				LOG("%d X %d @ %dHz\n", mode->HDisplay, mode->VDisplay, (int) mode->VRefresh);
 				
 				if (!BigestMode || ((BigestMode->HDisplay < mode->HDisplay) && (BigestMode->VDisplay < mode->VDisplay)))
@@ -204,7 +231,6 @@ IONDRV * NDRVHD::fromRegistryEntry( IORegistryEntry * regEntry, IOService * prov
 				inst->modeCount++;
 				mode = mode->next;
 			}
-			if (!inst->startMode) inst->startMode = pScrn->NativeMode;
 			if (!inst->startMode) inst->startMode = BigestMode;
 			
 			inst->modeTimings = IONew(IODetailedTimingInformationV2, inst->modeCount);
@@ -232,14 +258,10 @@ IONDRV * NDRVHD::fromRegistryEntry( IORegistryEntry * regEntry, IOService * prov
 				dtInfo->verticalSyncOffset = mode->VSyncStart - mode->VDisplay;
 				dtInfo->verticalSyncPulseWidth = mode->VSyncEnd - mode->VSyncStart;
 				dtInfo->verticalSyncConfig = (mode->Flags & V_NVSYNC)?0:1;
+				dtInfo->scalerFlags |= (mode->Flags & V_STRETCH)?kIOScaleStretchToFit:0;
 				dtInfo->numLinks = (pScrn->dualLink)?2:1;
 				inst->refreshRates[i] = ((Fixed) mode->VRefresh) << 16;
 				mode->modeID = inst->modeIDs[i];
-				/*
-				if ((mode->HDisplay == inst->fWidth) && (mode->VDisplay == inst->fHeight)) {
-					inst->fMode = inst->modeIDs[i];
-					inst->fRefreshRate = inst->refreshRates[i];
-				} */
 				
 				i++;
 				
@@ -272,11 +294,11 @@ void NDRVHD::free( void )
 	}
 #endif
 	if (memoryMap.BIOSCopy) {
-		xfree(memoryMap.BIOSCopy);
+		IOFree(memoryMap.BIOSCopy, memoryMap.BIOSLength);
 		memoryMap.BIOSCopy = NULL;
 	}
 	if (memoryMap.EDID_Block) {
-		xfree(memoryMap.EDID_Block);
+		IOFree(memoryMap.EDID_Block, memoryMap.EDID_Length);
 		memoryMap.EDID_Block = NULL;
 	}
 	if (modeTimings) IODelete(modeTimings, IODetailedTimingInformationV2, modeCount);
@@ -284,6 +306,9 @@ void NDRVHD::free( void )
 	if (refreshRates) IODelete(refreshRates, Fixed, modeCount);
 	if (IOMap) IOMap->release();
 	if (FBMap) FBMap->release();
+	
+	if (gTable) IOFree(gTable, 0x60C);
+	
     super::free();
 }
 
@@ -304,6 +329,19 @@ IOReturn NDRVHD::doDriverIO( UInt32 commandID, void * contents,
     IONDRVControlParameters * pb = (IONDRVControlParameters *) contents;
     IOReturn	ret;
 	
+	static UInt16 commandCodeCopy = 0;
+	static UInt16 pbCodeCopy = 0;
+	static UInt16 codeCount = 0;
+	
+	if ((commandCode == commandCodeCopy) && (pb->code == pbCodeCopy)) codeCount++;
+	else {
+		if (codeCount) LOG("cmd:%d->%d(%d)\n", commandCodeCopy, pbCodeCopy, codeCount + 1);
+		else if (commandCodeCopy) LOG("cmd:%d->%d\n", commandCodeCopy, pbCodeCopy);
+		commandCodeCopy = commandCode;
+		pbCodeCopy = pb->code;
+		codeCount = 0;
+	}
+	
     switch (commandCode)
     {
         case kIONDRVInitializeCommand:
@@ -311,11 +349,17 @@ IOReturn NDRVHD::doDriverIO( UInt32 commandID, void * contents,
 			break;
         case kIONDRVOpenCommand:
 			if (!debugMode && RHDReady) {
+				//initialize gamma
+				if (options.enableGammaTable) {
+					gTable = (GammaTbl *)IOMalloc(0x60C);
+					if (gTable) CreateLinearGamma(gTable);
+				}
+				//initialize mode
 				VDSwitchInfoRec info;
 				if (startMode)
 					info.csData = startMode->modeID;
 				else return kIOReturnSuccess;
-				info.csMode = 32;
+				info.csMode = fDepth;
 				doControl(cscSwitchMode, &info);
 			}
             ret = kIOReturnSuccess;
@@ -338,11 +382,6 @@ IOReturn NDRVHD::doDriverIO( UInt32 commandID, void * contents,
     return (ret);
 }
 
-static UInt32 getPitch(UInt32 width, UInt32 bytesPerPixel) {
-	if (bytesPerPixel == 0) bytesPerPixel = 1;
-	return ((width * bytesPerPixel + 0xFF) & (~ 0xFF));
-}
-
 IOReturn NDRVHD::doControl( UInt32 code, void * params )
 {
     IOReturn		ret = kIOReturnUnsupported;
@@ -350,17 +389,68 @@ IOReturn NDRVHD::doControl( UInt32 code, void * params )
     switch (code)
     {
         case cscSetEntries:
+			if (RHDReady && options.enableGammaTable)
+		{
+			VDSetEntryRecord *info = (VDSetEntryRecord *)params;
+			RadeonHDSetEntries(gTable, info->csTable, info->csStart, info->csCount + 1);
+		}
+			ret = kIOReturnSuccess;
+			break;
         case cscSetGamma:
-            ret = kIOReturnSuccess;
+			if (RHDReady && options.enableGammaTable)
+		{
+			VDGammaRecord *info = (VDGammaRecord *)params;
+			GammaTbl *gTableNew = (GammaTbl *)info->csGTable;
+			RadeonHDSetGamma(gTable, gTableNew);
+		}
+			ret = kIOReturnSuccess;
             break;
-			// to do list
 		case cscDoCommunication:
+			if (RHDReady && options.enableOSXI2C)
+		{
+			VDCommunicationRec *info = (VDCommunicationRec *) params;
+			if (RadeonHDDoCommunication(info))
+				ret = kIOReturnSuccess;
+		}
+			break;
 		case cscGrayPage:
+			if (RHDReady)
+		{
+			VDPageInfo *info = (VDPageInfo *) params;
+			if (info->csPage != 0) break;
+			HALGrayPage(fDepth);
+			ret = kIOReturnSuccess;
+		}
+			break;
 		case cscSetGray:
+			break;
 		case cscSetClutBehavior:
+			if (RHDReady && options.enableGammaTable)
+		{
+			VDClutBehavior *info = (VDClutBehavior *)params;
+			if ((*info == kSetClutAtSetEntries) || (*info == kSetClutAtVBL))
+				options.setCLUTAtSetEntries = (*info == kSetClutAtSetEntries);
+				ret = kIOReturnSuccess;
+		}
+			break;
 		case cscProbeConnection:
+			break;
 		case cscSetHardwareCursor:
+			if (RHDReady && options.HWCursorSupport)
+		{
+			VDSetHardwareCursorRec *info = (VDSetHardwareCursorRec *)params;
+			if (RadeonHDSetHardwareCursor(info->csCursorRef, gTable))
+				ret = kIOReturnSuccess;
+		}
+			break;
 		case cscDrawHardwareCursor:
+			if (RHDReady && options.HWCursorSupport)
+		{
+			VDHardwareCursorDrawStateRec *info = (VDHardwareCursorDrawStateRec *) params;
+			if (RadeonHDDrawHardwareCursor(info->csCursorX, info->csCursorY, info->csCursorVisible))
+				ret = kIOReturnSuccess;
+		}
+			break;
 		case cscSetDetailedTiming:
 		case cscSetScaler:
 			break;
@@ -368,11 +458,15 @@ IOReturn NDRVHD::doControl( UInt32 code, void * params )
 		if (!debugMode && RHDReady)	
 		{
 			VDSwitchInfoRec *info = (VDSwitchInfoRec *)params;
+			
+			if ((info->csMode < kDepthMode1) || (info->csMode > kDepthMode6)) break;
+			
 			UInt32 i;
 			for (i = 0;i < modeCount;i++) if (info->csData == modeIDs[i]) break;
 			if (i == modeCount) break;
-			UInt32 newWidth, newHeight, newRowBytes;
-			if (fMode != modeIDs[i]) {
+			
+			UInt32 newWidth, newHeight, newRowBytes, newBitsPerPixel, newBitsPerComponent;
+			if ((fMode != modeIDs[i]) || (fDepth != info->csMode)) {
 				if (modeTimings[i].horizontalScaled && modeTimings[i].verticalScaled) {
 					newWidth = modeTimings[i].horizontalScaled;
 					newHeight = modeTimings[i].verticalScaled;
@@ -380,14 +474,22 @@ IOReturn NDRVHD::doControl( UInt32 code, void * params )
 					newWidth = modeTimings[i].horizontalActive;
 					newHeight = modeTimings[i].verticalActive;
 				}
-				newRowBytes = getPitch(newWidth, fBitsPerPixel / 8);
+				newBitsPerPixel = HALPixelSize(info->csMode);
+				newBitsPerComponent = HALColorBits(info->csMode);
+				newRowBytes = getPitch(newWidth, newBitsPerPixel / 8);
 				ScrnInfoPtr pScrn = xf86Screens[0];
-				pScrn->displayWidth = newRowBytes * 8 / fBitsPerPixel;
+				pScrn->bitsPerPixel = newBitsPerPixel;
+				pScrn->depth = newBitsPerPixel;
+				pScrn->bitsPerComponent = newBitsPerComponent;
+				pScrn->displayWidth = newRowBytes * 8 / newBitsPerPixel;
 				pScrn->virtualX = newWidth;
 				pScrn->virtualY = newHeight;
 				if (RadeonHDSetMode(pScrn, info->csData, info->csMode)) {
 					fWidth = newWidth;
 					fHeight = newHeight;
+					fBitsPerPixel = newBitsPerPixel;
+					fBitsPerComponent = newBitsPerComponent;
+					fDepth = info->csMode;
 					fRowBytes = newRowBytes;
 					fMode = modeIDs[i];
 					fRefreshRate = refreshRates[i];
@@ -398,8 +500,9 @@ IOReturn NDRVHD::doControl( UInt32 code, void * params )
 		}	
 			break;
 		case cscSetBackLightLevel:
+			if (RHDReady && options.enableBacklight)
 		{
-			if (RHDReady && RadeonHDGetSetBKSV((UInt32 *)params, 1)) ret = kIOReturnSuccess;
+			if (RadeonHDGetSetBKSV((UInt32 *)params, 1)) ret = kIOReturnSuccess;
 		}
 			break;
 		case cscSetMode:
@@ -422,15 +525,46 @@ IOReturn NDRVHD::doStatus( UInt32 code, void * params )
 	
     switch (code)
     {
+		case cscGetMode:
+		{
+			VDSwitchInfoRec* info = (VDSwitchInfoRec*) params;
+			info->csPage = 1;
+			info->csMode = fDepth;
+			info->csBaseAddr = (Ptr) (1 | (unsigned long) fAddress);
+			ret = kIOReturnSuccess;
+		}
+			break;
+			
+		case cscGetPages:
+		{
+			VDPageInfo *info = (VDPageInfo *)params;
+			info->csPage = 1;
+			ret = kIOReturnSuccess;
+		}
+			break;
+			
+		case cscGetBaseAddr:
+		{
+			VDPageInfo *info = (VDPageInfo *)params;
+			info->csBaseAddr = (Ptr) (1 | (unsigned long) fAddress);
+			ret = kIOReturnSuccess;
+		}
+			break;
+			
         case cscGetCurMode:
 		{
 			VDSwitchInfoRec * info = (VDSwitchInfoRec *) params;
 			
-			//info->csData     = kIOBootNDRVDisplayMode;
 			info->csData     = fMode;
-			info->csMode     = kDepthMode1;
+			info->csMode     = fDepth;
 			info->csPage     = 1;
 			info->csBaseAddr = (Ptr) (1 | (unsigned long) fAddress);
+			/*
+			if (RHDReady) {
+				info->csPage = 0;
+				info->csBaseAddr = (Ptr) fAddress;
+				info->csReserved = 0;
+			} */
 			ret = kIOReturnSuccess;
 		}
             break;
@@ -445,7 +579,7 @@ IOReturn NDRVHD::doStatus( UInt32 code, void * params )
 				{
 					dtInfo = modeTimings;
 					info->csDisplayModeID 	= modeIDs[0];
-					info->csMaxDepthMode		= kDepthMode1;
+					info->csMaxDepthMode		= kDepthMode6;
 					if (dtInfo->horizontalScaled && dtInfo->verticalScaled) {
 						info->csHorizontalPixels	= dtInfo->horizontalScaled;
 						info->csVerticalLines	= dtInfo->verticalScaled;
@@ -472,7 +606,7 @@ IOReturn NDRVHD::doStatus( UInt32 code, void * params )
 			else if (kDisplayModeIDCurrent == (SInt32) info->csPreviousDisplayModeID)
 			{
 				info->csDisplayModeID 	= fMode;
-				info->csMaxDepthMode		= kDepthMode1;
+				info->csMaxDepthMode		= kDepthMode6;
 				info->csHorizontalPixels	= fWidth;
 				info->csVerticalLines	= fHeight;
 				info->csRefreshRate		= fRefreshRate;
@@ -498,7 +632,7 @@ IOReturn NDRVHD::doStatus( UInt32 code, void * params )
 					i++;
 					dtInfo						= &modeTimings[i];
 					info->csDisplayModeID 	= modeIDs[i];
-					info->csMaxDepthMode		= kDepthMode1;
+					info->csMaxDepthMode		= kDepthMode6;
 					if (dtInfo->horizontalScaled && dtInfo->verticalScaled) {
 						info->csHorizontalPixels	= dtInfo->horizontalScaled;
 						info->csVerticalLines	= dtInfo->verticalScaled;
@@ -517,9 +651,12 @@ IOReturn NDRVHD::doStatus( UInt32 code, void * params )
 		{
 			VDVideoParametersInfoRec * pixelParams = (VDVideoParametersInfoRec *) params;
 			VPBlock *	info = pixelParams->csVPBlockPtr;
+			//LOG("cscGetVideoParameters: modeID %d, depth %d\n", pixelParams->csDisplayModeID, pixelParams->csDepthMode);
 			
-			if (((kIOBootNDRVDisplayMode == pixelParams->csDisplayModeID)
-				 && (kDepthMode1 == pixelParams->csDepthMode)) || (fMode == pixelParams->csDisplayModeID))
+			IODisplayModeID modeID = pixelParams->csDisplayModeID;
+			if (modeID == 0) modeID = fMode;
+			
+			if ((kIOBootNDRVDisplayMode == modeID) && (fDepth == pixelParams->csDepthMode))
 			{
 				bzero(info, sizeof(VPBlock));
 				info->vpBounds.right	= fWidth;
@@ -535,12 +672,11 @@ IOReturn NDRVHD::doStatus( UInt32 code, void * params )
 			{
 				UInt32 i;
 				for (i = 0;i < modeCount;i++)
-					if (modeIDs[i] == pixelParams->csDisplayModeID) break;
+					if (modeIDs[i] == modeID) break;
 				if (i < modeCount) {
 					dtInfo = &modeTimings[i];
+					pixelParams->csPageCount = 1;
 					bzero(info, sizeof(VPBlock));
-					info->vpBounds.left	= 0;
-					info->vpBounds.top	= 0;
 					if (dtInfo->horizontalScaled && dtInfo->verticalScaled) {
 						info->vpBounds.right	= dtInfo->horizontalScaled;
 						info->vpBounds.bottom	= dtInfo->verticalScaled;
@@ -548,23 +684,38 @@ IOReturn NDRVHD::doStatus( UInt32 code, void * params )
 						info->vpBounds.right	= dtInfo->horizontalActive;
 						info->vpBounds.bottom	= dtInfo->verticalActive;
 					}
-					info->vpRowBytes	= getPitch(info->vpBounds.right, fBitsPerPixel / 8);
-					info->vpPlaneBytes	= 0;
-					info->vpPixelSize	= fBitsPerPixel;
-					info->vpPixelType     = kIORGBDirectPixels;
-					info->vpCmpCount      = 3;
-					info->vpCmpSize       = (fBitsPerPixel <= 16) ? 5 : 8;
+					info->vpCmpSize		= HALColorBits(pixelParams->csDepthMode);
+					info->vpPixelSize	= HALPixelSize(pixelParams->csDepthMode);
+					info->vpRowBytes	= getPitch(info->vpBounds.right, info->vpPixelSize / 8);
+					//info->vpHRes = 0x480055;
+					//info->vpVRes = 0x480044;
+					if (info->vpPixelSize == 8) {
+						info->vpPixelType = kIOCLUTPixels;
+						pixelParams->csDeviceType = kIOCLUTPixels;
+						info->vpCmpCount      = 1;
+						info->vpBounds.left = 0;
+					} else {
+						info->vpPixelType     = kIORGBDirectPixels;
+						pixelParams->csDeviceType = kIORGBDirectPixels;
+						info->vpCmpCount      = 3;
+						//info->vpBounds.left = 2;
+				}
 					ret = kIOReturnSuccess;
 				}
 			}
 		}
             break;
 			
+		case cscGetGammaInfoList:
+			break;
+			
         case cscGetModeTiming:
 		{
 			VDTimingInfoRec * info = (VDTimingInfoRec *) params;
 			UInt32 i;
 			
+			info->csTimingFormat = kDeclROMtables;
+			info->csTimingFlags  = kDisplayModeValidFlag | kDisplayModeSafeFlag;
 			if (kIOBootNDRVDisplayMode != info->csTimingMode)
 			{
 				for (i = 0;i < modeCount;i++)
@@ -573,11 +724,10 @@ IOReturn NDRVHD::doStatus( UInt32 code, void * params )
 					ret = kIOReturnBadArgument;
 					break;
 				}
+				info->csTimingFormat = kDetailedTimingFormat;	//all handled by detailed timing
+				if (modeTimings[i].scalerFlags & kIOScaleStretchToFit)
+					info->csTimingFlags |= (1 << kModeStretched);
 			}
-			if (kIOBootNDRVDisplayMode == info->csTimingMode)
-				info->csTimingFormat = kDeclROMtables;
-			else info->csTimingFormat = kDetailedTimingFormat;	//all handled by detailed timing
-			info->csTimingFlags  = kDisplayModeValidFlag | kDisplayModeSafeFlag;
 			ret = kIOReturnSuccess;
 		}
             break;
@@ -604,7 +754,12 @@ IOReturn NDRVHD::doStatus( UInt32 code, void * params )
 				if (modeIDs[i] == info->csDisplayModeID) break;
 			if (i < modeCount) {
 				dtInfo = &modeTimings[i];
+				//bzero(&info, info->csTimingSize);
+				//info->csDisplayModeID = modeIDs[i];
+				//info->csTimingSize = sizeof(VDDetailedTimingRec);
 				info->csPixelClock = dtInfo->pixelClock;
+				info->csMinPixelClock = info->csPixelClock;
+				info->csMaxPixelClock = info->csPixelClock;
 				info->csHorizontalActive = dtInfo->horizontalActive;
 				info->csHorizontalBlanking = dtInfo->horizontalBlanking;
 				info->csHorizontalSyncOffset = dtInfo->horizontalSyncOffset;
@@ -616,26 +771,49 @@ IOReturn NDRVHD::doStatus( UInt32 code, void * params )
 				info->csVerticalSyncPulseWidth = dtInfo->verticalSyncPulseWidth;
 				info->csVerticalSyncConfig = dtInfo->verticalSyncConfig;
 				//info->csNumLinks = dtInfo->numLinks;
-				//info->csHorizontalBorderLeft/csHorizontalBorderRight/csVerticalBorderTop/csVerticalBorderBottom
 				ret = kIOReturnSuccess;
 			}
 		}
 			break;
 			
-		case cscGetCommunicationInfo:	//used for I2C, not clear yet
+		case cscGetCommunicationInfo:	//code reverse enigeered from 10.5 driver
+			if (RHDReady && options.enableOSXI2C)
 		{
-			ret = kIOReturnUnsupported;
 			VDCommunicationInfoRec * info = (VDCommunicationInfoRec *) params;
-			if (kVideoDefaultBus == info->csBusID)	//return BusType, MinBus, MaxBus, SupportedTypes, SupportedCommFlags
-			{
-			}
-			else	//return information for specific busID
-			{
-			}
+			info->csBusID = 0;
+			info->csBusType = 1;
+			info->csMinBus = 0;
+			info->csMaxBus = 0;
+			info->csSupportedTypes = kVideoNoTransactionTypeMask | kVideoSimpleI2CTypeMask | kVideoDDCciReplyTypeMask | kVideoCombinedI2CTypeMask;
+			info->csSupportedCommFlags = kVideoUsageAddrSubAddrMask;
+			ret = kIOReturnSuccess;
 		}
 			break;
 			
 		case cscGetGamma:
+			if (RHDReady && options.enableGammaTable)
+		{
+			VDGammaRecord *info = (VDGammaRecord *)params;
+			if (gTable) {
+				info->csGTable = (Ptr)gTable;
+				ret = kIOReturnSuccess;
+			}
+		}
+			break;
+		case cscGetScalerInfo:
+			/*
+			if (RHDReady)
+		{
+			VDScalerInfoRec *info = (VDScalerInfoRec *)params;
+			info->csScalerFeatures = kScaleCanSupportInsetMask | kScaleCanScaleInterlacedMask | kScaleCanUpSamplePixelsMask | kScaleCanDownSamplePixelsMask;
+			//info->csScalerFeatures |= kScaleCanRotateMask;
+			info->csMaxHorizontalPixels = 4096;
+			info->csMaxVerticalPixels = 4096;
+			info->csReserved1 = 0;
+			info->csReserved2 = 0;
+			info->csReserved3 = 0;
+			ret = kIOReturnSuccess;
+		} */
 			break;
 		case cscGetScaler:
 			if (RHDReady)
@@ -646,29 +824,39 @@ IOReturn NDRVHD::doStatus( UInt32 code, void * params )
 				if (modeIDs[i] == info->csDisplayModeID) break;
 			if (i < modeCount) {
 				dtInfo = &modeTimings[i];
+				info->csScalerFlags = dtInfo->scalerFlags;
+				info->csHorizontalInset = dtInfo->horizontalScaledInset;
+				info->csVerticalInset = dtInfo->verticalScaledInset;
+				info->csHorizontalPixels = dtInfo->horizontalActive;
+				info->csVerticalPixels = dtInfo->verticalActive;
 				if (dtInfo->horizontalScaled && dtInfo->verticalScaled) {
-					info->csScalerFlags = dtInfo->scalerFlags;
 					info->csHorizontalPixels = dtInfo->horizontalScaled;
 					info->csVerticalPixels = dtInfo->verticalScaled;
-					info->csHorizontalInset = dtInfo->horizontalScaledInset;
-					info->csVerticalInset = dtInfo->verticalScaledInset;
-					ret = kIOReturnSuccess;
 				}
-			}
-		}
-			break;
-		case cscSupportsHardwareCursor:
-		{
-			VDSupportsHardwareCursorRec *info = (VDSupportsHardwareCursorRec *)params;
-			if (options.HWCursorSupport) {
-				info->csSupportsHardwareCursor = true;
 				ret = kIOReturnSuccess;
 			}
 		}
 			break;
-		case cscGetBackLightLevel:
+		case cscSupportsHardwareCursor:
+			if (RHDReady && options.HWCursorSupport)
 		{
-			if (RHDReady && RadeonHDGetSetBKSV((UInt32 *)params, 0)) ret = kIOReturnSuccess;
+			VDSupportsHardwareCursorRec *info = (VDSupportsHardwareCursorRec *)params;
+			info->csSupportsHardwareCursor = true;
+			ret = kIOReturnSuccess;
+		}
+			break;
+		case cscGetHardwareCursorDrawState:
+			if (RHDReady && options.HWCursorSupport)
+		{
+			VDHardwareCursorDrawStateRec *info = (VDHardwareCursorDrawStateRec *)params;
+			RadeonHDGetHardwareCursorState(&info->csCursorX, &info->csCursorY, &info->csCursorSet, &info->csCursorVisible);
+			ret = kIOReturnSuccess;
+		}
+			break;
+		case cscGetBackLightLevel:
+			if (RHDReady && options.enableBacklight)
+		{
+			if (RadeonHDGetSetBKSV((UInt32 *)params, 0)) ret = kIOReturnSuccess;
 		}
 			break;
 		case cscProbeConnection:
@@ -861,3 +1049,203 @@ IOReturn RadeonHD::updateCursorState(CursorInfo  const *crsrInfo) {
 	}
 }
 */
+
+IOReturn RadeonHD::setAttributeForConnection( IOIndex connectIndex, IOSelect attribute, unsigned long value ) {
+	IOReturn ret = kIOReturnUnsupported;
+	
+	switch (attribute) {
+			/*
+		case kConnectionFlags:
+			crtc.displayConnectFlags |= value;
+			theProvider->setProperty("display-connect-flags", &crtc.displayConnectFlags, 4);
+			ret = kIOReturnSuccess;
+			break;
+		case 'tbri':
+		case 'tsat':
+		case kConnectionVideoBest:
+		case 'wasr':
+		case 'thue':
+		case kConnectionOverscan:
+			ret = IOFramebuffer::setAttributeForConnection(connectIndex, attribute, value);
+			//if (ret == kIOReturnUnsupported) ret = setTvParameters(attribute, value);
+			break;
+		case kConnectionPower:
+			ret = kIOReturnSuccess;
+			break;
+		case kConnectionProbe:
+			//ret = probeAction(value);
+			break;
+		case kConnectionSyncEnable:
+			if (Connector != NULL) {
+				Connector->getActiveConnection()->setSync(value & 0xFF);
+				ret = kIOReturnSuccess;
+			}
+			break;
+		case 'auw ':
+		case 'aur ':
+			//ret = setHdcpAttribute(attribute, value);
+			break;
+		case 228:
+			//ret = setPrivateAttribute(value);
+			break;
+		case 227:
+			//ret = setDisplayParameters((ATIDisplayParameters *)value);
+			break; */
+		case 'bklt':	//IOKit/graphics/IOGraphicsTypesPrivate.h
+		{
+			IONDRVControlParameters pb;
+			pb.code = cscSetBackLightLevel;
+			pb.params = &value;
+			ret = doDriverIO(1, &pb, kIONDRVControlCommand, kIONDRVImmediateIOCommandKind);
+		}
+			break;
+			/*
+		case 'mvn ':
+			if ((value <= 3) && (value != crtc.u4)) {
+				crtc.u4 = value;
+				Controller->setMacrovisionMode(&crtc);
+			}
+			break;
+		case 'dith':
+			if (aConnection != NULL) {
+				UInt32 data = 0;
+				ret = aConnection->getAttribute('dith', &data);
+				if ((ret == kIOReturnSuccess) && (data != value)) ret = aConnection->setAttribute('dith', value);
+			}
+			break;
+		case kConnectionHandleDisplayPortEvent:
+			if ((value != 0) && (value != 3) && (aConnection != NULL) && aConnection->isDisplayPort()) {
+				DisplayPortUtilities *dp = Connector->getDpServices();
+				if (dp->isLinkTrained()) {
+					ret = kIOReturnSuccess;
+					break;
+				}
+				ret = dp->trainLink();
+			}
+			break; */
+		default:
+			break;
+	}
+	if (ret != kIOReturnSuccess) ret = super::setAttributeForConnection(connectIndex, attribute, value);
+	return ret;
+}
+
+IOReturn RadeonHD::getAttributeForConnection( IOIndex connectIndex, IOSelect attribute, UInt32 * value ) {
+	IOReturn ret = kIOReturnUnsupported;
+	
+	switch (attribute) {
+			/*
+		case 'enab':
+			if (value != NULL) {
+				if ((crtc.flags & crtcOnline) && (Connector != NULL) && Connector->isConnected()) *value = 1;
+				else *value = 0;
+			}
+			ret = kIOReturnSuccess;
+			break;
+		case 'aums':
+		case 'auph':
+		case 'aupp':
+		case 'aupc':
+		case 'auw ':
+		case 'aur ':
+			//ret = getHdcpAttribute(attribute, *value);
+			break; */
+		case 'bklt':
+		{
+			UInt32 bklt = 0;
+			IONDRVControlParameters pb;
+			pb.code = cscGetBackLightLevel;
+			pb.params = &bklt;
+				ret = doDriverIO(1, &pb, kIONDRVStatusCommand, kIONDRVImmediateIOCommandKind);
+				if ((value != NULL) && (ret == kIOReturnSuccess)) {
+					*value = bklt;		//current
+					*(value + 4) = 30;	//minimus?
+					*(value + 8) = 255;	//maximum?
+				}
+		}
+			break;
+			/*
+		case 'dith':
+		{
+			UInt32 data = 0;
+			ret = ndrv->getAttribute('dith', &data);
+			if ((value != NULL) && (ret == kIOReturnSuccess)) {
+				*value = data;
+				*(value + 4) = 0;
+				*(value + 8) = 1;
+			}
+		}
+			break;
+		case 'mvn ':
+			
+			*value = crtc.u4;
+			*(value + 4) = 0;
+			*(value + 8) = 3;
+			ret = kIOReturnUnsupported;
+			break;
+		case 227:
+			//ret = getDisplayParameters((ATIDisplayParameters *)value);
+			break;
+		case 228:
+			//ret = getPrivateAttribute(value);
+			break;
+		case 'asns':
+		case 'hddc':
+		case 'lddc':
+		case 'pwak':
+			ret = kIOReturnSuccess;
+			break;
+		case 'sycf':
+			if (value != NULL)
+				*value = ndrv->getSync();
+			ret = kIOReturnSuccess;
+			break;
+		case 'thue':
+		case kConnectionVideoBest:
+		case 'wasr':
+		case 'tbri':
+		case 'tsat':
+		case kConnectionOverscan:
+			ret = IOFramebuffer::getAttributeForConnection(connectIndex, attribute, value);
+			//if (ret == kIOReturnUnsupported) ret = getTvParameters(attribute, value);
+			break;
+		case 'thrm':
+			ret = Controller->readAsicTemperature(&var_20, &var_24, &var_28);
+			*value = var_20;
+			*(value + 4) = var_24;
+			*(value + 8) = var_28;
+			break;
+		case kConnectionSyncEnable:
+			if (value != NULL) *value = 0x87;
+			ret = kIOReturnSuccess;
+			break;
+		case kConnectionFlags:
+			if (value != NULL) {
+				if (Connector != NULL) {
+					UInt32 var_38[2];
+					Connector->getSenseInfo(var_38);
+					*value = var_38[1];
+				} else *value = 0;
+			}
+			ret = kIOReturnSuccess;
+			break;
+		case 'pcnt':
+			ret = IOFramebuffer::getAttributeForConnection(connectIndex, 'pcnt', value);
+			if (ret != kIOReturnSuccess) *value = 9;
+			else *value += 9;
+			ret = kIOReturnSuccess;
+			break;
+		case 'parm':
+		{
+			UInt32  featureList[9] = {'htid', 'sgd ', 'nvmn', 'csot', 'sbvr', 'sawt', 'lkbm', 'rht\0', '\0\0\0\0'};
+			bcopy(featureList, value, 36);
+			IOFramebuffer::getAttributeForConnection(connectIndex, 'parm', (value + 36));
+			ret = kIOReturnSuccess;
+		}
+			break; */
+		default:
+			break;
+	}
+	if (ret != kIOReturnSuccess) ret = super::getAttributeForConnection(connectIndex, attribute, value);
+	return ret;
+}

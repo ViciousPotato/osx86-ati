@@ -39,9 +39,13 @@
 			<key>UserOptions</key>
 			<dict>
 				<key>EDID</key>
-				<data>AP///////wAwriJAAAAAAC0QAQOAHRV46m+VnFRMhyYhUFQhCACBgAEBAQEBAQEBAQEBAQEBMCp4IFEaEEAwcBMAH9cQAAAYJSN4IFEaEEAwcBMAH9cQAAAYAAAADwCQQzKQQygPAQAwZJBVAAAA/gBMVEQxNDFFTjlCCiAgADU=</data>
+				<data></data>
 				<key>enableBacklight</key>
 				<true/>
+				<key>enableHWCursor</key>
+				<true/>
+				<key>enableGammaTable</key>
+				<false/>
 				<key>debugMode</key>
 				<false/>
 				<key>verboseLevel</key>

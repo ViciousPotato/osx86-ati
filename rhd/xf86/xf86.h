@@ -129,8 +129,6 @@ typedef union _DevUnion {
 						   LogicalAddress   ioAddr,
 						   UInt32 *         valuePtr);
 
-	LogicalAddress PoolAllocateResident(ByteCount byteSize, Boolean clear);	
-	OSStatus PoolDeallocate( LogicalAddress address );
 #endif
 
 extern UInt32 myPCIReadLong(RegEntryIDPtr node, LogicalAddress addr);
@@ -143,8 +141,13 @@ extern UInt8 myPCIReadByte(RegEntryIDPtr node, LogicalAddress addr);
 #define pciReadByte(node, addr) myPCIReadByte((node), (LogicalAddress)(unsigned long)(addr))
 #define pciWriteByte(node, addr, value) ExpMgrConfigWriteByte((node), (LogicalAddress)(unsigned long)(addr), (UInt8)(value))
 
-#define xalloc(size) PoolAllocateResident((ByteCount)(size), 0)
-#define xfree(addr) PoolDeallocate((LogicalAddress)(unsigned long)(addr))
+#include <Kern/debug.h>
+		
+extern void *kern_os_malloc(size_t size);
+extern void kern_os_free(void * addr);
+
+#define xalloc(size) kern_os_malloc((size_t)(size))
+#define xfree(addr) kern_os_free((void *)(addr))
 	
 extern char * xstrdup(const char *s);
 #define strdup xstrdup

@@ -155,22 +155,23 @@ void
 RHDOutputsDestroy(RHDPtr rhdPtr)
 {
     struct rhdOutput *Output = rhdPtr->Outputs, *Next;
-
+	
     RHDFUNC(rhdPtr);
-
+	
     while (Output) {
-	Next = Output->Next;
-
-	LOG("Destroying %s\n", Output->Name);
-
-	if (Output->Destroy)
-	    Output->Destroy(Output);
-
-	if (Output->OutputDriverPrivate)
-	    xfree(Output->OutputDriverPrivate);
-	xfree(Output);
-
-	Output = Next;
+		Next = Output->Next;
+		
+		LOG("Destroying %s\n", Output->Name);
+		
+		if (Output->Destroy)
+			Output->Destroy(Output);
+#ifdef ATOM_BIOS		
+		if (Output->OutputDriverPrivate)
+			IODelete(Output->OutputDriverPrivate, rhdOutputDriverPrivate, 1);
+#endif
+		IODelete(Output, struct rhdOutput, 1);
+		
+		Output = Next;
     }
 }
 

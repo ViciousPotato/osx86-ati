@@ -133,14 +133,14 @@ enum msgDataFormat {
     MSG_FORMAT_HEX,
     MSG_FORMAT_DEC
 };
-
+/*
 enum atomRegisterType {
     atomRegisterMMIO,
     atomRegisterMC,
     atomRegisterPLL,
     atomRegisterPCICFG
 };
-
+*/
 struct atomBIOSRequests {
     AtomBiosRequestID id;
     AtomBiosRequestFunc request;
@@ -380,10 +380,10 @@ typedef struct _atomDataTables
     ATOM_VOLTAGE_OBJECT_INFO            *VoltageObjectInfo;
     ATOM_POWER_SOURCE_INFO              *PowerSourceInfo;
 } atomDataTables, *atomDataTablesPtr;
-
+/*
 struct atomSaveListRecord
 {
-    /* header */
+    // header
     int Length;
     int Last;
     struct atomRegisterList{
@@ -392,7 +392,7 @@ struct atomSaveListRecord
 	CARD32 Value;
     } RegisterList[1];
 };
-
+*/
 struct atomSaveListObject
 {
     struct atomSaveListObject *next;
@@ -404,6 +404,8 @@ typedef struct _atomBiosHandle {
     unsigned char *BIOSBase;
     atomDataTablesPtr atomDataPtr;
     pointer *scratchBase;
+	CARD16 scratchSize;
+	CARD16 EDIDBlockLength;
     CARD32 fbBase;
     unsigned int BIOSImageSize;
     unsigned char *codeTable;
@@ -680,45 +682,46 @@ rhdAtomAllocateFbScratch(atomBiosHandlePtr handle,
     unsigned int size = data->fb.size;
     handle->scratchBase = NULL;
     handle->fbBase = 0;
-
+	
     if (rhdAtomGetFbBaseAndSize(handle, &fb_base, &fb_size)) {
-	LOG("AtomBIOS requests %dkB"
-		   " of VRAM scratch space\n",fb_size);
-	fb_size *= 1024; /* convert to bytes */
-	LOG("AtomBIOS VRAM scratch base: 0x%x\n",
-		   fb_base);
+		LOG("AtomBIOS requests %dkB"
+			" of VRAM scratch space\n",fb_size);
+		fb_size *= 1024; /* convert to bytes */
+		LOG("AtomBIOS VRAM scratch base: 0x%x\n",
+			fb_base);
     } else {
 	    fb_size = 20 * 1024;
 	    LOG(" default to: %d\n",fb_size);
     }
     if (fb_base && fb_size && size) {
-	/* 4k align */
-	fb_size = (fb_size & ~(CARD32)0xfff) + ((fb_size & 0xfff) ? 1 : 0);
-	if ((fb_base + fb_size) > (start + size)) {
-	    LOG("%s: FW FB scratch area %d (size: %d)"
-		       " extends beyond available framebuffer size %d\n",
-		       __func__, fb_base, fb_size, size);
-	} else if ((fb_base + fb_size) < (start + size)) {
-	    LOG("%s: FW FB scratch area not located "
-		       "at the end of VRAM. Scratch End: "
-		       "0x%x VRAM End: 0x%x\n", __func__,
-		       (unsigned int)(fb_base + fb_size),
-		       size);
-	} else if (fb_base < start) {
-	    LOG("%s: FW FB scratch area extends below "
-		       "the base of the free VRAM: 0x%x Base: 0x%x\n",
-		       __func__, (unsigned int)(fb_base), start);
-	} else {
-	    size -= fb_size;
-	    handle->fbBase = fb_base;
-	    return ATOM_SUCCESS;
-	}
+		/* 4k align */
+		fb_size = (fb_size & ~(CARD32)0xfff) + ((fb_size & 0xfff) ? 1 : 0);
+		handle->scratchSize = fb_size;	//leave a copy here
+		if ((fb_base + fb_size) > (start + size)) {
+			LOG("%s: FW FB scratch area %d (size: %d)"
+				" extends beyond available framebuffer size %d\n",
+				__func__, fb_base, fb_size, size);
+		} else if ((fb_base + fb_size) < (start + size)) {
+			LOG("%s: FW FB scratch area not located "
+				"at the end of VRAM. Scratch End: "
+				"0x%x VRAM End: 0x%x\n", __func__,
+				(unsigned int)(fb_base + fb_size),
+				size);
+		} else if (fb_base < start) {
+			LOG("%s: FW FB scratch area extends below "
+				"the base of the free VRAM: 0x%x Base: 0x%x\n",
+				__func__, (unsigned int)(fb_base), start);
+		} else {
+			size -= fb_size;
+			handle->fbBase = fb_base;
+			return ATOM_SUCCESS;
+		}
     }
-
+	
     if (!handle->fbBase) {
 		LOG("Cannot get VRAM scratch space. "
-				   "Allocating in main memory instead\n");
-		handle->scratchBase = (pointer *)xalloc(fb_size);
+			"Allocating in main memory instead\n");
+		handle->scratchBase = (pointer *)IOMalloc(fb_size);
 		if (!handle->scratchBase) return ATOM_FAILED;
 		bzero(handle->scratchBase, fb_size);
 		return ATOM_SUCCESS;
@@ -2841,13 +2844,15 @@ rhdAtomInit(atomBiosHandlePtr unused1, AtomBiosRequestID unused2,
     if (rhdPtr->BIOSCopy) {
 		LOG("Getting BIOS copy from legacy address\n");
 		ptr = rhdPtr->BIOSCopy;
-		rhdPtr->BIOSCopy = NULL;
 		
 		BIOSImageSize = ptr[2] * 512;
 		if (BIOSImageSize > legacyBIOSMax) {
 			LOG("Invalid BIOS length field\n");
 			return ATOM_FAILED;
 		}
+		BIOSImageSize = rhdPtr->BIOSSize;
+		rhdPtr->BIOSCopy = NULL;
+		rhdPtr->BIOSSize = 0;
     } else {
 		/* as last resort always try to read BIOS from PCI config space */
 		if (BIOSImageSize == 0) {
@@ -2893,7 +2898,7 @@ rhdAtomInit(atomBiosHandlePtr unused1, AtomBiosRequestID unused2,
  error1:
     IODelete(atomDataPtr, atomDataTables, 1);
  error:
-    xfree(ptr);
+    IOFree(ptr, BIOSImageSize);
     return ATOM_FAILED;
 }
 
@@ -2903,9 +2908,9 @@ rhdAtomTearDown(atomBiosHandlePtr handle,
 {
     RHDFUNC(handle);
 
-    xfree(handle->BIOSBase);
+    IOFree(handle->BIOSBase, handle->BIOSImageSize);
     IODelete(handle->atomDataPtr, atomDataTables, 1);
-    if (handle->scratchBase) xfree(handle->scratchBase);
+    if (handle->scratchBase) IOFree(handle->scratchBase, handle->scratchSize);
     IODelete(handle, struct _atomBiosHandle, 1);
     return ATOM_SUCCESS;
 }
@@ -2991,8 +2996,6 @@ static DisplayModePtr
 rhdAtomLvdsTimings(atomBiosHandlePtr handle, ATOM_DTD_FORMAT *dtd)
 {
     DisplayModePtr mode;
-#define NAME_LEN 16
-    char name[NAME_LEN];
 
     RHDFUNC(handle);
 
@@ -3019,9 +3022,7 @@ rhdAtomLvdsTimings(atomBiosHandlePtr handle, ATOM_DTD_FORMAT *dtd)
     mode->VRefresh = (1000.0 * ((float) mode->Clock))
 	/ ((float)(((float)mode->HTotal) * ((float)mode->VTotal)));
 
-    snprintf(name, NAME_LEN, "%dx%d",
-		 mode->HDisplay, mode->VDisplay);
-    mode->name = xstrdup(name);
+    snprintf(mode->name, MODE_NAME_LEN, "%dx%d", mode->HDisplay, mode->VDisplay);
 
     LOG("%s: LVDS Modeline: %s  "
 	     "%2.d  %d (%d) %d %d (%d) %d  %d (%d) %d %d (%d) %d\n",
@@ -3030,7 +3031,6 @@ rhdAtomLvdsTimings(atomBiosHandlePtr handle, ATOM_DTD_FORMAT *dtd)
 	     mode->CrtcHBlankEnd, mode->HTotal,
 	     mode->VDisplay, mode->CrtcVBlankStart, mode->VSyncStart, mode->VSyncEnd,
 	     mode->CrtcVBlankEnd, mode->VTotal);
-#undef NAME_LEN
     return mode;
 }
 
@@ -3038,64 +3038,64 @@ static unsigned char*
 rhdAtomLvdsDDC(atomBiosHandlePtr handle, CARD32 offset, unsigned char *record)
 {
     unsigned char *EDIDBlock;
-
+	
     RHDFUNC(handle);
-
+	
     while (*record != ATOM_RECORD_END_TYPE) {
-
-	switch (*record) {
-	    case LCD_MODE_PATCH_RECORD_MODE_TYPE:
-		offset += sizeof(ATOM_PATCH_RECORD_MODE);
-		if (offset > handle->BIOSImageSize) break;
-		record += sizeof(ATOM_PATCH_RECORD_MODE);
-		break;
-
-	    case LCD_RTS_RECORD_TYPE:
-		offset += sizeof(ATOM_LCD_RTS_RECORD);
-		if (offset > handle->BIOSImageSize) break;
-		record += sizeof(ATOM_LCD_RTS_RECORD);
-		break;
-
-	    case LCD_CAP_RECORD_TYPE:
-		offset += sizeof(ATOM_LCD_MODE_CONTROL_CAP);
-		if (offset > handle->BIOSImageSize) break;
-		record += sizeof(ATOM_LCD_MODE_CONTROL_CAP);
-		break;
-
-	    case LCD_FAKE_EDID_PATCH_RECORD_TYPE:
-		offset += sizeof(ATOM_FAKE_EDID_PATCH_RECORD);
-		/* check if the structure still fully lives in the BIOS image */
-		if (offset > handle->BIOSImageSize) break;
-		offset += ((ATOM_FAKE_EDID_PATCH_RECORD*)record)->ucFakeEDIDLength
-		    - sizeof(UCHAR);
-		if (offset > handle->BIOSImageSize) break;
-		/* dup string as we free it later */
-		if (!(EDIDBlock = (unsigned char *)xalloc(
-			  ((ATOM_FAKE_EDID_PATCH_RECORD*)record)->ucFakeEDIDLength)))
-		    return NULL;
-		memcpy(EDIDBlock,&((ATOM_FAKE_EDID_PATCH_RECORD*)record)->ucFakeEDIDString,
-		       ((ATOM_FAKE_EDID_PATCH_RECORD*)record)->ucFakeEDIDLength);
-
-		/* for testing */
-		{
-		    xf86MonPtr mon = xf86InterpretEDID(handle->scrnIndex,EDIDBlock);
-		    //xf86PrintEDID(mon);
-		    IODelete(mon, xf86MonPtr, 1);
+		
+		switch (*record) {
+			case LCD_MODE_PATCH_RECORD_MODE_TYPE:
+				offset += sizeof(ATOM_PATCH_RECORD_MODE);
+				if (offset > handle->BIOSImageSize) break;
+				record += sizeof(ATOM_PATCH_RECORD_MODE);
+				break;
+				
+			case LCD_RTS_RECORD_TYPE:
+				offset += sizeof(ATOM_LCD_RTS_RECORD);
+				if (offset > handle->BIOSImageSize) break;
+				record += sizeof(ATOM_LCD_RTS_RECORD);
+				break;
+				
+			case LCD_CAP_RECORD_TYPE:
+				offset += sizeof(ATOM_LCD_MODE_CONTROL_CAP);
+				if (offset > handle->BIOSImageSize) break;
+				record += sizeof(ATOM_LCD_MODE_CONTROL_CAP);
+				break;
+				
+			case LCD_FAKE_EDID_PATCH_RECORD_TYPE:
+				offset += sizeof(ATOM_FAKE_EDID_PATCH_RECORD);
+				/* check if the structure still fully lives in the BIOS image */
+				if (offset > handle->BIOSImageSize) break;
+				offset += ((ATOM_FAKE_EDID_PATCH_RECORD*)record)->ucFakeEDIDLength
+				- sizeof(UCHAR);
+				if (offset > handle->BIOSImageSize) break;
+				/* dup string as we free it later */
+				if (!(EDIDBlock = (unsigned char *)IOMalloc(((ATOM_FAKE_EDID_PATCH_RECORD*)record)->ucFakeEDIDLength)))
+					return NULL;
+				memcpy(EDIDBlock,&((ATOM_FAKE_EDID_PATCH_RECORD*)record)->ucFakeEDIDString,
+					   ((ATOM_FAKE_EDID_PATCH_RECORD*)record)->ucFakeEDIDLength);
+				handle->EDIDBlockLength = ((ATOM_FAKE_EDID_PATCH_RECORD*)record)->ucFakeEDIDLength;
+				
+				/* for testing */
+			{
+				xf86MonPtr mon = xf86InterpretEDID(handle->scrnIndex,EDIDBlock);
+				//xf86PrintEDID(mon);
+				IODelete(mon, xf86MonPtr, 1);
+			}
+				return EDIDBlock;
+				
+			case LCD_PANEL_RESOLUTION_RECORD_TYPE:
+				offset += sizeof(ATOM_PANEL_RESOLUTION_PATCH_RECORD);
+				if (offset > handle->BIOSImageSize) break;
+				record += sizeof(ATOM_PANEL_RESOLUTION_PATCH_RECORD);
+				break;
+				
+			default:
+				LOG("%s: unknown record type: %x\n",__func__,*record);
+				return NULL;
 		}
-		return EDIDBlock;
-
-	    case LCD_PANEL_RESOLUTION_RECORD_TYPE:
-		offset += sizeof(ATOM_PANEL_RESOLUTION_PATCH_RECORD);
-		if (offset > handle->BIOSImageSize) break;
-		record += sizeof(ATOM_PANEL_RESOLUTION_PATCH_RECORD);
-		break;
-
-	    default:
-		LOG("%s: unknown record type: %x\n",__func__,*record);
-		return NULL;
-	}
     }
-
+	
     return NULL;
 }
 
@@ -3531,7 +3531,7 @@ rhdAtomAnalogTVTimings(atomBiosHandlePtr handle,
     mode->VRefresh = (1000.0 * ((float) mode->Clock))
 	/ ((float)(((float)mode->HTotal) * ((float)mode->VTotal)));
 
-    mode->name = xstrdup(name);
+    snprintf(mode->name, MODE_NAME_LEN, "%s", name);
 
     LOG("%s: TV Modeline: %s  "
 	     "%2.d  %d (%d) %d %d (%d) %d  %d (%d) %d %d (%d) %d\n",
@@ -4166,32 +4166,32 @@ rhdAtomDeviceTagsFromRecord(atomBiosHandlePtr handle,
 {
     int i, j, k;
     char *devices;
-
+	
     RHDFUNC(handle);
-
+	
     LOG("   NumberOfDevice: %d\n",
-	     Record->ucNumberOfDevice);
-
+		Record->ucNumberOfDevice);
+	
     if (!Record->ucNumberOfDevice) return NULL;
-
-    devices = (char *)xalloc(Record->ucNumberOfDevice * 4 + 1);
+	
+    devices = (char *)IOMalloc(Record->ucNumberOfDevice * 4 + 1);
 	if (!devices) return NULL;
 	bzero(devices, Record->ucNumberOfDevice * 4 + 1);
-
+	
     for (i = 0; i < Record->ucNumberOfDevice; i++) {
-	k = 0;
-	j = Record->asDeviceTag[i].usDeviceID;
-
-	if (!j) continue;
-
-	while (!(j & 0x1)) { j >>= 1; k++; };
-
-	if (!Limit(k,n_rhd_devices,"usDeviceID"))
-	    strncat(devices, rhd_devices[k].name, strlen(rhd_devices[k].name));
+		k = 0;
+		j = Record->asDeviceTag[i].usDeviceID;
+		
+		if (!j) continue;
+		
+		while (!(j & 0x1)) { j >>= 1; k++; };
+		
+		if (!Limit(k,n_rhd_devices,"usDeviceID"))
+			strncat(devices, rhd_devices[k].name, strlen(rhd_devices[k].name));
     }
-
+	
     LOG("   Devices:%s\n",devices);
-
+	
     return devices;
 }
 
@@ -4249,9 +4249,9 @@ rhdAtomGetConnectorID(atomBiosHandlePtr handle, rhdConnectorType connector, int 
  *
  */
 static AtomBiosResult
-rhdAtomOutputDeviceListFromObjectHeader(atomBiosHandlePtr handle,
-				  struct rhdAtomOutputDeviceList **ptr)
+rhdAtomOutputDeviceListFromObjectHeader(atomBiosHandlePtr handle, AtomBiosArgPtr data)
 {
+	struct rhdAtomOutputDeviceList **ptr = &data->OutputDeviceList;
     atomDataTablesPtr atomDataPtr;
     CARD8 crev, frev;
     ATOM_DISPLAY_OBJECT_PATH_TABLE *disObjPathTable;
@@ -4262,124 +4262,124 @@ rhdAtomOutputDeviceListFromObjectHeader(atomBiosHandlePtr handle,
     unsigned short object_header_size;
     struct rhdAtomOutputDeviceList *DeviceList = NULL;
     int cnt = 0;
-
+	
     RHDFUNC(handle);
-
+	
     atomDataPtr = handle->atomDataPtr;
-
-    if (!rhdAtomGetTableRevisionAndSize(
-	    &atomDataPtr->Object_Header->sHeader,
-	    &crev,&frev,&object_header_size)) {
-	return ATOM_NOT_IMPLEMENTED;
+	
+    if (!rhdAtomGetTableRevisionAndSize(&atomDataPtr->Object_Header->sHeader, &crev, &frev, &object_header_size)) {
+		return ATOM_NOT_IMPLEMENTED;
     }
-
+	
     if (crev < 2) /* don't bother with anything below rev 2 */
-	return ATOM_NOT_IMPLEMENTED;
-
+		return ATOM_NOT_IMPLEMENTED;
+	
 	cp = IONew(struct rhdConnectorInfo, RHD_CONNECTORS_MAX);
     if (!cp) return ATOM_FAILED;
 	else bzero(cp, sizeof(struct rhdConnectorInfo) * RHD_CONNECTORS_MAX);
-
+	
     object_header_end =
 	atomDataPtr->Object_Header->usConnectorObjectTableOffset
 	+ object_header_size;
-
+	
     LOG("ObjectTable - size: %d, BIOS - size: %u "
-	     "TableOffset: %d object_header_end: %lu\n",
-	     object_header_size, handle->BIOSImageSize,
-	     atomDataPtr->Object_Header->usConnectorObjectTableOffset,
-	     object_header_end);
-
+		"TableOffset: %d object_header_end: %lu\n",
+		object_header_size, handle->BIOSImageSize,
+		atomDataPtr->Object_Header->usConnectorObjectTableOffset,
+		object_header_end);
+	
     if ((object_header_size > handle->BIOSImageSize)
-	|| (atomDataPtr->Object_Header->usConnectorObjectTableOffset
-	    > handle->BIOSImageSize)
-	|| object_header_end > handle->BIOSImageSize) {
-	LOG("%s: Object table information is bogus\n",__func__);
-	return ATOM_FAILED;
+		|| (atomDataPtr->Object_Header->usConnectorObjectTableOffset
+			> handle->BIOSImageSize)
+		|| object_header_end > handle->BIOSImageSize) {
+		LOG("%s: Object table information is bogus\n",__func__);
+		return ATOM_FAILED;
     }
-
+	
     if (((unsigned long)&atomDataPtr->Object_Header->sHeader
-	 + object_header_end) >  ((unsigned long)handle->BIOSBase
-		     + handle->BIOSImageSize)) {
-	LOG("%s: Object table extends beyond BIOS Image\n",__func__);
-	return ATOM_FAILED;
+		 + object_header_end) >  ((unsigned long)handle->BIOSBase
+								  + handle->BIOSImageSize)) {
+		LOG("%s: Object table extends beyond BIOS Image\n",__func__);
+		return ATOM_FAILED;
     }
     disObjPathTable = (ATOM_DISPLAY_OBJECT_PATH_TABLE *)
 	((char *)&atomDataPtr->Object_Header->sHeader +
 	 atomDataPtr->Object_Header->usDisplayPathTableOffset);
     LOG("DisplayPathObjectTable: entries: %d version: %d\n",
-	     disObjPathTable->ucNumOfDispPath, disObjPathTable->ucVersion);
-
+		disObjPathTable->ucNumOfDispPath, disObjPathTable->ucVersion);
+	
     disObjPath = &disObjPathTable->asDispPath[0];
     for (i = 0; i < disObjPathTable->ucNumOfDispPath; i++) {
-	CARD8 objNum, cObjNum;
-	CARD8 objId;
-	CARD8 objType;
-	rhdConnectorType ct;
-	char *name;
-
-	rhdAtomInterpretObjectID(handle, disObjPath->usConnObjectId, &objType, &objId, &objNum, &name);
-	LOG("  DisplaPathTable[%d]: size: %d DeviceTag: 0x%x ConnObjId: 0x%x NAME: %s GPUObjId: 0x%x\n",
-		 i, disObjPath->usSize, disObjPath->usDeviceTag, disObjPath->usConnObjectId, name, disObjPath->usGPUObjectId);
-
-	if (objType != GRAPH_OBJECT_TYPE_CONNECTOR)
-	    continue;
-
-	ct = rhd_connector_objs[objId].con;
-	cObjNum = objNum;
-
-	for (j = 0; j < disObjPath->usSize / sizeof(USHORT) - 4; j++) {
-	    int k = 0,l;
-
-	    rhdAtomInterpretObjectID(handle, disObjPath->usGraphicObjIds[j], &objType, &objId, &objNum, &name);
-	    LOG("   GraphicsObj[%d] ID: 0x%x Type: 0x%x ObjID: 0x%x ENUM: 0x%x NAME: %s\n",
-		     j, disObjPath->usGraphicObjIds[j], objType, objId, objNum, name);
-
-	    if (objType != GRAPH_OBJECT_TYPE_ENCODER)
-		continue;
-
-	    if (Limit(objId, n_rhd_encoders, "usGraphicsObjId"))
-			LOG("%s: %s %d exceeds maximum %d\n", __func__,"usGraphicsObjId",objId,n_rhd_encoders);
-
-	    l = disObjPath->usDeviceTag;
-	    if (!l) continue;
-
-	    while (!(l & 0x1)) { l >>= 1; k++; };
-	    if (!Limit(k,n_rhd_devices,"usDeviceID")) {
-		//if (!(DeviceList = (struct rhdAtomOutputDeviceList *)xrealloc(DeviceList, sizeof (struct rhdAtomOutputDeviceList) * (cnt + 1))))
-			struct rhdAtomOutputDeviceList *temp = (struct rhdAtomOutputDeviceList *)xalloc(sizeof (struct rhdAtomOutputDeviceList) * (cnt + 1));
-			if (temp == NULL) return ATOM_FAILED;
-			bzero(temp, sizeof(struct rhdAtomOutputDeviceList) * (cnt + 1));
-			bcopy(DeviceList, temp, sizeof (struct rhdAtomOutputDeviceList) * cnt);
-			xfree(DeviceList);
-			DeviceList = temp;
+		CARD8 objNum, cObjNum;
+		CARD8 objId;
+		CARD8 objType;
+		rhdConnectorType ct;
+		char *name;
+		
+		rhdAtomInterpretObjectID(handle, disObjPath->usConnObjectId, &objType, &objId, &objNum, &name);
+		LOG("  DisplaPathTable[%d]: size: %d DeviceTag: 0x%x ConnObjId: 0x%x NAME: %s GPUObjId: 0x%x\n",
+			i, disObjPath->usSize, disObjPath->usDeviceTag, disObjPath->usConnObjectId, name, disObjPath->usGPUObjectId);
+		
+		if (objType != GRAPH_OBJECT_TYPE_CONNECTOR)
+			continue;
+		
+		ct = rhd_connector_objs[objId].con;
+		cObjNum = objNum;
+		
+		for (j = 0; j < disObjPath->usSize / sizeof(USHORT) - 4; j++) {
+			int k = 0,l;
 			
-		DeviceList[cnt].DeviceId = rhd_devices[k].atomDevID;
-		DeviceList[cnt].ConnectorType = rhdAtomGetConnectorID(handle, ct, cObjNum);
-		DeviceList[cnt].OutputType = rhd_encoders[objId].ot[objNum - 1];
-		cnt++;
-		LOG("   DeviceIndex: 0x%x\n",k);
-	    }
-	}
-	disObjPath = (ATOM_DISPLAY_OBJECT_PATH*)(((char *)disObjPath) + disObjPath->usSize);
-	if ((((unsigned long)&atomDataPtr->Object_Header->sHeader + object_header_end)
-	     < (((unsigned long) disObjPath) + sizeof(ATOM_DISPLAY_OBJECT_PATH)))
-	    || (((unsigned long)&atomDataPtr->Object_Header->sHeader + object_header_end)
-		< (((unsigned long) disObjPath) + disObjPath->usSize)))
-	    break;
+			rhdAtomInterpretObjectID(handle, disObjPath->usGraphicObjIds[j], &objType, &objId, &objNum, &name);
+			LOG("   GraphicsObj[%d] ID: 0x%x Type: 0x%x ObjID: 0x%x ENUM: 0x%x NAME: %s\n",
+				j, disObjPath->usGraphicObjIds[j], objType, objId, objNum, name);
+			
+			if (objType != GRAPH_OBJECT_TYPE_ENCODER)
+				continue;
+			
+			if (Limit(objId, n_rhd_encoders, "usGraphicsObjId"))
+				LOG("%s: %s %d exceeds maximum %d\n", __func__,"usGraphicsObjId",objId,n_rhd_encoders);
+			
+			l = disObjPath->usDeviceTag;
+			if (!l) continue;
+			
+			while (!(l & 0x1)) { l >>= 1; k++; };
+			if (!Limit(k,n_rhd_devices,"usDeviceID")) {
+				//if (!(DeviceList = (struct rhdAtomOutputDeviceList *)xrealloc(DeviceList, sizeof (struct rhdAtomOutputDeviceList) * (cnt + 1))))
+				struct rhdAtomOutputDeviceList *temp = (struct rhdAtomOutputDeviceList *)IOMalloc(sizeof (struct rhdAtomOutputDeviceList) * (cnt + 1));
+				if (temp == NULL) return ATOM_FAILED;
+				bzero(temp, sizeof(struct rhdAtomOutputDeviceList) * (cnt + 1));
+				bcopy(DeviceList, temp, sizeof (struct rhdAtomOutputDeviceList) * cnt);
+				IOFree(DeviceList, sizeof(struct rhdAtomOutputDeviceList) * cnt);
+				DeviceList = temp;
+				data->deviceListCount = cnt + 1;
+				
+				DeviceList[cnt].DeviceId = rhd_devices[k].atomDevID;
+				DeviceList[cnt].ConnectorType = rhdAtomGetConnectorID(handle, ct, cObjNum);
+				DeviceList[cnt].OutputType = rhd_encoders[objId].ot[objNum - 1];
+				cnt++;
+				LOG("   DeviceIndex: 0x%x\n",k);
+			}
+		}
+		disObjPath = (ATOM_DISPLAY_OBJECT_PATH*)(((char *)disObjPath) + disObjPath->usSize);
+		if ((((unsigned long)&atomDataPtr->Object_Header->sHeader + object_header_end)
+			 < (((unsigned long) disObjPath) + sizeof(ATOM_DISPLAY_OBJECT_PATH)))
+			|| (((unsigned long)&atomDataPtr->Object_Header->sHeader + object_header_end)
+				< (((unsigned long) disObjPath) + disObjPath->usSize)))
+			break;
     }
     //DeviceList = xrealloc(DeviceList, sizeof(struct rhdAtomOutputDeviceList) * (cnt + 1));
-	struct rhdAtomOutputDeviceList *temp = (struct rhdAtomOutputDeviceList *)xalloc(sizeof(struct rhdAtomOutputDeviceList) * (cnt + 1));
+	struct rhdAtomOutputDeviceList *temp = (struct rhdAtomOutputDeviceList *)IOMalloc(sizeof(struct rhdAtomOutputDeviceList) * (cnt + 1));
 	if (temp != NULL) {
 		bzero(temp, sizeof(struct rhdAtomOutputDeviceList) * (cnt + 1));
 		bcopy(DeviceList, temp, sizeof (struct rhdAtomOutputDeviceList) * cnt);
-		xfree(DeviceList);
+		IOFree(DeviceList, sizeof (struct rhdAtomOutputDeviceList) * cnt);
 		DeviceList = temp;
+		data->deviceListCount = cnt + 1;
 	}
     DeviceList[cnt].DeviceId = atomNone;
-
+	
     *ptr = DeviceList;
-
+	
     return ATOM_SUCCESS;
 }
 
@@ -4536,7 +4536,7 @@ rhdAtomConnectorInfoFromObjectHeader(atomBiosHandlePtr handle,
 		    if (taglist) {
 			cp[ncon].Name = RhdAppendString(cp[ncon].Name,taglist);
 
-			xfree(taglist);
+			IOFree(taglist, ((ATOM_CONNECTOR_DEVICE_TAG_RECORD *)Record)->ucNumberOfDevice * 4 + 1);
 
 		    }
 		    break;
@@ -4564,10 +4564,9 @@ rhdAtomConnectorInfoFromObjectHeader(atomBiosHandlePtr handle,
  *
  */
 static AtomBiosResult
-rhdAtomOutputDeviceListFromSupportedDevices(atomBiosHandlePtr handle,
-					     Bool igp,
-					     struct rhdAtomOutputDeviceList **Ptr)
+rhdAtomOutputDeviceListFromSupportedDevices(atomBiosHandlePtr handle, Bool igp, AtomBiosArgPtr data)
 {
+	struct rhdAtomOutputDeviceList **Ptr = &data->OutputDeviceList;
     atomDataTablesPtr atomDataPtr;
     CARD8 crev, frev;
     int n;
@@ -4602,12 +4601,13 @@ rhdAtomOutputDeviceListFromSupportedDevices(atomBiosHandlePtr handle,
 	    continue;
 
 	//if (!(DeviceList = (struct rhdAtomOutputDeviceList *)xrealloc(DeviceList, sizeof(struct rhdAtomOutputDeviceList) * (cnt + 1))))
-		struct rhdAtomOutputDeviceList *temp = (struct rhdAtomOutputDeviceList *)xalloc(sizeof(struct rhdAtomOutputDeviceList) * (cnt + 1));
+		struct rhdAtomOutputDeviceList *temp = (struct rhdAtomOutputDeviceList *)IOMalloc(sizeof(struct rhdAtomOutputDeviceList) * (cnt + 1));
 		if (temp == NULL) return ATOM_FAILED;
 		bzero(temp, sizeof(struct rhdAtomOutputDeviceList) * (cnt + 1));
 		bcopy(DeviceList, temp, sizeof (struct rhdAtomOutputDeviceList) * cnt);
-		xfree(DeviceList);
+		IOFree(DeviceList, sizeof (struct rhdAtomOutputDeviceList) * cnt);
 		DeviceList = temp;
+		data->deviceListCount = cnt + 1;
 		
 	DeviceList[cnt].ConnectorType = rhd_connectors[ci.sucConnectorInfo.sbfAccess.bfConnectorType].con;
 	DeviceList[cnt].DeviceId = rhd_devices[n].atomDevID;
@@ -4623,12 +4623,13 @@ rhdAtomOutputDeviceListFromSupportedDevices(atomBiosHandlePtr handle,
 	}
     }
     //DeviceList = (struct rhdAtomOutputDeviceList *)xrealloc(DeviceList, sizeof(struct rhdAtomOutputDeviceList) * (cnt + 1));
-	struct rhdAtomOutputDeviceList *temp = (struct rhdAtomOutputDeviceList *)xalloc(sizeof(struct rhdAtomOutputDeviceList) * (cnt + 1));
+	struct rhdAtomOutputDeviceList *temp = (struct rhdAtomOutputDeviceList *)IOMalloc(sizeof(struct rhdAtomOutputDeviceList) * (cnt + 1));
 	if (temp != NULL) {
 		bzero(temp, sizeof(struct rhdAtomOutputDeviceList) * (cnt + 1));
 		bcopy(DeviceList, temp, sizeof (struct rhdAtomOutputDeviceList) * cnt);
-		xfree(DeviceList);
+		IOFree(DeviceList, sizeof (struct rhdAtomOutputDeviceList) * cnt);
 		DeviceList = temp;
+		data->deviceListCount = cnt + 1;
 	}
     DeviceList[cnt].DeviceId = atomNone;
 
@@ -4868,12 +4869,11 @@ rhdAtomOutputDeviceList(atomBiosHandlePtr handle,
 
     RHDFUNC(handle);
 
-    if (rhdAtomOutputDeviceListFromObjectHeader(handle, &data->OutputDeviceList)
-	== ATOM_SUCCESS) {
+    if (rhdAtomOutputDeviceListFromObjectHeader(handle, data) == ATOM_SUCCESS) {
 	return ATOM_SUCCESS;
     } else {
 	    Bool igp = RHDIsIGP(chipset);
-	    return rhdAtomOutputDeviceListFromSupportedDevices(handle, igp, &data->OutputDeviceList);
+	    return rhdAtomOutputDeviceListFromSupportedDevices(handle, igp, data);
     }
 }
 
@@ -5069,13 +5069,13 @@ atomRegisterSaveList(atomBiosHandlePtr handle, struct atomSaveListRecord **SaveL
 {
     struct atomSaveListObject *ListObject = handle->SaveListObjects;
     RHDFUNC(handle);
-
+	
     while (ListObject) {
-	if (ListObject->SaveList == SaveList)
-	    return;
-	ListObject = ListObject->next;
+		if (ListObject->SaveList == SaveList)
+			return;
+		ListObject = ListObject->next;
     }
-	ListObject = (struct atomSaveListObject *)xalloc(sizeof(struct atomSaveListObject));
+	ListObject = (struct atomSaveListObject *)IOMalloc(sizeof(struct atomSaveListObject));
     if (!ListObject) return;
 	else bzero(ListObject, sizeof(struct atomSaveListObject));
     ListObject->next = handle->SaveListObjects;
@@ -5091,20 +5091,20 @@ atomUnregisterSaveList(atomBiosHandlePtr handle, struct atomSaveListRecord **Sav
 {
     struct atomSaveListObject **ListObject;
     RHDFUNC(handle);
-
+	
     if (!handle->SaveListObjects)
-	return;
+		return;
     ListObject  = &handle->SaveListObjects;
-
+	
     while (1) {
-	if ((*ListObject)->SaveList == SaveList) {
-	    struct atomSaveListObject *tmp = *ListObject;
-	    *ListObject = ((*ListObject)->next);
-	    xfree(tmp);
-	}
-	if (!(*ListObject) || !(*ListObject)->next)
-	    return;
-	ListObject = &((*ListObject)->next);
+		if ((*ListObject)->SaveList == SaveList) {
+			struct atomSaveListObject *tmp = *ListObject;
+			*ListObject = ((*ListObject)->next);
+			IOFree(tmp, sizeof(struct atomSaveListObject));
+		}
+		if (!(*ListObject) || !(*ListObject)->next)
+			return;
+		ListObject = &((*ListObject)->next);
     }
 }
 
@@ -5169,7 +5169,7 @@ atomRestoreRegisters(atomBiosHandlePtr handle, AtomBiosRequestID func, AtomBiosA
 
     /* deallocate list */
     atomUnregisterSaveList(handle, (struct atomSaveListRecord **)data->Address);
-    xfree(List);
+    IOFree(List, sizeof(struct atomSaveListRecord) + (sizeof(struct  atomRegisterList) * (*(handle->SaveList))->Length - 1));
     *(data->Address) = NULL;
 
     return ATOM_SUCCESS;
@@ -5546,7 +5546,7 @@ atomSaveRegisters(atomBiosHandlePtr handle, enum atomRegisterType Type, CARD32 a
 	return;
 
     if (!(*(handle->SaveList))) {
-	if (!(*handle->SaveList = (struct atomSaveListRecord *)xalloc(sizeof(struct atomSaveListRecord)
+	if (!(*handle->SaveList = (struct atomSaveListRecord *)IOMalloc(sizeof(struct atomSaveListRecord)
 								  + sizeof(struct  atomRegisterList) * (ALLOC_CNT - 1))))
 	    return;
 	(*(handle->SaveList))->Length = ALLOC_CNT;
@@ -5556,11 +5556,11 @@ atomSaveRegisters(atomBiosHandlePtr handle, enum atomRegisterType Type, CARD32 a
 						      sizeof(struct atomSaveListRecord)
 						      + (sizeof(struct  atomRegisterList)
 							 * ((*(handle->SaveList))->Length + ALLOC_CNT - 1))))) */
-		struct atomSaveListRecord *temp = (struct atomSaveListRecord *)xalloc(sizeof(struct atomSaveListRecord) + (sizeof(struct  atomRegisterList) * (*(handle->SaveList))->Length + ALLOC_CNT - 1));
+		struct atomSaveListRecord *temp = (struct atomSaveListRecord *)IOMalloc(sizeof(struct atomSaveListRecord) + (sizeof(struct  atomRegisterList) * (*(handle->SaveList))->Length + ALLOC_CNT - 1));
 		if (temp == NULL) return;
 		bzero(temp, sizeof(struct atomSaveListRecord) + (sizeof(struct  atomRegisterList) * (*(handle->SaveList))->Length + ALLOC_CNT - 1));
 		bcopy(*handle->SaveList, temp, sizeof(struct atomSaveListRecord) + (sizeof(struct  atomRegisterList) * (*(handle->SaveList))->Length - 1));
-		xfree(*handle->SaveList);
+		IOFree(*handle->SaveList, sizeof(struct atomSaveListRecord) + (sizeof(struct  atomRegisterList) * (*(handle->SaveList))->Length - 1));
 		List = temp;
 	*handle->SaveList = List;
 	List->Length = (*(handle->SaveList))->Length + ALLOC_CNT;
@@ -5614,14 +5614,14 @@ VOID*
 CailAllocateMemory(VOID *CAIL,UINT16 size)
 {
     CAILFUNC(CAIL);
-	return (VOID*)kern_os_malloc(size);
+	return (VOID*)xalloc(size);
 }
 
 VOID
 CailReleaseMemory(VOID *CAIL, VOID *addr)
 {
     CAILFUNC(CAIL);
-	kern_os_free(addr);
+	xfree(addr);
 }
 
 VOID

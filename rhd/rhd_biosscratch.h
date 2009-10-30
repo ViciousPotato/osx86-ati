@@ -27,15 +27,16 @@
 # define RHD_BIOSSCRATCH_H_
 
 //# ifdef ATOM_BIOS
-
+/*
 struct BIOSScratchOutputPrivate {
     void (*Mode) (struct rhdOutput *Output, DisplayModePtr Mode);
     void (*Power) (struct rhdOutput *Output, int Power);
     void (*Destroy) (struct rhdOutput *Output);
     struct rhdOutputDevices *OutputDevices;
+	CARD32 devicesCount;
     enum atomDevice Device;
 };
-
+*/
 struct rhdAtomOutputDeviceList {
     enum atomDevice DeviceId;
     enum rhdOutputType OutputType;

@@ -282,13 +282,7 @@ RHDCVTMode(int HDisplay, int VDisplay, float VRefresh, Bool Reduced,
     if (Interlaced)
         Mode->VTotal *= 2;
 
-    {
-        char  Name[256];
-        Name[0] = 0;
-
-        snprintf(Name, 256, "%dx%d", HDisplay, VDisplay);
-        Mode->name = xnfstrdup(Name);
-    }
+	snprintf(Mode->name, 10, "%dx%d", HDisplay, VDisplay);
 
     if (Reduced)
         Mode->Flags |= V_PHSYNC | V_NVSYNC;
@@ -299,24 +293,6 @@ RHDCVTMode(int HDisplay, int VDisplay, float VRefresh, Bool Reduced,
         Mode->Flags |= V_INTERLACE;
 
     return Mode;
-}
-
-/*
- * Temporary.
- */
-static void
-add(char **p, char *new)
-{
-	char * tmp;
-	int len = strlen(*p) + strlen(new) + 2;
-	tmp = (char *)IOMalloc(len);
-	if (!tmp) return;
-	bzero(tmp, len);
-	strlcpy(tmp, *p, len);
-	strlcat(tmp, " ", len);
-	strlcat(tmp, new, len);
-	IOFree(*p, strlen(*p) + 1);
-    *p = tmp;
 }
 
 /*
@@ -348,37 +324,27 @@ rhdModesEqual(DisplayModePtr mode1, DisplayModePtr mode2)
 void
 RHDPrintModeline(DisplayModePtr mode)
 {
-    char tmp[256];
-    char *flags = (char *)IOMalloc(1);
-	bzero(flags, 1);
-
-    if (mode->HSkew) {
-	snprintf(tmp, 256, "hskew %d", mode->HSkew);
-	add(&flags, tmp);
-    }
-    if (mode->VScan) {
-	snprintf(tmp, 256, "vscan %d", mode->VScan);
-	add(&flags, tmp);
-    }
-    if (mode->Flags & V_INTERLACE) add(&flags, "interlace");
-    if (mode->Flags & V_CSYNC) add(&flags, "composite");
-    if (mode->Flags & V_DBLSCAN) add(&flags, "doublescan");
-    if (mode->Flags & V_BCAST) add(&flags, "bcast");
-    if (mode->Flags & V_PHSYNC) add(&flags, "+hsync");
-    if (mode->Flags & V_NHSYNC) add(&flags, "-hsync");
-    if (mode->Flags & V_PVSYNC) add(&flags, "+vsync");
-    if (mode->Flags & V_NVSYNC) add(&flags, "-vsync");
-    if (mode->Flags & V_PCSYNC) add(&flags, "+csync");
-    if (mode->Flags & V_NCSYNC) add(&flags, "-csync");
-#if 0
-    if (mode->Flags & V_CLKDIV2) add(&flags, "vclk/2");
-#endif
-    LOG("Modeline \"%s\"  %d  %d %d %d %d  %d %d %d %d%s\n",
+    LOG("Modeline \"%s\"  %d  %d %d %d %d  %d %d %d %d",
 	    mode->name, (int)(mode->Clock/1000.),
 	    mode->HDisplay, mode->HSyncStart, mode->HSyncEnd, mode->HTotal,
-	    mode->VDisplay, mode->VSyncStart, mode->VSyncEnd, mode->VTotal,
-	    flags);
-    IOFree(flags, strlen(flags) + 1);
+	    mode->VDisplay, mode->VSyncStart, mode->VSyncEnd, mode->VTotal);
+	
+    if (mode->HSkew) LOG(" hskew %d", mode->HSkew);
+    if (mode->VScan) LOG(" vscan %d", mode->VScan);
+    if (mode->Flags & V_INTERLACE) LOG(" interlace");
+    if (mode->Flags & V_CSYNC) LOG(" composite");
+    if (mode->Flags & V_DBLSCAN) LOG(" doublescan");
+    if (mode->Flags & V_BCAST) LOG(" bcast");
+    if (mode->Flags & V_PHSYNC) LOG(" +hsync");
+    if (mode->Flags & V_NHSYNC) LOG(" -hsync");
+    if (mode->Flags & V_PVSYNC) LOG(" +vsync");
+    if (mode->Flags & V_NVSYNC) LOG(" -vsync");
+    if (mode->Flags & V_PCSYNC) LOG(" +csync");
+    if (mode->Flags & V_NCSYNC) LOG(" -csync");
+#if 0
+    if (mode->Flags & V_CLKDIV2) LOG(" vclk/2");
+#endif
+	LOG("\n");
 }
 
 /*
@@ -436,7 +402,6 @@ rhdModeDelete(DisplayModePtr Modes, DisplayModePtr Delete)
     if (Previous)
 	Previous->next = Next;
 
-    IOFree(Delete->name, strlen(Delete->name) + 1);
     IODelete(Delete, DisplayModeRec, 1);
 
     if (Modes)
@@ -466,7 +431,6 @@ RHDModeCopy(DisplayModePtr Mode)
     New = IONew(DisplayModeRec, 1);
 	if (!New) return NULL;
     memcpy(New, Mode, sizeof(DisplayModeRec)); /* re-use private */
-    New->name = xnfstrdup(Mode->name);
     New->prev = NULL;
     New->next = NULL;
     New->Private = Mode->Private;
@@ -485,8 +449,7 @@ rhdModesDestroy(DisplayModePtr Modes)
 
     while (mode) {
         next = mode->next;
-        IOFree(mode->name, strlen(mode->name) + 1);
-        IODelete(mode, DisplayModeRec, 1);
+         IODelete(mode, DisplayModeRec, 1);
         mode = next;
     }
 }
@@ -501,8 +464,8 @@ rhdModeSanity(RHDPtr rhdPtr, DisplayModePtr Mode)
     if (Mode->status != MODE_OK)
         return Mode->status;
 
-    if (!Mode->name) {
-	LOG("Validation found mode without name.\n");
+    if (!strlen(Mode->name)) {
+		LOG("Validation found mode without name.\n");
         return MODE_ERROR;
     }
 
@@ -1238,8 +1201,7 @@ rhdModeCreateFromName(ScrnInfoPtr pScrn, char *name, Bool Silent)
 
     /* First, try a plain CVT mode */
     Mode = RHDCVTMode(HDisplay, VDisplay, VRefresh, Reduced, FALSE);
-    IOFree(Mode->name, strlen(Mode->name) + 1);
-    Mode->name = xnfstrdup(name);
+	snprintf(Mode->name, 10, "%dx%d", HDisplay, VDisplay);
     Mode->type = M_T_USERDEF;
 
     Status = rhdModeValidate(pScrn, Mode);
@@ -1256,8 +1218,7 @@ rhdModeCreateFromName(ScrnInfoPtr pScrn, char *name, Bool Silent)
             continue;
 
         Mode = RHDModeCopy(Crtc->FixedMode);
-        IOFree(Mode->name, strlen(Mode->name) + 1);
-        Mode->name = xnfstrdup(name);
+		snprintf(Mode->name, 10, "%dx%d", HDisplay, VDisplay);
         Mode->type = M_T_USERDEF;
 
         Mode->HDisplay = HDisplay;
@@ -1300,7 +1261,6 @@ rhdModesListValidateAndCopy(ScrnInfoPtr pScrn, DisplayModePtr Modes, Bool Silent
 			   "(%dx%d:%dMhz): %s\n", Mode->name,
 			   Mode->HDisplay, Mode->VDisplay,
 			   (int)(Mode->Clock / 1000.0), RHDModeStatusToString(Status));
-	    IOFree(Mode->name, strlen(Mode->name) + 1);
 	    IODelete(Mode, DisplayModeRec, 1);
 	}
     }
@@ -1734,7 +1694,7 @@ RHDRRValidateScaledToMode(struct rhdOutput *Output, DisplayModePtr Mode)
  * For now we assume we want reduced modes only.
  */
 void
-RHDSynthModes(int scrnIndex, DisplayModePtr Mode)
+RHDSynthModes(int scrnIndex, DisplayModePtr Mode, DisplayModePtr NativeMode)
 {
     ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
     RHDPtr rhdPtr = RHDPTR(pScrn);
@@ -1773,23 +1733,23 @@ RHDSynthModes(int scrnIndex, DisplayModePtr Mode)
     RHDFUNC(pScrn);
 
     for (i = 0; i < (sizeof(resolution_list) / sizeof(struct resolution)); i++) {
-	/*
-	 *  chances are that the native mode of a display is a CVT mode with 60 Hz.
-	 *  This will make RandR share the CRTC which is undesireable for scaling.
-	 *  This we 'tweak' the frequency to be slightly higher.
-	 *  Don't tell me it's ugly - I know this already.
-	 */
-	Tmp = RHDCVTMode(resolution_list[i].x, resolution_list[i].y, 60.5, TRUE, FALSE);
-	Tmp->status = MODE_OK;
-	rhdModeFillOutCrtcValues(Tmp);
-	IOFree(Tmp->name, strlen(Tmp->name) + 1);
-	Tmp->name = (char *)IOMalloc(20);
-	snprintf(Tmp->name, 20, "%dx%dScaled",resolution_list[i].x,resolution_list[i].y);
-	Tmp->type = M_T_BUILTIN;
-	if (rhdPtr->verbosity > 1) {
-	    LOG("%s: Adding Modeline ",__func__);
-	    RHDPrintModeline(Tmp);
-	}
-	RHDModesAdd(Mode, Tmp);
+		/*
+		 *  chances are that the native mode of a display is a CVT mode with 60 Hz.
+		 *  This will make RandR share the CRTC which is undesireable for scaling.
+		 *  This we 'tweak' the frequency to be slightly higher.
+		 *  Don't tell me it's ugly - I know this already.
+		 */
+		if (NativeMode && (resolution_list[i].x >= NativeMode->HDisplay) && (resolution_list[i].y >= NativeMode->VDisplay)) continue;
+		Tmp = RHDCVTMode(resolution_list[i].x, resolution_list[i].y, 60, TRUE, FALSE);
+		Tmp->status = MODE_OK;
+		if ((Tmp->HDisplay * NativeMode->VDisplay) != (Tmp->VDisplay * NativeMode->HDisplay)) Tmp->Flags |= V_STRETCH;
+		rhdModeFillOutCrtcValues(Tmp);
+		snprintf(Tmp->name, MODE_NAME_LEN, "%dx%dScaled",resolution_list[i].x,resolution_list[i].y);
+		Tmp->type = M_T_BUILTIN;
+		if (rhdPtr->verbosity > 1) {
+			LOG("%s: Adding Modeline ",__func__);
+			RHDPrintModeline(Tmp);
+		}
+		RHDModesAdd(Mode, Tmp);
     }
 }

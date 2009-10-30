@@ -992,7 +992,7 @@ RHDInitVideo(ScreenPtr pScreen)
     RHDFUNC(pScrn);
 
     num_adaptors = xf86XVListGenericAdaptors(pScrn, &adaptors);
-    newAdaptors = xalloc((num_adaptors + 2) * sizeof(XF86VideoAdaptorPtr *));
+    newAdaptors = IOMalloc((num_adaptors + 2) * sizeof(XF86VideoAdaptorPtr *));
     if (newAdaptors == NULL)
 	return;
 

@@ -220,6 +220,7 @@ typedef struct RHDRec {
      * POSTed hardware
      */
     unsigned char*	BIOSCopy;
+	unsigned int	BIOSSize;
 
     struct rhdMC       *MC;  /* Memory Controller */
     struct rhdVGA      *VGA; /* VGA compatibility HW */
@@ -295,6 +296,8 @@ struct rhdPowerState {
 
 /* rhd_driver.c */
 /* Some handy functions that makes life so much more readable */
+extern Bool isDisplayEnabled(RHDPtr rhdPtr, UInt8 index);
+extern void WaitForVBL(RHDPtr rhdPtr, UInt8 index, Bool disable);
 extern unsigned int RHDReadPCIBios(RHDPtr rhdPtr, unsigned char **prt);
 extern void RHDPrepareMode(RHDPtr rhdPtr);
 extern Bool RHDUseAtom(RHDPtr rhdPtr, enum RHD_CHIPSETS *BlackList, enum atomSubSystem subsys);

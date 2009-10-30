@@ -26,7 +26,7 @@ GetEDID_DDC1(unsigned int *s_ptr)
     if (s_start==-1) return NULL;
     s_end = s_ptr + NUM;
     s_pos = s_ptr + s_start;
-    d_block=(unsigned char *)xalloc(EDID1_LEN);
+    d_block=(unsigned char *)IOMalloc(EDID1_LEN);
     if (!d_block) return NULL;
     d_pos = d_block;
     for (i=0;i<EDID1_LEN;i++) {
@@ -40,7 +40,7 @@ GetEDID_DDC1(unsigned int *s_ptr)
 	s_pos++; if (s_pos == s_end) s_pos=s_ptr;
 	d_pos++;
     }
-    xfree(s_ptr);
+    IOFree(s_ptr, sizeof(int)*NUM);
     if (d_block && DDC_checksum(d_block,EDID1_LEN)) return NULL;
     return (resort(d_block));
 }
@@ -114,7 +114,7 @@ resort(unsigned char *s_block)
     unsigned char tmp;
 
     s_end = s_block + EDID1_LEN;
-    d_new = (unsigned char *)xalloc(EDID1_LEN);
+    d_new = (unsigned char *)IOMalloc(EDID1_LEN);
     if (!d_new) return NULL;
     d_end = d_new + EDID1_LEN;
 
@@ -125,7 +125,7 @@ resort(unsigned char *s_block)
 	*d_ptr = tmp; 
 	if (s_ptr == s_end) s_ptr = s_block;
     }
-    xfree(s_block);
+    IOFree(s_block, EDID1_LEN);
     return (d_new);
 }
 

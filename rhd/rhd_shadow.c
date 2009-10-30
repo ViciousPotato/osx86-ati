@@ -45,7 +45,7 @@ RHDShadowPreInit(ScrnInfoPtr pScrn)
     if (!xf86LoadSubModule(pScrn, "shadow")) {
 	return FALSE;
     }
-    if (!(rhdPtr->shadowPtr = (rhdShadowPtr)xalloc(sizeof(rhdShadowRec))))
+    if (!(rhdPtr->shadowPtr = (rhdShadowPtr)IOMalloc(sizeof(rhdShadowRec))))
 	return FALSE;
 
     LOG("Using ShadowFB\n");

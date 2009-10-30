@@ -112,7 +112,6 @@ rhdPanelEDIDModesFilter(struct rhdMonitor *Monitor)
 	    LOG("Monitor \"%s\": Discarding Mode \"%s\"\n",
 		     Monitor->Name, Mode->name);
 
-	    xfree(Mode->name);
 	    IODelete(Mode, DisplayModeRec, 1);
 	}
 
@@ -217,7 +216,7 @@ rhdMonitorPanel(struct rhdConnector *Connector)
 
 #ifdef ATOM_BIOS
     if (Mode) {
-			Monitor->Name = xstrdup("LVDS Panel");
+			snprintf(Monitor->Name, MONITOR_NAME_SIZE, "LVDS Panel");
 			Monitor->Modes = RHDModesAdd(Monitor->Modes, Mode);
 			Monitor->NativeMode = Mode;
 			Monitor->numHSync = 1;
@@ -263,24 +262,7 @@ rhdMonitorPanel(struct rhdConnector *Connector)
 		 */
 		
 		//Let's add some established modes, thus provide user some choices (Dong)
-#define MODEPREFIX(name) NULL, NULL, 0, name, 0, 0
-#define MODESUFFIX   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,FALSE,FALSE,0,NULL,0,0.0,0.0
-		
-		static DisplayModeRec EDIDEstablishedModes[4] = {
-			{ MODEPREFIX("800x600"),    40000,  800,  840,  968, 1056, 0,  600,  601,  605,  628, 0, V_PHSYNC | V_PVSYNC, MODESUFFIX }, /* 800x600@60Hz */
-			{ MODEPREFIX("640x480"),    25200,  640,  656,  752,  800, 0,  480,  490,  492,  525, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX }, /* 640x480@60Hz */
-			{ MODEPREFIX("1280x1024"), 135000, 1280, 1296, 1440, 1688, 0, 1024, 1025, 1028, 1066, 0, V_PHSYNC | V_PVSYNC, MODESUFFIX }, /* 1280x1024@75Hz */
-			{ MODEPREFIX("1024x768"),   65000, 1024, 1048, 1184, 1344, 0,  768,  771,  777,  806, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX }, /* 1024x768@60Hz */
-		};
-		
-		DisplayModePtr eMode = NULL;
-		int i;
-		for (i = 0; i < 4; i++) {
-			eMode = &EDIDEstablishedModes[i];
-			if ((eMode->HDisplay >= Monitor->NativeMode->HDisplay) && (eMode->VDisplay >= Monitor->NativeMode->VDisplay))
-				continue;
-			Monitor->Modes = RHDModesAdd(Monitor->Modes, RHDModeCopy(eMode));
-		}
+		RHDSynthModes(Connector->scrnIndex, Monitor->Modes, Monitor->NativeMode);
     }
 	
     /* panel should be driven at native resolution only. */
@@ -324,8 +306,8 @@ rhdMonitorTV(struct rhdConnector *Connector)
     Monitor->scrnIndex = Connector->scrnIndex;
     Monitor->EDID      = NULL;
 
-    Monitor->Name      = xstrdup("TV");
-    Monitor->Modes     = RHDModesAdd(Monitor->Modes, Mode);
+	snprintf(Monitor->Name, MONITOR_NAME_SIZE, "TV");
+	Monitor->Modes     = RHDModesAdd(Monitor->Modes, Mode);
     Monitor->NativeMode= Mode;
     Monitor->numHSync  = 1;
     Monitor->HSync[0].lo = Mode->HSync;
@@ -395,15 +377,13 @@ RHDMonitorDestroy(struct rhdMonitor *Monitor)
     for (Mode = Monitor->Modes; Mode;) {
 	Next = Mode->next;
 
-	xfree(Mode->name);
 	IODelete(Mode, DisplayModeRec, 1);
 
 	Mode = Next;
     }
 
     if (Monitor->EDID)
-	xfree(Monitor->EDID->rawData);
+	IOFree(Monitor->EDID->rawData, EDID1_LEN);
     IODelete(Monitor->EDID, xf86Monitor, 1);
-    xfree(Monitor->Name);
     IODelete(Monitor, struct rhdMonitor, 1);
 }

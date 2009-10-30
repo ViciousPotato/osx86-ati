@@ -603,7 +603,7 @@ RHDMCInit(RHDPtr rhdPtr)
 		MC->GetFBLocation = R700MCGetFBLocation;
     } else {
 		LOG("I don't know anything about MC on this chipset\n");
-		xfree(MC);
+		IODelete(MC, struct rhdMC, 1);
 		return;
     }
     if (rhdPtr->ChipSet < RHD_R600)

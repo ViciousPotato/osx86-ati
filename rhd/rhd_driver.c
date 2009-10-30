@@ -113,7 +113,7 @@ RHDGetRec(ScrnInfoPtr pScrn)
     if (pScrn->driverPrivate != NULL)
 	return TRUE;
 
-    pScrn->driverPrivate = (pointer)xalloc(sizeof(RHDRec));
+    pScrn->driverPrivate = (pointer)IOMalloc(sizeof(RHDRec));
     if (pScrn->driverPrivate == NULL) return FALSE;
 	bzero(pScrn->driverPrivate, sizeof(RHDRec));
 
@@ -149,9 +149,9 @@ RHDFreeRec(ScrnInfoPtr pScrn)
     if (rhdPtr->CursorInfo)
         IODelete(rhdPtr->CursorInfo, xf86CursorInfoRec, 1);
 	
-	if (rhdPtr->BIOSCopy) xfree(rhdPtr->BIOSCopy);
+	if (rhdPtr->BIOSCopy) IOFree(rhdPtr->BIOSCopy, rhdPtr->BIOSSize);
 		
-    xfree(pScrn->driverPrivate);	/* == rhdPtr */
+    IOFree(pScrn->driverPrivate, sizeof(RHDRec));	/* == rhdPtr */
     pScrn->driverPrivate = NULL;
 }
 
@@ -202,6 +202,7 @@ RHDPreInit(ScrnInfoPtr pScrn)
     pScrn->chipset = (char *)xf86TokenToString(RHDChipsets, rhdPtr->ChipSet);
 
 	rhdPtr->BIOSCopy = pScrn->memoryMap->BIOSCopy;
+	rhdPtr->BIOSSize = pScrn->memoryMap->BIOSLength;
 	pScrn->memoryMap->BIOSCopy = NULL;
 
     /* Now check whether we know this card */
@@ -363,7 +364,10 @@ RHDPreInit(ScrnInfoPtr pScrn)
 #endif
     //RHDAudioInit(rhdPtr);
     RHDLUTsInit(rhdPtr);
-    if (pScrn->options->HWCursorSupport) RHDCursorsInit(rhdPtr); /* do this irrespective of hw/sw cursor setting */
+    if (pScrn->options->HWCursorSupport) {
+		//RHDCursorsInit(rhdPtr); // moved to RHDxf86InitCursor
+		if (!RHDxf86InitCursor(pScrn)) pScrn->options->HWCursorSupport = FALSE;	//allocate cursor image space failed
+	}
     if (pScrn->options->lowPowerMode) RHDPmInit(rhdPtr);
 	
     if (!RHDConnectorsInit(rhdPtr, rhdPtr->Card)) {
@@ -373,10 +377,11 @@ RHDPreInit(ScrnInfoPtr pScrn)
 	
 #ifdef ATOM_BIOS
 	struct rhdAtomOutputDeviceList *OutputDeviceList = NULL;
+	int k = 0;
 	
 	if (rhdPtr->Card && (rhdPtr->Card->ConnectorInfo[0].Type != RHD_CONNECTOR_NONE)
 		&& (rhdPtr->Card->DeviceInfo[0][0] != atomNone || rhdPtr->Card->DeviceInfo[0][1] != atomNone)) {
-		int i, k = 0;
+		int i;
 		
 		for (i = 0; i < RHD_CONNECTORS_MAX; i++) {
 			int j;
@@ -385,11 +390,11 @@ RHDPreInit(ScrnInfoPtr pScrn)
 				if (rhdPtr->Card->ConnectorInfo[i].Output[j] != RHD_OUTPUT_NONE) {
 					/* if (!(OutputDeviceList = (struct rhdAtomOutputDeviceList *)xrealloc(
 					 OutputDeviceList, sizeof (struct rhdAtomOutputDeviceList) * (k + 1)))) */
-					struct rhdAtomOutputDeviceList *temp = (struct rhdAtomOutputDeviceList *)xalloc(sizeof (struct rhdAtomOutputDeviceList) * (k + 1));
+					struct rhdAtomOutputDeviceList *temp = (struct rhdAtomOutputDeviceList *)IOMalloc(sizeof (struct rhdAtomOutputDeviceList) * (k + 1));
 					if (temp == NULL) break;
 					bzero(temp, sizeof (struct rhdAtomOutputDeviceList) * (k + 1));
 					bcopy(OutputDeviceList, temp, sizeof (struct rhdAtomOutputDeviceList) * k);
-					xfree(OutputDeviceList);
+					IOFree(OutputDeviceList, sizeof (struct rhdAtomOutputDeviceList) * k);
 					OutputDeviceList = temp;
 					
 					OutputDeviceList[k].ConnectorType = rhdPtr->Card->ConnectorInfo[i].Type;
@@ -407,8 +412,10 @@ RHDPreInit(ScrnInfoPtr pScrn)
 		
 		data.chipset = rhdPtr->ChipSet;
 		if (RHDAtomBiosFunc(rhdPtr->scrnIndex, rhdPtr->atomBIOS,
-							ATOM_GET_OUTPUT_DEVICE_LIST, &data) == ATOM_SUCCESS)
+							ATOM_GET_OUTPUT_DEVICE_LIST, &data) == ATOM_SUCCESS) {
 			OutputDeviceList = data.OutputDeviceList;
+			k = data.deviceListCount;
+		}
 	}
 	
 	if (OutputDeviceList) {
@@ -416,7 +423,7 @@ RHDPreInit(ScrnInfoPtr pScrn)
 		
 		for (Output = rhdPtr->Outputs; Output; Output = Output->Next)
 			RHDAtomSetupOutputDriverPrivate(OutputDeviceList, Output);
-		xfree(OutputDeviceList);
+		IOFree(OutputDeviceList, sizeof (struct rhdAtomOutputDeviceList) * k);
 	}
 #endif
 	
@@ -523,14 +530,14 @@ RHDScreenInit(ScrnInfoPtr pScrn, DisplayModePtr mode)
 
     /* enable/disable audio */
     //RHDAudioSetEnable(rhdPtr, rhdPtr->audio);
-
+/* moved to preInit
 	if (pScrn->options->HWCursorSupport) {
-		/* Inititalize HW cursor */
+		// Inititalize HW cursor
 		Bool ret;
 		ret = RHDxf86InitCursor(pScrn);
 		if (!ret)
 			LOG("Hardware cursor initialization failed\n");
-	}
+	} */
     /* fixme */
     /* Support 10-bits of precision in LUT */ /*
     if (!xf86HandleColormaps(pScreen, 256, 10,
@@ -1199,7 +1206,6 @@ rhdModeLayoutSelect(RHDPtr rhdPtr)
 			IODelete(crtc->ScaledToMode, DisplayModeRec, 1);
 			crtc->ScaledToMode = NULL;
 		}
-		xf86Screens[0]->NativeMode = crtc->ScaledToMode;	//keep a reference here (Dong)
     }
 	
     return Found;
@@ -1701,7 +1707,7 @@ static unsigned int readATOMBIOS(RHDPtr rhdPtr, unsigned char **ptr) {
 	//regr32(0xAC);
 	//regw32(0xA8, 0);
 	//regr32(0xAC);
-	*ptr = (unsigned char *)xalloc(0x10000);
+	*ptr = (unsigned char *)IOMalloc(0x10000);
 	if (*ptr == NULL) return 0;
 	int i;
 	for (i = 0;i < 0x10000;i += 4){
@@ -1887,7 +1893,35 @@ unsigned int RHDAllocFb(RHDPtr rhdPtr, unsigned int size, const char *name)
     return chunk;
 }
 
-//Interface 
+//reverse engineered code
+Bool isDisplayEnabled(RHDPtr rhdPtr, UInt8 index) {
+	if (index == 0) return (RHDRegRead(rhdPtr, D1CRTC_CONTROL) & 1);
+	if (index == 1) return (RHDRegRead(rhdPtr, D2CRTC_CONTROL) & 1);
+	return TRUE;
+}
+
+void WaitForVBL(RHDPtr rhdPtr, UInt8 index, Bool noWait) {
+	UInt32 crtcStatusReg;
+	uint64_t deadline, now;
+	
+	if (index > 2) return;
+	if (!isDisplayEnabled(rhdPtr, index)) return;
+	crtcStatusReg = (index)?D2CRTC_STATUS:D1CRTC_STATUS;
+	if (!noWait) {
+		clock_interval_to_deadline(80, 1000000, &deadline);	//80ms
+		while(RHDRegRead(rhdPtr, crtcStatusReg) & 1) {
+			clock_get_uptime(&now);
+			if (now > deadline) break;
+		}
+	}
+	clock_interval_to_deadline(80, 1000000, &deadline);
+	while(!(RHDRegRead(rhdPtr, crtcStatusReg) & 1)) {
+		clock_get_uptime(&now);
+		if (now > deadline) break;
+	}
+}
+
+//Interface added by Dong
 
 Bool RadeonHDPreInit(ScrnInfoPtr pScrn, RegEntryIDPtr pciTag, RHDMemoryMap *pMemory, pciVideoPtr PciInfo, UserOptions *options) {
 	pScrn->PciTag = pciTag;
@@ -1896,6 +1930,8 @@ Bool RadeonHDPreInit(ScrnInfoPtr pScrn, RegEntryIDPtr pciTag, RHDMemoryMap *pMem
 	pScrn->memPhysBase = pMemory->FbPhysBase;
 	pScrn->fbOffset = 0;	//scanout offset
 	pScrn->bitsPerPixel = pMemory->bitsPerPixel;
+	pScrn->bitsPerComponent = pMemory->bitsPerComponent;
+	pScrn->colorFormat = pMemory->colorFormat;
 	pScrn->depth = pScrn->bitsPerPixel;
 	pScrn->memoryMap = pMemory;
 	
@@ -1956,4 +1992,3 @@ Bool RadeonHDGetSetBKSV(UInt32 *value, Bool set) {
     }
 	return FALSE;
 }
-

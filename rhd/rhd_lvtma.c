@@ -414,7 +414,7 @@ LVDSEnable(struct rhdOutput *Output)
 		   __func__, i, (int) tmp);
     }
 
-    if (Private->BlLevel >= 0) {
+    if (Private->BlLevel >= 30) {
 		if (xf86Screens[0]->options->enableBacklight)
 			LVDSSetBacklight(Output);	// BackLight Debug
     }

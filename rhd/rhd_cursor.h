@@ -29,6 +29,8 @@
 #define MAX_CURSOR_WIDTH  64
 #define MAX_CURSOR_HEIGHT 64
 
+#define ARGB_CURSOR
+
 /*
  * source and mask point directly to the bits, which are in the server-defined
  * bitmap format.

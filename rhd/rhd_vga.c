@@ -115,7 +115,7 @@ rhdVGASaveFB(RHDPtr rhdPtr)
 		   "framebuffer (0x%08X)\n", __func__,
 		   (unsigned int) RHDRegRead(rhdPtr, VGA_MEMORY_BASE_ADDRESS));
 	if (VGA->FB)
-	    xfree(VGA->FB);
+	    IOFree(VGA->FB, VGA->FBSize);
 	VGA->FB = NULL;
 	VGA->FBSize = 0;
 	return;
@@ -127,7 +127,7 @@ rhdVGASaveFB(RHDPtr rhdPtr)
 	     __func__, VGA->FBOffset, VGA->FBSize);
 
     if (!VGA->FB) {
-		VGA->FB = (CARD8 *)xalloc(VGA->FBSize);
+		VGA->FB = (CARD8 *)IOMalloc(VGA->FBSize);
 		if (VGA->FB) bzero(VGA->FB, VGA->FBSize);
 	}
     if (VGA->FB)
@@ -224,6 +224,6 @@ RHDVGADestroy(RHDPtr rhdPtr)
 	return; /* We don't need to warn , this is intended use */
 
     if (VGA->FB)
-	xfree(VGA->FB);
+	IOFree(VGA->FB, VGA->FBSize);
     IODelete(VGA, struct rhdVGA, 1);
 }

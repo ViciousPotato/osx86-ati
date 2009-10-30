@@ -194,11 +194,12 @@ static void
 rhdAtomCrtcScaleDestroy(struct rhdCrtc *Crtc)
 {
     RHDFUNC(Crtc);
-
+	
     if (Crtc->ScalePriv) {
-	xfree(Crtc->ScalePriv->RegList);
-	IODelete(Crtc->ScalePriv, struct rhdCrtcScalePrivate, 1);
-	Crtc->ScalePriv = NULL;
+		CARD32 len = ((struct atomSaveListRecord *)Crtc->ScalePriv->RegList)->Length - 1;
+		IOFree(Crtc->ScalePriv->RegList, sizeof(struct atomSaveListRecord) + sizeof(struct atomRegisterList) * len);
+		IODelete(Crtc->ScalePriv, struct rhdCrtcScalePrivate, 1);
+		Crtc->ScalePriv = NULL;
     }
 }
 
@@ -385,11 +386,12 @@ static void
 rhdAtomModeDestroy(struct rhdCrtc *Crtc)
 {
     RHDFUNC(Crtc);
-
+	
     if (Crtc->ModePriv) {
-	xfree(Crtc->ModePriv->RegList);
-	IODelete(Crtc->ModePriv, struct rhdCrtcModePrivate, 1);
-	Crtc->ModePriv = NULL;
+		CARD32 len = ((struct atomSaveListRecord *)Crtc->ModePriv->RegList)->Length - 1;
+		IOFree(Crtc->ModePriv->RegList, sizeof(struct atomSaveListRecord) + sizeof(struct atomRegisterList) * len);
+		IODelete(Crtc->ModePriv, struct rhdCrtcModePrivate, 1);
+		Crtc->ModePriv = NULL;
     }
 }
 

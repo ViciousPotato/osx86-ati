@@ -26,10 +26,12 @@
 #ifndef _RHD_MONITOR_H
 #define _RHD_MONITOR_H
 
+#define MONITOR_NAME_SIZE 13
+
 struct rhdMonitor {
     int scrnIndex;
 
-    char *Name;
+    char Name[MONITOR_NAME_SIZE];
 
     int xDpi;
     int yDpi;
