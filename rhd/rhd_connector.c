@@ -128,7 +128,7 @@ rhdConnectorSynthName(struct rhdConnectorInfo *ConnectorInfo,
 		"DVI-I", "VGA", "DVI-A", "DVI-D"
 	};
 	
-    char *str = NULL;
+    char str[20];
     char *TypeName;
     char *str1, *str2;
     int cnt;
@@ -164,29 +164,34 @@ rhdConnectorSynthName(struct rhdConnectorInfo *ConnectorInfo,
 		TypeName = names[3];
 		cnt = ++(*state)->dvi_cnt;
 	    }
-	    str = (char *)IOMalloc(12);
+			//MemFix
+	    //str = (char *)IOMalloc(12);
 	    snprintf(str, 11, "%s %d",TypeName, cnt);
-	    return str;
+	    return xstrdup(str);
 
 	case RHD_CONNECTOR_VGA:
-	    str = (char *)IOMalloc(10);
+			//MemFix
+	    //str = (char *)IOMalloc(10);
 	    snprintf(str, 9, "VGA %d",++(*state)->vga_cnt);
-	    return str;
+	    return xstrdup(str);
 
 	case RHD_CONNECTOR_PANEL:
-	    str = (char *)IOMalloc(10);
+			//MemFix
+	    //str = (char *)IOMalloc(10);
 	    snprintf(str, 9, "PANEL");
-	    return str;
+	    return xstrdup(str);
 
 	case RHD_CONNECTOR_TV:
 	    str1 = xstrdup(ConnectorInfo->Name);
-	    str = (char *)IOMalloc(20);
-	    str2 = strchr(str1, ' ');
-	    if (str2) *(str2) = '\0';
-	    snprintf(str, 20, "TV %s",str1);
-	    IOFree(str1, strlen(str1) + 1);
-	    return str;
-
+			//MemFix
+			//str = (char *)IOMalloc(20);
+			int len = strlen(str1) + 1;
+			str2 = strchr(str1, ' ');
+			if (str2) *(str2) = '\0';
+			snprintf(str, 20, "TV %s",str1);
+			IOFree(str1, len);
+			return xstrdup(str);
+			
 	case RHD_CONNECTOR_PCIE: /* should never get here */
 	    return NULL;
     }

@@ -37,7 +37,7 @@
     Version:    Technology: PowerSurge 1.0.2.
                 Package:    Universal Interfaces 2.1.2 on ETO #20
  
-    Copyright:  © 1984-1995 by Apple Computer, Inc.
+    Copyright:  ï¿½ 1984-1995 by Apple Computer, Inc.
                 All rights reserved.
  
     Bugs?:      If you find a problem with this file, use the Apple Bug Reporter
@@ -58,7 +58,9 @@
 extern "C" {
 #endif
 
+#ifndef __LP64__
 #pragma options align=mac68k
+#endif
 
 #ifndef NULL
 #if !defined(__cplusplus) && (defined(__SC__) || defined(THINK_C))
@@ -72,8 +74,8 @@ enum {
     noErr                       = 0
 };
 
-typedef unsigned long KernelProcessID;
-typedef unsigned long AddressSpaceID;
+typedef uintptr_t KernelProcessID;
+typedef uintptr_t AddressSpaceID;
 
 #if 0
 #ifndef __cplusplus
@@ -91,11 +93,11 @@ typedef char *Ptr;
 
 typedef Ptr *Handle;
 
-typedef long Fixed;
+typedef UInt32 Fixed;
 
 typedef Fixed *FixedPtr;
 
-typedef long Fract;
+typedef UInt32 Fract;
 
 typedef Fract *FractPtr;
 
@@ -184,13 +186,15 @@ typedef struct OpaqueRef *KernelID;
 
 typedef UInt8 *BytePtr;
 
-typedef UInt32 ByteCount;
+typedef IOByteCount ByteCount;
 
-typedef UInt32 ItemCount;
+typedef IOItemCount ItemCount;
 
 typedef void *LogicalAddress;
 
+#if !defined(__LP64__)
 typedef void *PhysicalAddress;
+#endif
 
 typedef UInt32 PBVersion;
 
@@ -209,7 +213,7 @@ typedef unsigned char Str31[32];
 /*
 From:
 	File:		DriverFamilyMatching.i <18>
-	Copyright:	© 1995-1996 by Apple Computer, Inc., all rights reserved.
+	Copyright:	ï¿½ 1995-1996 by Apple Computer, Inc., all rights reserved.
 */
 
 //##############################################
@@ -338,7 +342,9 @@ typedef struct DriverDescription	DriverDescription;
 typedef DriverDescription *			DriverDescriptionPtr;
 
 
+#ifndef __LP64__
 #pragma options align=reset
+#endif
 
 #ifdef __cplusplus
 }
@@ -352,7 +358,9 @@ typedef DriverDescription *			DriverDescriptionPtr;
 extern "C" {
 #endif
 
+#ifndef __LP64__
 #pragma options align=mac68k
+#endif
 
 struct RGBColor {
  unsigned short red;                /*magnitude of red component*/
@@ -383,7 +391,46 @@ struct GammaTbl {
 typedef struct GammaTbl     GammaTbl;
 typedef GammaTbl            *GammaTblPtr;
 
+struct RegEntryID
+{
+    void * opaque[4];
+};
+typedef struct RegEntryID RegEntryID;
+typedef RegEntryID *                    RegEntryIDPtr;
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+struct IONDRVControlParameters {
+    UInt8	__reservedA[0x1a];
+    UInt16	code;
+    void *	params;
+    UInt8	__reservedB[0x12];
+};
+
+enum {
+    kIONDRVOpenCommand                = 128 + 0,
+    kIONDRVCloseCommand               = 128 + 1,
+    kIONDRVReadCommand                = 128 + 2,
+    kIONDRVWriteCommand               = 128 + 3,
+    kIONDRVControlCommand             = 128 + 4,
+    kIONDRVStatusCommand              = 128 + 5,
+    kIONDRVKillIOCommand              = 128 + 6,
+    kIONDRVInitializeCommand          = 128 + 7,		/* init driver and device*/
+    kIONDRVFinalizeCommand            = 128 + 8,		/* shutdown driver and device*/
+    kIONDRVReplaceCommand             = 128 + 9,		/* replace an old driver*/
+    kIONDRVSupersededCommand          = 128 + 10		/* prepare to be replaced by a new driver*/
+};
+enum {
+    kIONDRVSynchronousIOCommandKind   = 0x00000001,
+    kIONDRVAsynchronousIOCommandKind  = 0x00000002,
+    kIONDRVImmediateIOCommandKind     = 0x00000004
+};
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+#ifndef __LP64__
 #pragma options align=reset
+#endif
 
 #ifdef __cplusplus
 }

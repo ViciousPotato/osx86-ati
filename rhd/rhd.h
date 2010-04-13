@@ -32,6 +32,7 @@
 #define RHD_DRIVER_NAME "radeonhd"
 #define ATOM_BIOS
 #define ATOM_BIOS_PARSER
+#define SaveRestore
 
 enum RHD_CHIPSETS {
     RHD_UNKNOWN = 0,
@@ -337,6 +338,7 @@ char *RhdAppendString(char *s1, const char *s2);
 /* __func__ is really nice, but not universal */
 #if !defined(__GNUC__) && !defined(C99)
 #define __func__ "unknown"
+#define __LINE__ "unknown"
 #endif
 
 #define LOG_DEBUG 7

@@ -50,6 +50,9 @@ private:
 	RHDMemoryMap	memoryMap;
 	bool			debugMode;
 	
+	UInt32			fLastPowerState;
+	UInt32			fLastBacklightLevel;
+	
 public:
 	
     static IONDRV * fromRegistryEntry( IORegistryEntry * regEntry, IOService * provider );
@@ -127,7 +130,7 @@ public:
 	 */
 	
     virtual IOReturn setAttributeForConnection( IOIndex connectIndex,
-											   IOSelect attribute, UInt32 value );
+											   IOSelect attribute, uintptr_t  info );
 
 	/*! @function getAttributeForConnection
 	 @abstract Generic method to retrieve some attribute of the framebuffer device, specific to one display connection.
@@ -140,7 +143,7 @@ public:
 	 */
 	
     virtual IOReturn getAttributeForConnection( IOIndex connectIndex,
-											   IOSelect attribute, UInt32 * value );
+											   IOSelect attribute, uintptr_t  * value );
 };
 
 #endif /* ! _RADEONHD_H */

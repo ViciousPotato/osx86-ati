@@ -388,22 +388,28 @@ RHDPreInit(ScrnInfoPtr pScrn)
 			if (rhdPtr->Card->ConnectorInfo[i].Type == RHD_CONNECTOR_NONE) break;
 			for (j = 0; j < MAX_OUTPUTS_PER_CONNECTOR; j++) {
 				if (rhdPtr->Card->ConnectorInfo[i].Output[j] != RHD_OUTPUT_NONE) {
-					/* if (!(OutputDeviceList = (struct rhdAtomOutputDeviceList *)xrealloc(
-					 OutputDeviceList, sizeof (struct rhdAtomOutputDeviceList) * (k + 1)))) */
-					struct rhdAtomOutputDeviceList *temp = (struct rhdAtomOutputDeviceList *)IOMalloc(sizeof (struct rhdAtomOutputDeviceList) * (k + 1));
-					if (temp == NULL) break;
-					bzero(temp, sizeof (struct rhdAtomOutputDeviceList) * (k + 1));
-					bcopy(OutputDeviceList, temp, sizeof (struct rhdAtomOutputDeviceList) * k);
-					IOFree(OutputDeviceList, sizeof (struct rhdAtomOutputDeviceList) * k);
-					OutputDeviceList = temp;
+					//MemFix
+					//struct rhdAtomOutputDeviceList *temp = (struct rhdAtomOutputDeviceList *)IOMalloc(sizeof (struct rhdAtomOutputDeviceList) * (k + 1));
+					//if (temp == NULL) break;
+					//bzero(temp, sizeof (struct rhdAtomOutputDeviceList) * (k + 1));
+					//bcopy(OutputDeviceList, temp, sizeof (struct rhdAtomOutputDeviceList) * k);
+					//IOFree(OutputDeviceList, sizeof (struct rhdAtomOutputDeviceList) * k);
+					//OutputDeviceList = temp;
+					if (!OutputDeviceList &&
+						!(OutputDeviceList = IONew(struct rhdAtomOutputDeviceList, MaxAtomOutputDeviceList))) {
+						LOG("not enough memory\n");
+						goto error1;
+					} else bzero(OutputDeviceList, sizeof(struct rhdAtomOutputDeviceList) * MaxAtomOutputDeviceList);
 					
-					OutputDeviceList[k].ConnectorType = rhdPtr->Card->ConnectorInfo[i].Type;
-					OutputDeviceList[k].DeviceId = rhdPtr->Card->DeviceInfo[i][j];
-					OutputDeviceList[k].OutputType = rhdPtr->Card->ConnectorInfo[i].Output[j];
-					LOG("OutputDevice: C: 0x%2.2x O: 0x%2.2x DevID: 0x%2.2x\n",
-						OutputDeviceList[k].ConnectorType, OutputDeviceList[k].OutputType,
-						OutputDeviceList[k].DeviceId);
-					k++;
+					if (k < MaxAtomOutputDeviceList) {
+						OutputDeviceList[k].ConnectorType = rhdPtr->Card->ConnectorInfo[i].Type;
+						OutputDeviceList[k].DeviceId = rhdPtr->Card->DeviceInfo[i][j];
+						OutputDeviceList[k].OutputType = rhdPtr->Card->ConnectorInfo[i].Output[j];
+						LOG("OutputDevice: C: 0x%2.2x O: 0x%2.2x DevID: 0x%2.2x\n",
+							OutputDeviceList[k].ConnectorType, OutputDeviceList[k].OutputType,
+							OutputDeviceList[k].DeviceId);
+						k++;
+					}
 				}
 			}
 		}
@@ -423,7 +429,7 @@ RHDPreInit(ScrnInfoPtr pScrn)
 		
 		for (Output = rhdPtr->Outputs; Output; Output = Output->Next)
 			RHDAtomSetupOutputDriverPrivate(OutputDeviceList, Output);
-		IOFree(OutputDeviceList, sizeof (struct rhdAtomOutputDeviceList) * k);
+		IOFree(OutputDeviceList, sizeof (struct rhdAtomOutputDeviceList) * MaxAtomOutputDeviceList);
 	}
 #endif
 	
@@ -1400,28 +1406,28 @@ rhdSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 
     /* Set up D1/D2 and appendages */
     for (i = 0; i < 2; i++) {
-	struct rhdCrtc *Crtc;
-
-	Crtc = rhdPtr->Crtc[i];
-	if (Crtc->Active) {
-	    Crtc->FBSet(Crtc, pScrn->displayWidth, pScrn->virtualX, pScrn->virtualY,
-			pScrn->depth, rhdPtr->FbScanoutStart);
-	    if (Crtc->ScaledToMode) {
-		Crtc->ModeSet(Crtc, Crtc->ScaledToMode);
-		if (Crtc->ScaleSet)
-		    Crtc->ScaleSet(Crtc, Crtc->ScaleType, mode, Crtc->ScaledToMode);
-	    } else {
-		Crtc->ModeSet(Crtc, mode);
-		if (Crtc->ScaleSet)
-		    Crtc->ScaleSet(Crtc, RHD_CRTC_SCALE_TYPE_NONE, mode, NULL);
-	    }
-	    RHDPLLSet(Crtc->PLL, mode->Clock);
-	    Crtc->LUTSelect(Crtc, Crtc->LUT);
-	    RHDOutputsMode(rhdPtr, Crtc, Crtc->ScaledToMode
-			   ? Crtc->ScaledToMode : mode);
-	}
+		struct rhdCrtc *Crtc;
+		
+		Crtc = rhdPtr->Crtc[i];
+		if (Crtc->Active) {
+			Crtc->FBSet(Crtc, pScrn->displayWidth, pScrn->virtualX, pScrn->virtualY,
+						pScrn->depth, rhdPtr->FbScanoutStart);
+			if (Crtc->ScaledToMode) {
+				Crtc->ModeSet(Crtc, Crtc->ScaledToMode);
+				if (Crtc->ScaleSet)
+					Crtc->ScaleSet(Crtc, Crtc->ScaleType, mode, Crtc->ScaledToMode);
+			} else {
+				Crtc->ModeSet(Crtc, mode);
+				if (Crtc->ScaleSet)
+					Crtc->ScaleSet(Crtc, RHD_CRTC_SCALE_TYPE_NONE, mode, NULL);
+			}
+			RHDPLLSet(Crtc->PLL, mode->Clock);
+			Crtc->LUTSelect(Crtc, Crtc->LUT);
+			RHDOutputsMode(rhdPtr, Crtc, Crtc->ScaledToMode
+						   ? Crtc->ScaledToMode : mode);
+		}
     }
-
+	
 	/* shut down that what we don't use */
 	RHDPLLsShutdownInactive(rhdPtr);
 	RHDOutputsShutdownInactive(rhdPtr);
@@ -1992,3 +1998,14 @@ Bool RadeonHDGetSetBKSV(UInt32 *value, Bool set) {
     }
 	return FALSE;
 }
+
+Bool RadeonHDDisplayPowerManagementSet(int PowerManagementMode, int flags) {
+	ScrnInfoPtr pScrn;
+	RHDPtr rhdPtr;
+	
+	pScrn = xf86Screens[0];
+	if (!pScrn) return FALSE;
+	rhdPtr = RHDPTR(pScrn);
+	RHDDisplayPowerManagementSet(pScrn, PowerManagementMode, flags);
+	return TRUE;
+}	

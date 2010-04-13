@@ -338,7 +338,6 @@ typedef struct {
 		Bool		enableOSXI2C;
 		Bool		enableGammaTable;
 		Bool		setCLUTAtSetEntries;
-		Bool		enableBacklight;
 		Bool		UseAtomBIOS;	//need initialize it to be true, then overwrote by user
 		Bool		SetIGPMemory;
 		Bool		audio;
@@ -348,6 +347,7 @@ typedef struct {
 		Bool        lowPowerMode;
 		int			lowPowerModeEngineClock;
 		int			lowPowerModeMemoryClock;
+		int			BackLightLevel;
 		int			verbosity;
 		char		modeNameByUser[25];	//15 should be enough
 	} UserOptions;

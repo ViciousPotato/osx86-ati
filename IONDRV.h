@@ -30,47 +30,7 @@
 #include <IOKit/ndrvsupport/IOMacOSTypes.h>
 #include <IOKit/ndrvsupport/IONDRVSupport.h>
 
-#pragma options align=mac68k
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-enum {
-    kIONDRVOpenCommand                = 128 + 0,
-    kIONDRVCloseCommand               = 128 + 1,
-    kIONDRVReadCommand                = 128 + 2,
-    kIONDRVWriteCommand               = 128 + 3,
-    kIONDRVControlCommand             = 128 + 4,
-    kIONDRVStatusCommand              = 128 + 5,
-    kIONDRVKillIOCommand              = 128 + 6,
-    kIONDRVInitializeCommand          = 128 + 7,		/* init driver and device*/
-    kIONDRVFinalizeCommand            = 128 + 8,		/* shutdown driver and device*/
-    kIONDRVReplaceCommand             = 128 + 9,		/* replace an old driver*/
-    kIONDRVSupersededCommand          = 128 + 10		/* prepare to be replaced by a new driver*/
-};
-enum {
-    kIONDRVSynchronousIOCommandKind   = 0x00000001,
-    kIONDRVAsynchronousIOCommandKind  = 0x00000002,
-    kIONDRVImmediateIOCommandKind     = 0x00000004
-};
-
-struct IONDRVControlParameters {
-    UInt8	__reservedA[0x1a];
-    UInt16	code;
-    void *	params;
-    UInt8	__reservedB[0x12];
-};
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-//typedef void * RegEntryID[4];
-struct RegEntryID { void * opaque[4]; };
-
-struct DriverInitInfo {
-    UInt16                          refNum;
-    RegEntryID                      deviceEntry;
-};
 
 #ifndef kAAPLRegEntryIDKey
 #define kAAPLRegEntryIDKey	"AAPL,RegEntryID"
@@ -82,95 +42,36 @@ struct DriverInitInfo {
 
 #define MAKE_REG_ENTRY(regEntryID,obj) 				\
 	(regEntryID)->opaque[ 0 ] = (void *) obj;			\
-	(regEntryID)->opaque[ 1 ] = (void *) ~(UInt32)obj;		\
+	(regEntryID)->opaque[ 1 ] = (void *) ~(uintptr_t)obj;		\
 	(regEntryID)->opaque[ 2 ] = (void *) 0x53696d65;		\
 	(regEntryID)->opaque[ 3 ] = (void *) 0x52756c7a;
 
 #define REG_ENTRY_TO_OBJ(regEntryID,obj) 				\
-	if( (UInt32)((obj = ((IORegistryEntry **)regEntryID)[ 0 ])) 	\
-	 != ~((UInt32 *)regEntryID)[ 1 ] )				\
+	if( (uintptr_t)((obj = ((IORegistryEntry **)regEntryID)[ 0 ])) 	\
+	 != ~((uintptr_t *)regEntryID)[ 1 ] )				\
 	    return( -2538);
 
 #define REG_ENTRY_TO_OBJ_RET(regEntryID,obj,ret) 			\
-	if( (UInt32)((obj = ((IORegistryEntry **)regEntryID)[ 0 ])) 	\
-	 != ~((UInt32 *)regEntryID)[ 1 ] )				\
+	if( (uintptr_t)((obj = ((IORegistryEntry **)regEntryID)[ 0 ])) 	\
+	 != ~((uintptr_t *)regEntryID)[ 1 ] )				\
 	    return( ret);
 
 #define REG_ENTRY_TO_PT(regEntryID,obj) 				\
 	IORegistryEntry * obj;						\
-	if( (UInt32)((obj = ((IORegistryEntry **)regEntryID)[ 0 ])) 	\
-	 != ~((UInt32 *)regEntryID)[ 1 ] )				\
+	if( (uintptr_t)((obj = ((IORegistryEntry **)regEntryID)[ 0 ])) 	\
+	 != ~((uintptr_t *)regEntryID)[ 1 ] )				\
 	    return( -2538);
 
 #define REG_ENTRY_TO_SERVICE(regEntryID,type,obj) 			\
 	IORegistryEntry * regEntry;					\
 	type		* obj;						\
-	if( (UInt32)((regEntry = ((IORegistryEntry **)regEntryID)[ 0 ])) \
-	 != ~((UInt32 *)regEntryID)[ 1 ] )				\
+	if( (uintptr_t)((regEntry = ((IORegistryEntry **)regEntryID)[ 0 ])) \
+	 != ~((uintptr_t *)regEntryID)[ 1 ] )				\
 	    return( -2538);						\
 	if( 0 == (obj = OSDynamicCast( type, regEntry))) 		\
 	    return( -2542);
 
-struct CntrlParam {
-    void *                          qLink;
-    short                           qType;
-    short                           ioTrap;
-    void *                          ioCmdAddr;
-    void *                          ioCompletion;
-    short                           ioResult;
-    char *                          ioNamePtr;
-    short                           ioVRefNum;
-    short                           ioCRefNum;
-    short                           csCode;
-    void *                          csParams;
-    short                           csParam[9];
-};
-typedef struct CntrlParam CntrlParam, *CntrlParamPtr;
-
-#pragma options align=reset
-
-enum {
-    kOpenCommand                = 0,
-    kCloseCommand               = 1,
-    kReadCommand                = 2,
-    kWriteCommand               = 3,
-    kControlCommand             = 4,
-    kStatusCommand              = 5,
-    kKillIOCommand              = 6,
-    kInitializeCommand          = 7,                            /* init driver and device*/
-    kFinalizeCommand            = 8,                            /* shutdown driver and device*/
-    kReplaceCommand             = 9,                            /* replace an old driver*/
-    kSupersededCommand          = 10                            /* prepare to be replaced by a new driver*/
-};
-enum {
-    kSynchronousIOCommandKind   = 0x00000001,
-    kAsynchronousIOCommandKind  = 0x00000002,
-    kImmediateIOCommandKind     = 0x00000004
-};
-
-
-extern OSStatus    CallTVector( 
-	    void * p1, void * p2, void * p3, void * p4, void * p5, void * p6,
-	    struct IOTVector * entry );
-
-#ifdef __cplusplus
-}
-#endif
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-class IOPEFContainer : public OSData
-{
-    OSDeclareDefaultStructors(IOPEFContainer)
-
-    OSData * fContainer;
-    OSData * fDescription;
-
-public:
-    static IOPEFContainer * withData(OSData * data, OSData * description);
-    virtual void free( void );
-    virtual bool serialize(OSSerialize *s) const;
-};
 
 class IONDRV : public OSObject
 {
@@ -186,6 +87,14 @@ public:
 				 UInt32 commandCode, UInt32 commandKind ) = 0;
 };
 
+#if __ppc__
+
+#if VERSION_MAJOR <= 9
+#define CREATE_PEF_KMOD 1
+#else
+#define CREATE_PEF_KMOD 0
+#endif
+
 class IOPEFNDRV : public IONDRV
 {
     OSDeclareDefaultStructors(IOPEFNDRV)
@@ -195,7 +104,9 @@ private:
     struct IOTVector *		fDoDriverIO;
     struct DriverDescription *	fDriverDesc;
     char			fName[64];
+#if CREATE_PEF_KMOD
     kmod_t			fKModID;
+#endif
 
 public:
     static void initialize( void );
@@ -219,6 +130,8 @@ public:
     virtual IOReturn doDriverIO( UInt32 commandID, void * contents,
 				 UInt32 commandCode, UInt32 commandKind );
 };
+
+#endif /* __ppc__ */
 
 struct IONDRVInterruptSource {
     void *	refCon;
@@ -248,6 +161,11 @@ public:
                                     IOOptionBits options, SInt32 count);
     void free();
 };
+
+extern "C" OSStatus
+CallTVector( 
+	    void * p1, void * p2, void * p3, void * p4, void * p5, void * p6,
+	    struct IOTVector * entry );
 
 #endif /* __IONDRV__ */
 

@@ -171,20 +171,19 @@ private:
     static const IOTVector * _undefinedSymbolHandler( void * self, 
                             const char * libraryName, const char * symbolName );
     static bool _videoJackStateChangeHandler( void * target, void * ref,
-                            IOService * newService );
+                            IOService * newService, IONotifier * notifier );
     static void _avProbeAction( OSObject * p0, IOTimerEventSource * evtSrc );
     void displayI2CPower( bool enable );
     IOReturn ndrvSetPowerState( UInt32 newState );
     IOReturn ndrvUpdatePowerState( void );
     IOReturn ndrvSetDisplayPowerState( UInt32 newState );
     static IOReturn _probeAction( IONDRVFramebuffer * self, IOOptionBits options );
-    IOReturn mirrorInfo( UInt32 index );
     bool searchOfflineMode( IODisplayModeID * offlineMode );
-    IOReturn processConnectChange( UInt32 * value );
+    IOReturn processConnectChange( uintptr_t * value );
     IOReturn setMirror( IONDRVFramebuffer * other );
     IOReturn setConnectionFlags( void );
     bool getOnlineState( void );
-    IOReturn ndrvGetSetFeature( UInt32 feature, UInt32 newValue, UInt32 * currentValue );
+    IOReturn ndrvGetSetFeature( UInt32 feature, uintptr_t newValue, uintptr_t * currentValue );
     static IOReturn _doControl( IONDRVFramebuffer * self, UInt32 code, void * params );
     static IOReturn _doStatus( IONDRVFramebuffer * self, UInt32 code, void * params );
     static IOReturn extControl( OSObject * owner, void * code, void * params );
@@ -286,18 +285,18 @@ public:
 
     //// Controller attributes
 
-    virtual IOReturn setAttribute( IOSelect attribute, UInt32 value );
-    virtual IOReturn getAttribute( IOSelect attribute, UInt32 * value );
+    virtual IOReturn setAttribute( IOSelect attribute, uintptr_t value );
+    virtual IOReturn getAttribute( IOSelect attribute, uintptr_t * value );
 
     //// Connections
 
     virtual IOItemCount getConnectionCount( void );
 
     virtual IOReturn getAttributeForConnection( IOIndex connectIndex,
-                    IOSelect attribute, UInt32  * value );
+                    IOSelect attribute, uintptr_t  * value );
     
     virtual IOReturn setAttributeForConnection( IOIndex connectIndex,
-                    IOSelect attribute, UInt32  info );
+                    IOSelect attribute, uintptr_t  info );
 
     // Apple sensing
 

@@ -1399,7 +1399,7 @@ AtomDACLoadDetectionVersion(atomBiosHandlePtr handle, enum atomDevice id)
  */
 Bool
 rhdAtomEncoderControl(atomBiosHandlePtr handle, enum atomEncoder EncoderId,
-			     enum atomEncoderAction Action, struct atomEncoderConfig *Config)
+					  enum atomEncoderAction Action, struct atomEncoderConfig *Config)
 {
 	static char names[10][25] = {
 		"DACAEncoderControl",
@@ -1417,495 +1417,495 @@ rhdAtomEncoderControl(atomBiosHandlePtr handle, enum atomEncoder EncoderId,
     AtomBiosArgRec data;
     char *name = NULL;
     CARD8 version;
-
+	
     union
     {
-	DAC_ENCODER_CONTROL_PARAMETERS dac;
-	DAC_ENCODER_CONTROL_PS_ALLOCATION dac_a;
-	TV_ENCODER_CONTROL_PARAMETERS tv;
-	TV_ENCODER_CONTROL_PS_ALLOCATION tv_a;
-	LVDS_ENCODER_CONTROL_PARAMETERS lvds;
-	LVDS_ENCODER_CONTROL_PS_ALLOCATION lvds_a;
-	DIG_ENCODER_CONTROL_PARAMETERS dig;
-	DIG_ENCODER_CONTROL_PS_ALLOCATION dig_a;
-	EXTERNAL_ENCODER_CONTROL_PARAMETER ext;
-	EXTERNAL_ENCODER_CONTROL_PS_ALLOCATION ext_a;
-	DVO_ENCODER_CONTROL_PARAMETERS dvo;
-	DVO_ENCODER_CONTROL_PS_ALLOCATION dvo_a;
-	DVO_ENCODER_CONTROL_PARAMETERS_V3 dvo_v3;
-	DVO_ENCODER_CONTROL_PS_ALLOCATION_V3 dvo_v3_a;
-	LVDS_ENCODER_CONTROL_PARAMETERS_V2 lvdsv2;
-	LVDS_ENCODER_CONTROL_PS_ALLOCATION_V2 lvds2_a;
-	USHORT usPixelClock;
+		DAC_ENCODER_CONTROL_PARAMETERS dac;
+		DAC_ENCODER_CONTROL_PS_ALLOCATION dac_a;
+		TV_ENCODER_CONTROL_PARAMETERS tv;
+		TV_ENCODER_CONTROL_PS_ALLOCATION tv_a;
+		LVDS_ENCODER_CONTROL_PARAMETERS lvds;
+		LVDS_ENCODER_CONTROL_PS_ALLOCATION lvds_a;
+		DIG_ENCODER_CONTROL_PARAMETERS dig;
+		DIG_ENCODER_CONTROL_PS_ALLOCATION dig_a;
+		EXTERNAL_ENCODER_CONTROL_PARAMETER ext;
+		EXTERNAL_ENCODER_CONTROL_PS_ALLOCATION ext_a;
+		DVO_ENCODER_CONTROL_PARAMETERS dvo;
+		DVO_ENCODER_CONTROL_PS_ALLOCATION dvo_a;
+		DVO_ENCODER_CONTROL_PARAMETERS_V3 dvo_v3;
+		DVO_ENCODER_CONTROL_PS_ALLOCATION_V3 dvo_v3_a;
+		LVDS_ENCODER_CONTROL_PARAMETERS_V2 lvdsv2;
+		LVDS_ENCODER_CONTROL_PS_ALLOCATION_V2 lvds2_a;
+		USHORT usPixelClock;
     } ps;
-
+	
     RHDFUNC(handle);
-
+	
     ps.usPixelClock = Config->PixelClock / 10;
-
+	
     switch (EncoderId) {
-	case atomEncoderDACA:
-	case atomEncoderDACB:
-	    if (EncoderId == atomEncoderDACA) {
-		name = names[0];
-		data.exec.index = GetIndexIntoMasterTable(COMMAND, DAC1EncoderControl);
-	    } else {
-		name = names[1];
-		data.exec.index = GetIndexIntoMasterTable(COMMAND, DAC2EncoderControl);
-	    }
+		case atomEncoderDACA:
+		case atomEncoderDACB:
+			if (EncoderId == atomEncoderDACA) {
+				name = names[0];
+				data.exec.index = GetIndexIntoMasterTable(COMMAND, DAC1EncoderControl);
+			} else {
+				name = names[1];
+				data.exec.index = GetIndexIntoMasterTable(COMMAND, DAC2EncoderControl);
+			}
 	    {
-		DAC_ENCODER_CONTROL_PARAMETERS *dac = &ps.dac;
-		switch (Config->u.dac.DacStandard) {
-		    case atomDAC_VGA:
-			dac->ucDacStandard = ATOM_DAC1_PS2;
-			break;
-		    case atomDAC_CV:
-			dac->ucDacStandard = ATOM_DAC1_CV;
-			break;
-		    case atomDAC_NTSC:
-			dac->ucDacStandard = ATOM_DAC1_NTSC;
-			break;
-		    case atomDAC_PAL:
-			dac->ucDacStandard = ATOM_DAC1_PAL;
-			break;
-		}
-		switch (Action) {
-		    case atomEncoderOn:
-			dac->ucAction = ATOM_ENABLE;
-			break;
-		    case atomEncoderOff:
-			dac->ucAction = ATOM_DISABLE;
-			break;
-		    default:
-			LOG("%s: DAC unknown action\n",__func__);
-			return FALSE;
-		}
+			DAC_ENCODER_CONTROL_PARAMETERS *dac = &ps.dac;
+			switch (Config->u.dac.DacStandard) {
+				case atomDAC_VGA:
+					dac->ucDacStandard = ATOM_DAC1_PS2;
+					break;
+				case atomDAC_CV:
+					dac->ucDacStandard = ATOM_DAC1_CV;
+					break;
+				case atomDAC_NTSC:
+					dac->ucDacStandard = ATOM_DAC1_NTSC;
+					break;
+				case atomDAC_PAL:
+					dac->ucDacStandard = ATOM_DAC1_PAL;
+					break;
+			}
+			switch (Action) {
+				case atomEncoderOn:
+					dac->ucAction = ATOM_ENABLE;
+					break;
+				case atomEncoderOff:
+					dac->ucAction = ATOM_DISABLE;
+					break;
+				default:
+					LOG("%s: DAC unknown action\n",__func__);
+					return FALSE;
+			}
 	    }
-	    break;
-	case atomEncoderTV:
-	    data.exec.index = GetIndexIntoMasterTable(COMMAND, TVEncoderControl);
-	    name = names[2];
+			break;
+		case atomEncoderTV:
+			data.exec.index = GetIndexIntoMasterTable(COMMAND, TVEncoderControl);
+			name = names[2];
 	    {
-		TV_ENCODER_CONTROL_PARAMETERS *tv = &ps.tv;
-		switch (Config->u.tv.TvStandard) {
-		    case RHD_TV_NTSC:
-			tv->ucTvStandard = ATOM_TV_NTSC;
-			break;
-		    case RHD_TV_NTSCJ:
-			tv->ucTvStandard = ATOM_TV_NTSCJ;
-			break;
-		    case RHD_TV_PAL:
-			tv->ucTvStandard = ATOM_TV_PAL;
-			break;
-		    case RHD_TV_PALM:
-			tv->ucTvStandard = ATOM_TV_PALM;
-			break;
-		    case RHD_TV_PALCN:
-			tv->ucTvStandard = ATOM_TV_PALCN;
-			break;
-		    case RHD_TV_PALN:
-			tv->ucTvStandard = ATOM_TV_PALN;
-			break;
-		    case RHD_TV_PAL60:
-			tv->ucTvStandard = ATOM_TV_PAL60;
-			break;
-		    case RHD_TV_SECAM:
-			tv->ucTvStandard = ATOM_TV_SECAM;
-			break;
-		    case RHD_TV_CV:
-			tv->ucTvStandard = ATOM_TV_CV;
-			break;
-		    case RHD_TV_NONE:
-			return FALSE;
-		}
-		switch (Action) {
-		    case atomEncoderOn:
-			tv->ucAction = ATOM_ENABLE;
-			break;
-		    case atomEncoderOff:
-			tv->ucAction = ATOM_DISABLE;
-			break;
-		    default:
-			LOG("%s: TV unknown action\n",__func__);
-			return FALSE;
-		}
-	    }
-	    break;
-	case atomEncoderTMDS1:
-	case atomEncoderTMDS2:
-	case atomEncoderLVDS:
-	    if (EncoderId == atomEncoderLVDS) {
-		name = names[3];
-		data.exec.index = GetIndexIntoMasterTable(COMMAND, LVDSEncoderControl);
-	    } else if (EncoderId == atomEncoderTMDS1) {
-		name = names[4];
-		data.exec.index = GetIndexIntoMasterTable(COMMAND, TMDSAEncoderControl);
-	    } else {
-		name = names[5];
-		data.exec.index = GetIndexIntoMasterTable(COMMAND, LVTMAEncoderControl);
-	    }
-	    if (!rhdAtomGetCommandTableRevisionSize(handle, data.exec.index, &version, NULL, NULL))
-		return FALSE;
-	    switch  (version) {
-		case 1:
-		{
-		    LVDS_ENCODER_CONTROL_PARAMETERS *lvds = &ps.lvds;
-		    lvds->ucMisc = 0;
-		    if (Config->u.lvds.LinkCnt == atomDualLink)
-			lvds->ucMisc |= 0x1;
-		    if (Config->u.lvds.Is24bit)
-			lvds->ucMisc |= 0x1 << 1;
-
-		    switch (Action) {
-			case atomEncoderOn:
-			    lvds->ucAction = ATOM_ENABLE;
-			    break;
-			case atomEncoderOff:
-			    lvds->ucAction = ATOM_DISABLE;
-			    break;
-			default:
-			    LOG("%s: LVDS unknown action\n",__func__);
-			    return FALSE;
-		    }
-		    break;
-		}
-		case 2:
-		case 3:
-		{
-		    LVDS_ENCODER_CONTROL_PARAMETERS_V2 *lvds = &ps.lvdsv2;
-
-		    lvds->ucMisc = 0;
-		    if (Config->u.lvds2.LinkCnt == atomDualLink)
-			lvds->ucMisc |= PANEL_ENCODER_MISC_DUAL;
-		    if (Config->u.lvds2.Coherent)
-			lvds->ucMisc |= PANEL_ENCODER_MISC_COHERENT;
-		    if (Config->u.lvds2.LinkB)
-			lvds->ucMisc |= PANEL_ENCODER_MISC_TMDS_LINKB;
-		    if (Config->u.lvds2.Hdmi)
-			lvds->ucMisc |= PANEL_ENCODER_MISC_HDMI_TYPE;
-		    lvds->ucTruncate = 0;
-		    lvds->ucSpatial = 0;
-		    lvds->ucTemporal = 0;
-		    lvds->ucFRC = 0;
-
-		    if (EncoderId == atomEncoderLVDS) {
-			if (Config->u.lvds2.Is24bit) {
-			    lvds->ucTruncate |= PANEL_ENCODER_TRUNCATE_DEPTH;
-			    lvds->ucSpatial |= PANEL_ENCODER_SPATIAL_DITHER_DEPTH;
-			    lvds->ucTemporal |= PANEL_ENCODER_TEMPORAL_DITHER_DEPTH;
+			TV_ENCODER_CONTROL_PARAMETERS *tv = &ps.tv;
+			switch (Config->u.tv.TvStandard) {
+				case RHD_TV_NTSC:
+					tv->ucTvStandard = ATOM_TV_NTSC;
+					break;
+				case RHD_TV_NTSCJ:
+					tv->ucTvStandard = ATOM_TV_NTSCJ;
+					break;
+				case RHD_TV_PAL:
+					tv->ucTvStandard = ATOM_TV_PAL;
+					break;
+				case RHD_TV_PALM:
+					tv->ucTvStandard = ATOM_TV_PALM;
+					break;
+				case RHD_TV_PALCN:
+					tv->ucTvStandard = ATOM_TV_PALCN;
+					break;
+				case RHD_TV_PALN:
+					tv->ucTvStandard = ATOM_TV_PALN;
+					break;
+				case RHD_TV_PAL60:
+					tv->ucTvStandard = ATOM_TV_PAL60;
+					break;
+				case RHD_TV_SECAM:
+					tv->ucTvStandard = ATOM_TV_SECAM;
+					break;
+				case RHD_TV_CV:
+					tv->ucTvStandard = ATOM_TV_CV;
+					break;
+				case RHD_TV_NONE:
+					return FALSE;
 			}
-			switch (Config->u.lvds2.TemporalGrey) {
-			    case atomTemporalDither0:
-				break;
-			    case atomTemporalDither4:
-				lvds->ucTemporal |= PANEL_ENCODER_TEMPORAL_LEVEL_4;
-			    case atomTemporalDither2:
-				lvds->ucTemporal |= PANEL_ENCODER_TEMPORAL_DITHER_EN;
-				break;
+			switch (Action) {
+				case atomEncoderOn:
+					tv->ucAction = ATOM_ENABLE;
+					break;
+				case atomEncoderOff:
+					tv->ucAction = ATOM_DISABLE;
+					break;
+				default:
+					LOG("%s: TV unknown action\n",__func__);
+					return FALSE;
 			}
-			if (Config->u.lvds2.SpatialDither)
-			    lvds->ucSpatial |= PANEL_ENCODER_SPATIAL_DITHER_EN;
-		    }
-
-		    switch (Action) {
-			case atomEncoderOn:
-			    lvds->ucAction = ATOM_ENABLE;
-			    break;
-			case atomEncoderOff:
-			    lvds->ucAction = ATOM_DISABLE;
-			    break;
-			default:
-			    LOG("%s: LVDS2 unknown action\n",__func__);
-			    return FALSE;
-		    }
-		    break;
-		}
-		default:
-		    LOG("%s: LVDS unknown version\n",__func__);
-		    return FALSE;
 	    }
-	    break;
-	case atomEncoderDIG1:
-	case atomEncoderDIG2:
-	case atomEncoderExternal:
-	{
-	    DIG_ENCODER_CONTROL_PARAMETERS *dig = &ps.dig;
-	    struct atomCodeTableVersion version;
-
-	    if (EncoderId == atomEncoderDIG1) {
-		name = names[6];
-		data.exec.index = GetIndexIntoMasterTable(COMMAND, DIG1EncoderControl);
-	    } else if (EncoderId == atomEncoderDIG2) {
-		name = names[7];
-		data.exec.index = GetIndexIntoMasterTable(COMMAND, DIG2EncoderControl);
-	    } else {
-		name = names[8];
-		data.exec.index = GetIndexIntoMasterTable(COMMAND, ExternalEncoderControl);
-	    }
-	    rhdAtomGetCommandTableRevisionSize(handle, data.exec.index, &version.cref, &version.fref, NULL);
-	    if (version.fref > 1 || version.cref > 2)
-		return FALSE;
-
-	    dig->ucConfig = 0;
-	    switch (version.cref) {
-		case 1:
-		    switch (Config->u.dig.Link) {
-			case atomTransLinkA:
-			    dig->ucConfig |= ATOM_ENCODER_CONFIG_LINKA;
-			    break;
-			case atomTransLinkAB:
-			    dig->ucConfig |= ATOM_ENCODER_CONFIG_LINKA_B;
-			    break;
-			case atomTransLinkB:
-			    dig->ucConfig |= ATOM_ENCODER_CONFIG_LINKB;
-			    break;
-			case atomTransLinkBA:
-			    dig->ucConfig |= ATOM_ENCODER_CONFIG_LINKB_A;
-			    break;
-		    }
-
-		    if (EncoderId != atomEncoderExternal) {
-			switch (Config->u.dig.Transmitter) {
-			    case atomTransmitterUNIPHY:
-			    case atomTransmitterPCIEPHY:
-			    case atomTransmitterDIG1:
-				dig->ucConfig |= ATOM_ENCODER_CONFIG_UNIPHY;
-				break;
-			    case atomTransmitterLVTMA:
-			    case atomTransmitterDIG2:
-				dig->ucConfig |= ATOM_ENCODER_CONFIG_LVTMA;
-				break;
-			/*
-			 * these are not DCE3.0 but we need them here as DIGxEncoderControl tables for
-			 * DCE3.2 still report cref 1.
-			 */
-			    case atomTransmitterUNIPHY1:
-				dig->ucConfig |= ATOM_ENCODER_CONFIG_V2_TRANSMITTER2;
-				break;
-			    case atomTransmitterUNIPHY2:
-				dig->ucConfig |= ATOM_ENCODER_CONFIG_V2_TRANSMITTER3;
-				break;
-			    default:
-				LOG("%s: Invalid Transmitter for DCE3.0: %x\n",
-					   __func__, Config->u.dig.Transmitter);
+			break;
+		case atomEncoderTMDS1:
+		case atomEncoderTMDS2:
+		case atomEncoderLVDS:
+			if (EncoderId == atomEncoderLVDS) {
+				name = names[3];
+				data.exec.index = GetIndexIntoMasterTable(COMMAND, LVDSEncoderControl);
+			} else if (EncoderId == atomEncoderTMDS1) {
+				name = names[4];
+				data.exec.index = GetIndexIntoMasterTable(COMMAND, TMDSAEncoderControl);
+			} else {
+				name = names[5];
+				data.exec.index = GetIndexIntoMasterTable(COMMAND, LVTMAEncoderControl);
+			}
+			if (!rhdAtomGetCommandTableRevisionSize(handle, data.exec.index, &version, NULL, NULL))
 				return FALSE;
+			switch  (version) {
+				case 1:
+				{
+					LVDS_ENCODER_CONTROL_PARAMETERS *lvds = &ps.lvds;
+					lvds->ucMisc = 0;
+					if (Config->u.lvds.LinkCnt == atomDualLink)
+						lvds->ucMisc |= 0x1;
+					if (Config->u.lvds.Is24bit)
+						lvds->ucMisc |= 0x1 << 1;
+					
+					switch (Action) {
+						case atomEncoderOn:
+							lvds->ucAction = ATOM_ENABLE;
+							break;
+						case atomEncoderOff:
+							lvds->ucAction = ATOM_DISABLE;
+							break;
+						default:
+							LOG("%s: LVDS unknown action\n",__func__);
+							return FALSE;
+					}
+					break;
+				}
+				case 2:
+				case 3:
+				{
+					LVDS_ENCODER_CONTROL_PARAMETERS_V2 *lvds = &ps.lvdsv2;
+					
+					lvds->ucMisc = 0;
+					if (Config->u.lvds2.LinkCnt == atomDualLink)
+						lvds->ucMisc |= PANEL_ENCODER_MISC_DUAL;
+					if (Config->u.lvds2.Coherent)
+						lvds->ucMisc |= PANEL_ENCODER_MISC_COHERENT;
+					if (Config->u.lvds2.LinkB)
+						lvds->ucMisc |= PANEL_ENCODER_MISC_TMDS_LINKB;
+					if (Config->u.lvds2.Hdmi)
+						lvds->ucMisc |= PANEL_ENCODER_MISC_HDMI_TYPE;
+					lvds->ucTruncate = 0;
+					lvds->ucSpatial = 0;
+					lvds->ucTemporal = 0;
+					lvds->ucFRC = 0;
+					
+					if (EncoderId == atomEncoderLVDS) {
+						if (Config->u.lvds2.Is24bit) {
+							lvds->ucTruncate |= PANEL_ENCODER_TRUNCATE_DEPTH;
+							lvds->ucSpatial |= PANEL_ENCODER_SPATIAL_DITHER_DEPTH;
+							lvds->ucTemporal |= PANEL_ENCODER_TEMPORAL_DITHER_DEPTH;
+						}
+						switch (Config->u.lvds2.TemporalGrey) {
+							case atomTemporalDither0:
+								break;
+							case atomTemporalDither4:
+								lvds->ucTemporal |= PANEL_ENCODER_TEMPORAL_LEVEL_4;
+							case atomTemporalDither2:
+								lvds->ucTemporal |= PANEL_ENCODER_TEMPORAL_DITHER_EN;
+								break;
+						}
+						if (Config->u.lvds2.SpatialDither)
+							lvds->ucSpatial |= PANEL_ENCODER_SPATIAL_DITHER_EN;
+					}
+					
+					switch (Action) {
+						case atomEncoderOn:
+							lvds->ucAction = ATOM_ENABLE;
+							break;
+						case atomEncoderOff:
+							lvds->ucAction = ATOM_DISABLE;
+							break;
+						default:
+							LOG("%s: LVDS2 unknown action\n",__func__);
+							return FALSE;
+					}
+					break;
+				}
+				default:
+					LOG("%s: LVDS unknown version\n",__func__);
+					return FALSE;
 			}
-		    }
-		    break;
-
-		case 2:
-		    switch (Config->u.dig.Link) {
-			case atomTransLinkA:
-			case atomTransLinkAB:
-			    dig->ucConfig |= ATOM_ENCODER_CONFIG_V2_LINKA;
-			    break;
-			case atomTransLinkB:
-			case atomTransLinkBA:
-			    dig->ucConfig |= ATOM_ENCODER_CONFIG_V2_LINKB;
-			    break;
-		    }
-		    switch (Config->u.dig.Transmitter) {
-			case atomTransmitterUNIPHY:
-			    dig->ucConfig |= ATOM_ENCODER_CONFIG_UNIPHY;
-			    break;
-			case atomTransmitterUNIPHY1:
-			    dig->ucConfig |= ATOM_ENCODER_CONFIG_V2_TRANSMITTER2;
-			    break;
-			case atomTransmitterUNIPHY2:
-			    dig->ucConfig |= ATOM_ENCODER_CONFIG_V2_TRANSMITTER3;
-			    break;
-			default:
-			    LOG("%s: Invalid Encoder for DCE3.2: %x\n",
-				       __func__, Config->u.dig.Transmitter);
-			    return FALSE;
-			}
-		    break;
-
-		default:
-		    return FALSE;
-	    }
-
-	    switch (Config->u.dig.EncoderMode) {
-		case atomDVI:
-		    dig->ucEncoderMode = ATOM_ENCODER_MODE_DVI;
-		    break;
-		case atomDP:
-		    dig->ucEncoderMode = ATOM_ENCODER_MODE_DP;
-		    break;
-		case atomLVDS:
-		    dig->ucEncoderMode = ATOM_ENCODER_MODE_LVDS;
-		    break;
-		case atomHDMI:
-		    dig->ucEncoderMode = ATOM_ENCODER_MODE_HDMI;
-		    break;
-		case atomSDVO:
-		    dig->ucEncoderMode = ATOM_ENCODER_MODE_SDVO;
-		    break;
-		case atomNoEncoder:
-		case atomTVComposite:
-		case atomTVSVideo:
-		case atomTVComponent:
-		case atomCRT:
-		    LOG("%s called with invalid DIG encoder mode %d\n",
-			       __func__,Config->u.dig.EncoderMode);
-		    return FALSE;
-		    break;
-	    }
-
-	    switch (Action) {
-		case atomEncoderOn:
-		    dig->ucAction = ATOM_ENABLE;
-		    break;
-		case atomEncoderOff:
-		    dig->ucAction = ATOM_DISABLE;
-		    break;
-		default:
-		    LOG("%s: DIG unknown action\n",__func__);
-		    return FALSE;
-	    }
-
-	    switch (Config->u.dig.LinkCnt) {
-		case atomSingleLink:
-		    dig->ucLaneNum = 4;
-		    break;
-		case atomDualLink:
-		    dig->ucLaneNum = 8;
-		    break;
-	    }
-	    break;
-	case atomEncoderDVO:
-	    name = names[9];
-	    data.exec.index = GetIndexIntoMasterTable(COMMAND, DVOEncoderControl);
-	    if (!rhdAtomGetCommandTableRevisionSize(handle, data.exec.index, &version.cref, NULL, NULL))
-		return FALSE;
-	    switch  (version.cref) {
-		case 1:
-		case 2:
+			break;
+		case atomEncoderDIG1:
+		case atomEncoderDIG2:
+		case atomEncoderExternal:
 		{
-		    DVO_ENCODER_CONTROL_PARAMETERS *dvo = &ps.dvo;
-		    dvo->usEncoderID = Config->u.dvo.EncoderID;
-		    switch (Config->u.dvo.DvoDeviceType) {
-			case atomLCD1:
-			case atomLCD2:
-			    dvo->ucDeviceType = ATOM_DEVICE_LCD1_INDEX;
-			    break;
-			case atomCRT1:
-			case atomCRT2:
-			    dvo->ucDeviceType = ATOM_DEVICE_CRT1_INDEX;
-			    break;
-			case atomDFP1:
-			case atomDFP2:
-			case atomDFP3:
-			case atomDFP4:
-			case atomDFP5:
-			    dvo->ucDeviceType = ATOM_DEVICE_DFP1_INDEX;
-			    break;
-			case atomTV1:
-			case atomTV2:
-			    dvo->ucDeviceType = ATOM_DEVICE_TV1_INDEX;
-			    break;
-			case atomCV:
-			    dvo->ucDeviceType = ATOM_DEVICE_CV_INDEX;
-			    break;
-			case atomNone:
-			    return FALSE;
-		    }
-		    if (Config->u.dvo.digital) {
-			dvo->usDevAttr.sDigAttrib.ucAttribute = 0; /* @@@ What do these attributes mean? */
-		    } else {
-			switch (Config->u.dvo.u.TVMode) {
-			    case RHD_TV_NTSC:
-				dvo->usDevAttr.sAlgAttrib.ucTVStandard = ATOM_TV_NTSC;
-				break;
-			    case RHD_TV_NTSCJ:
-				dvo->usDevAttr.sAlgAttrib.ucTVStandard = ATOM_TV_NTSCJ;
-				break;
-			    case RHD_TV_PAL:
-				dvo->usDevAttr.sAlgAttrib.ucTVStandard = ATOM_TV_PAL;
-				break;
-			    case RHD_TV_PALM:
-				dvo->usDevAttr.sAlgAttrib.ucTVStandard = ATOM_TV_PALM;
-				break;
-			    case RHD_TV_PALCN:
-				dvo->usDevAttr.sAlgAttrib.ucTVStandard = ATOM_TV_PALCN;
-				break;
-			    case RHD_TV_PALN:
-				dvo->usDevAttr.sAlgAttrib.ucTVStandard = ATOM_TV_PALN;
-				break;
-			    case RHD_TV_PAL60:
-				dvo->usDevAttr.sAlgAttrib.ucTVStandard = ATOM_TV_PAL60;
-				break;
-			    case RHD_TV_SECAM:
-				dvo->usDevAttr.sAlgAttrib.ucTVStandard = ATOM_TV_SECAM;
-				break;
-			    case RHD_TV_CV:
-				dvo->usDevAttr.sAlgAttrib.ucTVStandard = ATOM_TV_CV;
-				break;
-			    case RHD_TV_NONE:
+			DIG_ENCODER_CONTROL_PARAMETERS *dig = &ps.dig;
+			struct atomCodeTableVersion version;
+			
+			if (EncoderId == atomEncoderDIG1) {
+				name = names[6];
+				data.exec.index = GetIndexIntoMasterTable(COMMAND, DIG1EncoderControl);
+			} else if (EncoderId == atomEncoderDIG2) {
+				name = names[7];
+				data.exec.index = GetIndexIntoMasterTable(COMMAND, DIG2EncoderControl);
+			} else {
+				name = names[8];
+				data.exec.index = GetIndexIntoMasterTable(COMMAND, ExternalEncoderControl);
+			}
+			rhdAtomGetCommandTableRevisionSize(handle, data.exec.index, &version.cref, &version.fref, NULL);
+			if (version.fref > 1 || version.cref > 2)
 				return FALSE;
+			
+			dig->ucConfig = 0;
+			switch (version.cref) {
+				case 1:
+					switch (Config->u.dig.Link) {
+						case atomTransLinkA:
+							dig->ucConfig |= ATOM_ENCODER_CONFIG_LINKA;
+							break;
+						case atomTransLinkAB:
+							dig->ucConfig |= ATOM_ENCODER_CONFIG_LINKA_B;
+							break;
+						case atomTransLinkB:
+							dig->ucConfig |= ATOM_ENCODER_CONFIG_LINKB;
+							break;
+						case atomTransLinkBA:
+							dig->ucConfig |= ATOM_ENCODER_CONFIG_LINKB_A;
+							break;
+					}
+					
+					if (EncoderId != atomEncoderExternal) {
+						switch (Config->u.dig.Transmitter) {
+							case atomTransmitterUNIPHY:
+							case atomTransmitterPCIEPHY:
+							case atomTransmitterDIG1:
+								dig->ucConfig |= ATOM_ENCODER_CONFIG_UNIPHY;
+								break;
+							case atomTransmitterLVTMA:
+							case atomTransmitterDIG2:
+								dig->ucConfig |= ATOM_ENCODER_CONFIG_LVTMA;
+								break;
+								/*
+								 * these are not DCE3.0 but we need them here as DIGxEncoderControl tables for
+								 * DCE3.2 still report cref 1.
+								 */
+							case atomTransmitterUNIPHY1:
+								dig->ucConfig |= ATOM_ENCODER_CONFIG_V2_TRANSMITTER2;
+								break;
+							case atomTransmitterUNIPHY2:
+								dig->ucConfig |= ATOM_ENCODER_CONFIG_V2_TRANSMITTER3;
+								break;
+							default:
+								LOG("%s: Invalid Transmitter for DCE3.0: %x\n",
+									__func__, Config->u.dig.Transmitter);
+								return FALSE;
+						}
+					}
+					break;
+					
+				case 2:
+					switch (Config->u.dig.Link) {
+						case atomTransLinkA:
+						case atomTransLinkAB:
+							dig->ucConfig |= ATOM_ENCODER_CONFIG_V2_LINKA;
+							break;
+						case atomTransLinkB:
+						case atomTransLinkBA:
+							dig->ucConfig |= ATOM_ENCODER_CONFIG_V2_LINKB;
+							break;
+					}
+					switch (Config->u.dig.Transmitter) {
+						case atomTransmitterUNIPHY:
+							dig->ucConfig |= ATOM_ENCODER_CONFIG_UNIPHY;
+							break;
+						case atomTransmitterUNIPHY1:
+							dig->ucConfig |= ATOM_ENCODER_CONFIG_V2_TRANSMITTER2;
+							break;
+						case atomTransmitterUNIPHY2:
+							dig->ucConfig |= ATOM_ENCODER_CONFIG_V2_TRANSMITTER3;
+							break;
+						default:
+							LOG("%s: Invalid Encoder for DCE3.2: %x\n",
+								__func__, Config->u.dig.Transmitter);
+							return FALSE;
+					}
+					break;
+					
+				default:
+					return FALSE;
 			}
-		    }
-		    switch (Action) {
-			case atomEncoderOn:
-			    dvo->ucAction = ATOM_ENABLE;
-			    break;
-			case atomEncoderOff:
-			    dvo->ucAction = ATOM_DISABLE;
-			    break;
-			default:
-			    LOG("%s: DVO unknown action\n",__func__);
-			    return FALSE;
-		    }
-		break;
+			
+			switch (Config->u.dig.EncoderMode) {
+				case atomDVI:
+					dig->ucEncoderMode = ATOM_ENCODER_MODE_DVI;
+					break;
+				case atomDP:
+					dig->ucEncoderMode = ATOM_ENCODER_MODE_DP;
+					break;
+				case atomLVDS:
+					dig->ucEncoderMode = ATOM_ENCODER_MODE_LVDS;
+					break;
+				case atomHDMI:
+					dig->ucEncoderMode = ATOM_ENCODER_MODE_HDMI;
+					break;
+				case atomSDVO:
+					dig->ucEncoderMode = ATOM_ENCODER_MODE_SDVO;
+					break;
+				case atomNoEncoder:
+				case atomTVComposite:
+				case atomTVSVideo:
+				case atomTVComponent:
+				case atomCRT:
+					LOG("%s called with invalid DIG encoder mode %d\n",
+						__func__,Config->u.dig.EncoderMode);
+					return FALSE;
+					break;
+			}
+			
+			switch (Action) {
+				case atomEncoderOn:
+					dig->ucAction = ATOM_ENABLE;
+					break;
+				case atomEncoderOff:
+					dig->ucAction = ATOM_DISABLE;
+					break;
+				default:
+					LOG("%s: DIG unknown action\n",__func__);
+					return FALSE;
+			}
+			
+			switch (Config->u.dig.LinkCnt) {
+				case atomSingleLink:
+					dig->ucLaneNum = 4;
+					break;
+				case atomDualLink:
+					dig->ucLaneNum = 8;
+					break;
+			}
+			break;
+		case atomEncoderDVO:
+			name = names[9];
+			data.exec.index = GetIndexIntoMasterTable(COMMAND, DVOEncoderControl);
+			if (!rhdAtomGetCommandTableRevisionSize(handle, data.exec.index, &version.cref, NULL, NULL))
+				return FALSE;
+			switch  (version.cref) {
+				case 1:
+				case 2:
+				{
+					DVO_ENCODER_CONTROL_PARAMETERS *dvo = &ps.dvo;
+					dvo->usEncoderID = Config->u.dvo.EncoderID;
+					switch (Config->u.dvo.DvoDeviceType) {
+						case atomLCD1:
+						case atomLCD2:
+							dvo->ucDeviceType = ATOM_DEVICE_LCD1_INDEX;
+							break;
+						case atomCRT1:
+						case atomCRT2:
+							dvo->ucDeviceType = ATOM_DEVICE_CRT1_INDEX;
+							break;
+						case atomDFP1:
+						case atomDFP2:
+						case atomDFP3:
+						case atomDFP4:
+						case atomDFP5:
+							dvo->ucDeviceType = ATOM_DEVICE_DFP1_INDEX;
+							break;
+						case atomTV1:
+						case atomTV2:
+							dvo->ucDeviceType = ATOM_DEVICE_TV1_INDEX;
+							break;
+						case atomCV:
+							dvo->ucDeviceType = ATOM_DEVICE_CV_INDEX;
+							break;
+						case atomNone:
+							return FALSE;
+					}
+					if (Config->u.dvo.digital) {
+						dvo->usDevAttr.sDigAttrib.ucAttribute = 0; /* @@@ What do these attributes mean? */
+					} else {
+						switch (Config->u.dvo.u.TVMode) {
+							case RHD_TV_NTSC:
+								dvo->usDevAttr.sAlgAttrib.ucTVStandard = ATOM_TV_NTSC;
+								break;
+							case RHD_TV_NTSCJ:
+								dvo->usDevAttr.sAlgAttrib.ucTVStandard = ATOM_TV_NTSCJ;
+								break;
+							case RHD_TV_PAL:
+								dvo->usDevAttr.sAlgAttrib.ucTVStandard = ATOM_TV_PAL;
+								break;
+							case RHD_TV_PALM:
+								dvo->usDevAttr.sAlgAttrib.ucTVStandard = ATOM_TV_PALM;
+								break;
+							case RHD_TV_PALCN:
+								dvo->usDevAttr.sAlgAttrib.ucTVStandard = ATOM_TV_PALCN;
+								break;
+							case RHD_TV_PALN:
+								dvo->usDevAttr.sAlgAttrib.ucTVStandard = ATOM_TV_PALN;
+								break;
+							case RHD_TV_PAL60:
+								dvo->usDevAttr.sAlgAttrib.ucTVStandard = ATOM_TV_PAL60;
+								break;
+							case RHD_TV_SECAM:
+								dvo->usDevAttr.sAlgAttrib.ucTVStandard = ATOM_TV_SECAM;
+								break;
+							case RHD_TV_CV:
+								dvo->usDevAttr.sAlgAttrib.ucTVStandard = ATOM_TV_CV;
+								break;
+							case RHD_TV_NONE:
+								return FALSE;
+						}
+					}
+					switch (Action) {
+						case atomEncoderOn:
+							dvo->ucAction = ATOM_ENABLE;
+							break;
+						case atomEncoderOff:
+							dvo->ucAction = ATOM_DISABLE;
+							break;
+						default:
+							LOG("%s: DVO unknown action\n",__func__);
+							return FALSE;
+					}
+					break;
+				}
+				case 3:
+				{
+					DVO_ENCODER_CONTROL_PARAMETERS_V3 *dvo = &ps.dvo_v3;
+					dvo->ucDVOConfig = 0;
+					if (Config->u.dvo3.Rate == atomDVO_RateSDR)
+						dvo->ucDVOConfig |= DVO_ENCODER_CONFIG_SDR_SPEED;
+					else
+						dvo->ucDVOConfig |= DVO_ENCODER_CONFIG_DDR_SPEED;
+					switch (Config->u.dvo3.DvoOutput) {
+						case atomDVO_OutputLow12Bit:
+							dvo->ucDVOConfig = DVO_ENCODER_CONFIG_LOW12BIT;
+							break;
+						case atomDVO_OutputHigh12Bit:
+							dvo->ucDVOConfig = DVO_ENCODER_CONFIG_UPPER12BIT;
+							break;
+						case atomDVO_Output24Bit:
+							dvo->ucDVOConfig = DVO_ENCODER_CONFIG_24BIT;
+							break;
+					}
+					switch (Action) {
+						case atomEncoderOn:
+							dvo->ucAction = ATOM_ENABLE;
+							break;
+						case atomEncoderOff:
+							dvo->ucAction = ATOM_DISABLE;
+							break;
+						default:
+							LOG("%s: DVO3 unknown action\n",__func__);
+							return FALSE;
+					}
+					break;
+				}
+			}
+			break;
 		}
-		case 3:
-		{
-		    DVO_ENCODER_CONTROL_PARAMETERS_V3 *dvo = &ps.dvo_v3;
-		    dvo->ucDVOConfig = 0;
-		    if (Config->u.dvo3.Rate == atomDVO_RateSDR)
-			dvo->ucDVOConfig |= DVO_ENCODER_CONFIG_SDR_SPEED;
-		    else
-			dvo->ucDVOConfig |= DVO_ENCODER_CONFIG_DDR_SPEED;
-		    switch (Config->u.dvo3.DvoOutput) {
-			case atomDVO_OutputLow12Bit:
-			    dvo->ucDVOConfig = DVO_ENCODER_CONFIG_LOW12BIT;
-			    break;
-			case atomDVO_OutputHigh12Bit:
-			    dvo->ucDVOConfig = DVO_ENCODER_CONFIG_UPPER12BIT;
-			    break;
-			case atomDVO_Output24Bit:
-			    dvo->ucDVOConfig = DVO_ENCODER_CONFIG_24BIT;
-			    break;
-		    }
-		    switch (Action) {
-			case atomEncoderOn:
-			    dvo->ucAction = ATOM_ENABLE;
-			    break;
-			case atomEncoderOff:
-			    dvo->ucAction = ATOM_DISABLE;
-			    break;
-			default:
-			    LOG("%s: DVO3 unknown action\n",__func__);
-			    return FALSE;
-		    }
-		    break;
-		}
-	    }
-	    break;
-	}
-	case atomEncoderNone:
-	    return FALSE;
+		case atomEncoderNone:
+			return FALSE;
     }
-
+	
     data.exec.dataSpace = NULL;
     data.exec.pspace = (pointer)&ps;
-
+	
     LOGV("Calling %s\n",name);
     atomDebugPrintPspace(handle, &data, sizeof(ps));
     if (RHDAtomBiosFunc(handle->scrnIndex, handle,
-			ATOM_EXEC, &data) == ATOM_SUCCESS) {
-	LOG("%s Successful\n",name);
-	return TRUE;
+						ATOM_EXEC, &data) == ATOM_SUCCESS) {
+		LOG("%s Successful\n",name);
+		return TRUE;
     }
     LOG("%s Failed\n",name);
     return FALSE;
@@ -4273,6 +4273,10 @@ rhdAtomOutputDeviceListFromObjectHeader(atomBiosHandlePtr handle, AtomBiosArgPtr
 	
     if (crev < 2) /* don't bother with anything below rev 2 */
 		return ATOM_NOT_IMPLEMENTED;
+//MemFix	
+	if (!(DeviceList = IONew(struct rhdAtomOutputDeviceList, MaxAtomOutputDeviceList)))
+		return ATOM_FAILED;
+	else bzero(DeviceList, sizeof(struct rhdAtomOutputDeviceList) * MaxAtomOutputDeviceList);
 	
 	cp = IONew(struct rhdConnectorInfo, RHD_CONNECTORS_MAX);
     if (!cp) return ATOM_FAILED;
@@ -4344,20 +4348,20 @@ rhdAtomOutputDeviceListFromObjectHeader(atomBiosHandlePtr handle, AtomBiosArgPtr
 			
 			while (!(l & 0x1)) { l >>= 1; k++; };
 			if (!Limit(k,n_rhd_devices,"usDeviceID")) {
-				//if (!(DeviceList = (struct rhdAtomOutputDeviceList *)xrealloc(DeviceList, sizeof (struct rhdAtomOutputDeviceList) * (cnt + 1))))
-				struct rhdAtomOutputDeviceList *temp = (struct rhdAtomOutputDeviceList *)IOMalloc(sizeof (struct rhdAtomOutputDeviceList) * (cnt + 1));
-				if (temp == NULL) return ATOM_FAILED;
-				bzero(temp, sizeof(struct rhdAtomOutputDeviceList) * (cnt + 1));
-				bcopy(DeviceList, temp, sizeof (struct rhdAtomOutputDeviceList) * cnt);
-				IOFree(DeviceList, sizeof(struct rhdAtomOutputDeviceList) * cnt);
-				DeviceList = temp;
-				data->deviceListCount = cnt + 1;
-				
-				DeviceList[cnt].DeviceId = rhd_devices[k].atomDevID;
-				DeviceList[cnt].ConnectorType = rhdAtomGetConnectorID(handle, ct, cObjNum);
-				DeviceList[cnt].OutputType = rhd_encoders[objId].ot[objNum - 1];
-				cnt++;
-				LOG("   DeviceIndex: 0x%x\n",k);
+				//MemFix
+				//struct rhdAtomOutputDeviceList *temp = (struct rhdAtomOutputDeviceList *)IOMalloc(sizeof (struct rhdAtomOutputDeviceList) * (cnt + 1));
+				//if (temp == NULL) return ATOM_FAILED;
+				//bzero(temp, sizeof(struct rhdAtomOutputDeviceList) * (cnt + 1));
+				//bcopy(DeviceList, temp, sizeof (struct rhdAtomOutputDeviceList) * cnt);
+				//IOFree(DeviceList, sizeof(struct rhdAtomOutputDeviceList) * cnt);
+				//DeviceList = temp;
+				if (cnt < MaxAtomOutputDeviceList) {
+					DeviceList[cnt].DeviceId = rhd_devices[k].atomDevID;
+					DeviceList[cnt].ConnectorType = rhdAtomGetConnectorID(handle, ct, cObjNum);
+					DeviceList[cnt].OutputType = rhd_encoders[objId].ot[objNum - 1];
+					cnt++;
+					LOG("   DeviceIndex: 0x%x\n",k);
+				} else LOG("   DeviceIndex is beyond maxim allowed number %d\n", MaxAtomOutputDeviceList);
 			}
 		}
 		disObjPath = (ATOM_DISPLAY_OBJECT_PATH*)(((char *)disObjPath) + disObjPath->usSize);
@@ -4367,17 +4371,21 @@ rhdAtomOutputDeviceListFromObjectHeader(atomBiosHandlePtr handle, AtomBiosArgPtr
 				< (((unsigned long) disObjPath) + disObjPath->usSize)))
 			break;
     }
-    //DeviceList = xrealloc(DeviceList, sizeof(struct rhdAtomOutputDeviceList) * (cnt + 1));
-	struct rhdAtomOutputDeviceList *temp = (struct rhdAtomOutputDeviceList *)IOMalloc(sizeof(struct rhdAtomOutputDeviceList) * (cnt + 1));
-	if (temp != NULL) {
-		bzero(temp, sizeof(struct rhdAtomOutputDeviceList) * (cnt + 1));
-		bcopy(DeviceList, temp, sizeof (struct rhdAtomOutputDeviceList) * cnt);
-		IOFree(DeviceList, sizeof (struct rhdAtomOutputDeviceList) * cnt);
-		DeviceList = temp;
+    //MemFix
+	//struct rhdAtomOutputDeviceList *temp = (struct rhdAtomOutputDeviceList *)IOMalloc(sizeof(struct rhdAtomOutputDeviceList) * (cnt + 1));
+	//if (temp != NULL) {
+		//bzero(temp, sizeof(struct rhdAtomOutputDeviceList) * (cnt + 1));
+		//bcopy(DeviceList, temp, sizeof (struct rhdAtomOutputDeviceList) * cnt);
+		//IOFree(DeviceList, sizeof (struct rhdAtomOutputDeviceList) * cnt);
+		//DeviceList = temp;
+		//data->deviceListCount = cnt + 1;
+	//}
+	if (cnt < MaxAtomOutputDeviceList) {
 		data->deviceListCount = cnt + 1;
-	}
-    DeviceList[cnt].DeviceId = atomNone;
-	
+		DeviceList[cnt].DeviceId = atomNone;
+	} else
+		data->deviceListCount = cnt;
+
     *ptr = DeviceList;
 	
     return ATOM_SUCCESS;
@@ -4398,20 +4406,20 @@ rhdAtomConnectorInfoFromObjectHeader(atomBiosHandlePtr handle,
     int ncon = 0;
     int i,j;
     unsigned short object_header_size;
-
+	
     RHDFUNC(handle);
-
+	
     atomDataPtr = handle->atomDataPtr;
-
+	
     if (!rhdAtomGetTableRevisionAndSize(
-	    &atomDataPtr->Object_Header->sHeader,
-	    &crev,&frev,&object_header_size)) {
-	return ATOM_NOT_IMPLEMENTED;
+										&atomDataPtr->Object_Header->sHeader,
+										&crev,&frev,&object_header_size)) {
+		return ATOM_NOT_IMPLEMENTED;
     }
-
+	
     if (crev < 2) /* don't bother with anything below rev 2 */
-	return ATOM_NOT_IMPLEMENTED;
-
+		return ATOM_NOT_IMPLEMENTED;
+	
 	cp = IONew(struct rhdConnectorInfo, RHD_CONNECTORS_MAX);
     if (!cp) return ATOM_FAILED;
 	else bzero(cp, sizeof(struct rhdConnectorInfo) * RHD_CONNECTORS_MAX);
@@ -4419,144 +4427,147 @@ rhdAtomConnectorInfoFromObjectHeader(atomBiosHandlePtr handle,
     object_header_end =
 	atomDataPtr->Object_Header->usConnectorObjectTableOffset
 	+ object_header_size;
-
+	
     LOG("ObjectTable - size: %d, BIOS - size: %u "
-	     "TableOffset: %d object_header_end: %lu\n",
-	     object_header_size, handle->BIOSImageSize,
-	     atomDataPtr->Object_Header->usConnectorObjectTableOffset,
-	     object_header_end);
-
+		"TableOffset: %d object_header_end: %lu\n",
+		object_header_size, handle->BIOSImageSize,
+		atomDataPtr->Object_Header->usConnectorObjectTableOffset,
+		object_header_end);
+	
     if ((object_header_size > handle->BIOSImageSize)
-	|| (atomDataPtr->Object_Header->usConnectorObjectTableOffset
-	    > handle->BIOSImageSize)
-	|| object_header_end > handle->BIOSImageSize) {
-	IODelete(cp, struct rhdConnectorInfo, RHD_CONNECTORS_MAX);
-	LOG("%s: Object table information is bogus\n",__func__);
-	return ATOM_FAILED;
+		|| (atomDataPtr->Object_Header->usConnectorObjectTableOffset
+			> handle->BIOSImageSize)
+		|| object_header_end > handle->BIOSImageSize) {
+		IODelete(cp, struct rhdConnectorInfo, RHD_CONNECTORS_MAX);
+		LOG("%s: Object table information is bogus\n",__func__);
+		return ATOM_FAILED;
     }
-
+	
     if (((unsigned long)&atomDataPtr->Object_Header->sHeader
-	 + object_header_end) >  ((unsigned long)handle->BIOSBase
-		     + handle->BIOSImageSize)) {
-	IODelete(cp, struct rhdConnectorInfo, RHD_CONNECTORS_MAX);
-	LOG("%s: Object table extends beyond BIOS Image\n",__func__);
-	return ATOM_FAILED;
+		 + object_header_end) >  ((unsigned long)handle->BIOSBase
+								  + handle->BIOSImageSize)) {
+		IODelete(cp, struct rhdConnectorInfo, RHD_CONNECTORS_MAX);
+		LOG("%s: Object table extends beyond BIOS Image\n",__func__);
+		return ATOM_FAILED;
     }
-
+	
     con_obj = (ATOM_CONNECTOR_OBJECT_TABLE *)
 	((char *)&atomDataPtr->Object_Header->sHeader +
 	 atomDataPtr->Object_Header->usConnectorObjectTableOffset);
-
+	
     for (i = 0; i < con_obj->ucNumberOfObjects; i++) {
-	ATOM_SRC_DST_TABLE_FOR_ONE_OBJECT *SrcDstTable;
-	ATOM_COMMON_RECORD_HEADER *Record;
-	int record_base;
-	CARD8 obj_type, obj_id, num;
-	char *name;
-
-	rhdAtomInterpretObjectID(handle, con_obj->asObjects[i].usObjectID,
-			     &obj_type, &obj_id, &num, &name);
-
-	LOG("Object: ID: %x name: %s type: %x id: %x\n",
-		 con_obj->asObjects[i].usObjectID, name ? name : "",
-		 obj_type, obj_id);
-
-
-	if (obj_type != GRAPH_OBJECT_TYPE_CONNECTOR)
-	    continue;
-
-	SrcDstTable = (ATOM_SRC_DST_TABLE_FOR_ONE_OBJECT *)
+		ATOM_SRC_DST_TABLE_FOR_ONE_OBJECT *SrcDstTable;
+		ATOM_COMMON_RECORD_HEADER *Record;
+		int record_base;
+		CARD8 obj_type, obj_id, num;
+		char *name;
+		
+		rhdAtomInterpretObjectID(handle, con_obj->asObjects[i].usObjectID,
+								 &obj_type, &obj_id, &num, &name);
+		
+		LOG("Object: ID: %x name: %s type: %x id: %x\n",
+			con_obj->asObjects[i].usObjectID, name ? name : "",
+			obj_type, obj_id);
+		
+		
+		if (obj_type != GRAPH_OBJECT_TYPE_CONNECTOR)
+			continue;
+		
+		SrcDstTable = (ATOM_SRC_DST_TABLE_FOR_ONE_OBJECT *)
 	    ((char *)&atomDataPtr->Object_Header->sHeader
 	     + con_obj->asObjects[i].usSrcDstTableOffset);
-
-	if (con_obj->asObjects[i].usSrcDstTableOffset
-	    + (SrcDstTable->ucNumberOfSrc
-	       * sizeof(ATOM_SRC_DST_TABLE_FOR_ONE_OBJECT))
-	    > handle->BIOSImageSize) {
-	    LOG("%s: SrcDstTable[%d] extends "
-		       "beyond Object_Header table\n",__func__,i);
-	    continue;
-	}
-	cp[ncon].Type = rhdAtomGetConnectorID(handle, rhd_connector_objs[obj_id].con, num);
-	cp[ncon].Name = RhdAppendString(cp[ncon].Name,name);
-	cp[ncon].DDC  = RHD_DDC_NONE;
-
-	for (j = 0; ((j < SrcDstTable->ucNumberOfSrc) &&
-		     (j < MAX_OUTPUTS_PER_CONNECTOR)); j++) {
-	    CARD8 stype, sobj_id, snum;
-	    char *sname;
-
-	    rhdAtomInterpretObjectID(handle, SrcDstTable->usSrcObjectID[j],
-				     &stype, &sobj_id, &snum, &sname);
-
-	    LOG(" * SrcObject: ID: %x name: %s enum: %d\n",
-		     SrcDstTable->usSrcObjectID[j], sname, snum);
-
-	    if (snum <= 2)
-		cp[ncon].Output[j] = rhd_encoders[sobj_id].ot[snum - 1];
-	}
-
-	Record = (ATOM_COMMON_RECORD_HEADER *)
+		
+		if (con_obj->asObjects[i].usSrcDstTableOffset
+			+ (SrcDstTable->ucNumberOfSrc
+			   * sizeof(ATOM_SRC_DST_TABLE_FOR_ONE_OBJECT))
+			> handle->BIOSImageSize) {
+			LOG("%s: SrcDstTable[%d] extends "
+				"beyond Object_Header table\n",__func__,i);
+			continue;
+		}
+		cp[ncon].Type = rhdAtomGetConnectorID(handle, rhd_connector_objs[obj_id].con, num);
+		cp[ncon].Name = RhdAppendString(cp[ncon].Name,name);
+		//if (1) LOG("%s line %d: %s\n", __func__, __LINE__, cp[ncon].Name);
+		cp[ncon].DDC  = RHD_DDC_NONE;
+		
+		for (j = 0; ((j < SrcDstTable->ucNumberOfSrc) &&
+					 (j < MAX_OUTPUTS_PER_CONNECTOR)); j++) {
+			CARD8 stype, sobj_id, snum;
+			char *sname;
+			
+			rhdAtomInterpretObjectID(handle, SrcDstTable->usSrcObjectID[j],
+									 &stype, &sobj_id, &snum, &sname);
+			
+			LOG(" * SrcObject: ID: %x name: %s enum: %d\n",
+				SrcDstTable->usSrcObjectID[j], sname, snum);
+			
+			if (snum <= 2)
+				cp[ncon].Output[j] = rhd_encoders[sobj_id].ot[snum - 1];
+		}
+		
+		Record = (ATOM_COMMON_RECORD_HEADER *)
 	    ((char *)&atomDataPtr->Object_Header->sHeader
 	     + con_obj->asObjects[i].usRecordOffset);
-
-	record_base = con_obj->asObjects[i].usRecordOffset;
-
-	while (Record->ucRecordType > 0
-	       && Record->ucRecordType <= ATOM_MAX_OBJECT_RECORD_NUMBER ) {
-	    char *taglist;
-
-	    if ((record_base += Record->ucRecordSize)
-		> object_header_size) {
-		LOG("%s: Object Records extend beyond Object Table\n",
-			   __func__);
-		break;
-	    }
-
-	    LOG(" - Record Type: %x\n",
-		     Record->ucRecordType);
-
-	    switch (Record->ucRecordType) {
-
-		case ATOM_I2C_RECORD_TYPE:
-		    rhdAtomDDCFromI2CRecord(handle,
-					    (ATOM_I2C_RECORD *)Record,
-					    &cp[ncon].DDC);
-		    break;
-
-		case ATOM_HPD_INT_RECORD_TYPE:
-		    rhdAtomHPDFromRecord(handle,
-					 (ATOM_HPD_INT_RECORD *)Record,
-					 &cp[ncon].HPD);
-		    break;
-
-		case ATOM_CONNECTOR_DEVICE_TAG_RECORD_TYPE:
-		    taglist = rhdAtomDeviceTagsFromRecord(handle,
-							  (ATOM_CONNECTOR_DEVICE_TAG_RECORD *)Record);
-		    if (taglist) {
-			cp[ncon].Name = RhdAppendString(cp[ncon].Name,taglist);
-
-			IOFree(taglist, ((ATOM_CONNECTOR_DEVICE_TAG_RECORD *)Record)->ucNumberOfDevice * 4 + 1);
-
-		    }
-		    break;
-
-		default:
-		    break;
-	    }
-
-	    Record = (ATOM_COMMON_RECORD_HEADER*)
-		((char *)Record + Record->ucRecordSize);
-
-	}
-
-	if ((++ncon) == RHD_CONNECTORS_MAX)
-	    break;
+		
+		record_base = con_obj->asObjects[i].usRecordOffset;
+		
+		while (Record->ucRecordType > 0
+			   && Record->ucRecordType <= ATOM_MAX_OBJECT_RECORD_NUMBER ) {
+			char *taglist;
+			
+			if ((record_base += Record->ucRecordSize)
+				> object_header_size) {
+				LOG("%s: Object Records extend beyond Object Table\n",
+					__func__);
+				break;
+			}
+			
+			LOG(" - Record Type: %x\n",
+				Record->ucRecordType);
+			
+			switch (Record->ucRecordType) {
+					
+				case ATOM_I2C_RECORD_TYPE:
+					rhdAtomDDCFromI2CRecord(handle,
+											(ATOM_I2C_RECORD *)Record,
+											&cp[ncon].DDC);
+					break;
+					
+				case ATOM_HPD_INT_RECORD_TYPE:
+					rhdAtomHPDFromRecord(handle,
+										 (ATOM_HPD_INT_RECORD *)Record,
+										 &cp[ncon].HPD);
+					break;
+					
+				case ATOM_CONNECTOR_DEVICE_TAG_RECORD_TYPE:
+					taglist = rhdAtomDeviceTagsFromRecord(handle,
+														  (ATOM_CONNECTOR_DEVICE_TAG_RECORD *)Record);
+					if (taglist) {
+						//if (1) LOG("%s line %d: %s\n", __func__, __LINE__, taglist);
+						cp[ncon].Name = RhdAppendString(cp[ncon].Name,taglist);
+						//if (1) LOG("%s line %d: %s\n", __func__, __LINE__, cp[ncon].Name);
+						
+						IOFree(taglist, ((ATOM_CONNECTOR_DEVICE_TAG_RECORD *)Record)->ucNumberOfDevice * 4 + 1);
+						
+					}
+					break;
+					
+				default:
+					break;
+			}
+			
+			Record = (ATOM_COMMON_RECORD_HEADER*)
+			((char *)Record + Record->ucRecordSize);
+			
+		}
+		
+		if ((++ncon) == RHD_CONNECTORS_MAX)
+			break;
     }
     *ptr = cp;
-
+	
     RhdPrintConnectorInfo(handle->scrnIndex, cp);
-
+	
     return ATOM_SUCCESS;
 }
 
@@ -4584,54 +4595,62 @@ rhdAtomOutputDeviceListFromSupportedDevices(atomBiosHandlePtr handle, Bool igp, 
 	return ATOM_NOT_IMPLEMENTED;
     }
 
+	//MemFix	
+	if (!(DeviceList = IONew(struct rhdAtomOutputDeviceList, MaxAtomOutputDeviceList)))
+		return ATOM_FAILED;
+	else bzero(DeviceList, sizeof(struct rhdAtomOutputDeviceList) * MaxAtomOutputDeviceList);
+	
 	cp = IONew(struct rhdConnectorInfo, RHD_CONNECTORS_MAX);
     if (!cp) return ATOM_FAILED;
 	else bzero(cp, sizeof(struct rhdConnectorInfo) * RHD_CONNECTORS_MAX);
 	
     for (n = 0; n < ATOM_MAX_SUPPORTED_DEVICE; n++) {
-	ATOM_CONNECTOR_INFO_I2C ci
+		ATOM_CONNECTOR_INFO_I2C ci
 	    = atomDataPtr->SupportedDevicesInfo.SupportedDevicesInfo->asConnInfo[n];
-
-	if (!(atomDataPtr->SupportedDevicesInfo
-	      .SupportedDevicesInfo->usDeviceSupport & (1 << n)))
-	    continue;
-
-	if (Limit(ci.sucConnectorInfo.sbfAccess.bfConnectorType,
-		  n_rhd_connectors, "bfConnectorType"))
-	    continue;
-
-	//if (!(DeviceList = (struct rhdAtomOutputDeviceList *)xrealloc(DeviceList, sizeof(struct rhdAtomOutputDeviceList) * (cnt + 1))))
-		struct rhdAtomOutputDeviceList *temp = (struct rhdAtomOutputDeviceList *)IOMalloc(sizeof(struct rhdAtomOutputDeviceList) * (cnt + 1));
-		if (temp == NULL) return ATOM_FAILED;
-		bzero(temp, sizeof(struct rhdAtomOutputDeviceList) * (cnt + 1));
-		bcopy(DeviceList, temp, sizeof (struct rhdAtomOutputDeviceList) * cnt);
-		IOFree(DeviceList, sizeof (struct rhdAtomOutputDeviceList) * cnt);
-		DeviceList = temp;
-		data->deviceListCount = cnt + 1;
 		
-	DeviceList[cnt].ConnectorType = rhd_connectors[ci.sucConnectorInfo.sbfAccess.bfConnectorType].con;
-	DeviceList[cnt].DeviceId = rhd_devices[n].atomDevID;
-
-	if (!Limit(ci.sucConnectorInfo.sbfAccess.bfAssociatedDAC,
-		   n_acc_dac, "bfAssociatedDAC")) {
-	    if ((DeviceList[cnt].OutputType
-		 = acc_dac[ci.sucConnectorInfo.sbfAccess.bfAssociatedDAC])
-		== RHD_OUTPUT_NONE) {
-		DeviceList[cnt].OutputType = rhd_devices[n].ot[igp ? 1 : 0];
-	    }
-	    cnt++;
-	}
+		if (!(atomDataPtr->SupportedDevicesInfo
+			  .SupportedDevicesInfo->usDeviceSupport & (1 << n)))
+			continue;
+		
+		if (Limit(ci.sucConnectorInfo.sbfAccess.bfConnectorType,
+				  n_rhd_connectors, "bfConnectorType"))
+			continue;
+		
+		//MemFix
+		//struct rhdAtomOutputDeviceList *temp = (struct rhdAtomOutputDeviceList *)IOMalloc(sizeof(struct rhdAtomOutputDeviceList) * (cnt + 1));
+		//if (temp == NULL) return ATOM_FAILED;
+		//bzero(temp, sizeof(struct rhdAtomOutputDeviceList) * (cnt + 1));
+		//bcopy(DeviceList, temp, sizeof (struct rhdAtomOutputDeviceList) * cnt);
+		//IOFree(DeviceList, sizeof (struct rhdAtomOutputDeviceList) * cnt);
+		//DeviceList = temp;
+		if (cnt < MaxAtomOutputDeviceList) {
+			DeviceList[cnt].ConnectorType = rhd_connectors[ci.sucConnectorInfo.sbfAccess.bfConnectorType].con;
+			DeviceList[cnt].DeviceId = rhd_devices[n].atomDevID;
+			
+			if (!Limit(ci.sucConnectorInfo.sbfAccess.bfAssociatedDAC,
+					   n_acc_dac, "bfAssociatedDAC")) {
+				if ((DeviceList[cnt].OutputType
+					 = acc_dac[ci.sucConnectorInfo.sbfAccess.bfAssociatedDAC])
+					== RHD_OUTPUT_NONE) {
+					DeviceList[cnt].OutputType = rhd_devices[n].ot[igp ? 1 : 0];
+				}
+				cnt++;
+			}
+		}
     }
-    //DeviceList = (struct rhdAtomOutputDeviceList *)xrealloc(DeviceList, sizeof(struct rhdAtomOutputDeviceList) * (cnt + 1));
-	struct rhdAtomOutputDeviceList *temp = (struct rhdAtomOutputDeviceList *)IOMalloc(sizeof(struct rhdAtomOutputDeviceList) * (cnt + 1));
-	if (temp != NULL) {
-		bzero(temp, sizeof(struct rhdAtomOutputDeviceList) * (cnt + 1));
-		bcopy(DeviceList, temp, sizeof (struct rhdAtomOutputDeviceList) * cnt);
-		IOFree(DeviceList, sizeof (struct rhdAtomOutputDeviceList) * cnt);
-		DeviceList = temp;
+    //MemFix
+	//struct rhdAtomOutputDeviceList *temp = (struct rhdAtomOutputDeviceList *)IOMalloc(sizeof(struct rhdAtomOutputDeviceList) * (cnt + 1));
+	//if (temp != NULL) {
+		//bzero(temp, sizeof(struct rhdAtomOutputDeviceList) * (cnt + 1));
+		//bcopy(DeviceList, temp, sizeof (struct rhdAtomOutputDeviceList) * cnt);
+		//IOFree(DeviceList, sizeof (struct rhdAtomOutputDeviceList) * cnt);
+		//DeviceList = temp;
+		//data->deviceListCount = cnt + 1;
+	//}
+	if (cnt < MaxAtomOutputDeviceList) {
 		data->deviceListCount = cnt + 1;
-	}
-    DeviceList[cnt].DeviceId = atomNone;
+		DeviceList[cnt].DeviceId = atomNone;
+	} else data->deviceListCount = cnt;
 
     *Ptr = DeviceList;
 
@@ -4765,6 +4784,7 @@ rhdAtomConnectorInfoFromSupportedDevices(atomBiosHandlePtr handle,
 	cp[ncon].Type = devices[n].con;
 	cp[ncon].Name = xstrdup(devices[n].name);
 	cp[ncon].Name = RhdAppendString(cp[ncon].Name, devices[n].outputName);
+		//if (1) LOG("%s line %d: %s\n", __func__, __LINE__, cp[ncon].Name);
 
 	if (devices[n].ddc == RHD_DDC_NONE) {
 	    if (devices[n].dual)
@@ -4798,6 +4818,7 @@ rhdAtomConnectorInfoFromSupportedDevices(atomBiosHandlePtr handle,
 						    devices[i].outputName);
 		    cp[ncon].Name = RhdAppendString(cp[ncon].Name,
 						    devices[n].outputName);
+				//if (1) LOG("%s line %d: %s\n", __func__, __LINE__, cp[ncon].Name);
 		    devices[i].ot = RHD_OUTPUT_NONE; /* zero the device */
 		} else if ((devices[i].ot == RHD_OUTPUT_DACA
 			    || devices[i].ot == RHD_OUTPUT_DACB)
@@ -4811,6 +4832,7 @@ rhdAtomConnectorInfoFromSupportedDevices(atomBiosHandlePtr handle,
 
 		    cp[ncon].Name = RhdAppendString(cp[ncon].Name,
 						    devices[i].outputName);
+				   //if (1) LOG("%s line %d: %s\n", __func__, __LINE__, cp[ncon].Name);
 		    devices[i].ot = RHD_OUTPUT_NONE; /* zero the device */
 		}
 	    }
@@ -4990,7 +5012,7 @@ rhdAtomExec (atomBiosHandlePtr handle,
     if (!ret)
 	LOG("%s\n",msg);
     else
-	LOG("%s\n",msg);
+	LOGV("%s\n",msg);
 
     return (ret) ? ATOM_SUCCESS : ATOM_FAILED;
 }
@@ -5040,7 +5062,7 @@ RHDAtomBiosFunc(int scrnIndex, atomBiosHandlePtr handle,
 			   (unsigned long) data->val);
 		break;
 	    case MSG_FORMAT_NONE:
-		LOG("Call to %s succeeded\n", msg);
+		LOGV("Call to %s succeeded\n", msg);
 		break;
 	}
 
@@ -5051,7 +5073,7 @@ RHDAtomBiosFunc(int scrnIndex, atomBiosHandlePtr handle,
 	switch (msg_f) {
 	    case MSG_FORMAT_DEC:
 	    case MSG_FORMAT_HEX:
-		LOG("Call to %s %s\n", msg, result);
+		LOGV("Call to %s %s\n", msg, result);
 		break;
 	    case MSG_FORMAT_NONE:
 		LOG("Query for %s: %s\n", msg, result);
@@ -5115,11 +5137,11 @@ static AtomBiosResult
 atomSetRegisterListLocation(atomBiosHandlePtr handle, AtomBiosRequestID func, AtomBiosArgPtr data)
 {
     RHDFUNC(handle);
-
+/*
     handle->SaveList = (struct atomSaveListRecord **)data->Address;
     if (handle->SaveList)
 	atomRegisterSaveList(handle, handle->SaveList);
-
+*/
     return ATOM_SUCCESS;
 }
 
@@ -5650,8 +5672,9 @@ CailWriteATIRegister(VOID *CAIL, UINT32 idx, UINT32 data)
 {
     CAILFUNC(CAIL);
 
+#ifdef SaveRestore
     atomSaveRegisters((atomBiosHandlePtr)CAIL, atomRegisterMMIO, idx << 2);
-
+#endif
     RHDRegWrite(((atomBiosHandlePtr)CAIL),idx << 2,data);
     LOGV("%s(%x,%x)\n",__func__,idx << 2,data);
 }
@@ -5714,8 +5737,9 @@ CailWriteMC(VOID *CAIL, ULONG Address, ULONG data)
 
     LOGV("%s(%x,%x)\n",__func__,Address,data);
 
+#ifdef SaveRestore
     atomSaveRegisters((atomBiosHandlePtr)CAIL, atomRegisterMC, Address);
-
+#endif
     RHDWriteMC(((atomBiosHandlePtr)CAIL), Address | MC_IND_ALL | MC_IND_WR_EN, data);
 }
 
@@ -5755,8 +5779,9 @@ CailWritePCIConfigData(VOID*CAIL,VOID*src,UINT32 idx,UINT16 size)
 
     LOGV("%s(%x,%x)\n",__func__,idx,(*(unsigned int*)src));
 
+#ifdef SaveRestore
     atomSaveRegisters((atomBiosHandlePtr)CAIL, atomRegisterPCICFG, idx << 2);
-
+#endif
     switch (size) {
 	case 8:
 	    pciWriteByte(tag,idx << 2,*(CARD8*)src);
@@ -5791,7 +5816,9 @@ CailWritePLL(VOID *CAIL, ULONG Address,ULONG Data)
     CAILFUNC(CAIL);
 
     LOGV("%s(%x,%x)\n",__func__,Address,Data);
+#ifdef SaveRestore
     atomSaveRegisters((atomBiosHandlePtr)CAIL, atomRegisterPLL, Address);
+#endif
     _RHDWritePLL(((atomBiosHandlePtr)CAIL)->scrnIndex, Address, Data);
 }
 

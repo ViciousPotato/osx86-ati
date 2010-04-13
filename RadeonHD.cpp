@@ -13,6 +13,8 @@
 #include <IOKit/pci/IOPCIDevice.h>
 
 #include "RadeonHD.h"
+#include "rhd/rhd.h"
+#include "rhd/rhd_pm.h"
 
 #define RHD_VBIOS_BASE 0xC0000
 #define RHD_VBIOS_SIZE 0x10000
@@ -29,6 +31,7 @@ extern "C" void RadeonHDSetEntries(GammaTbl *gTable, ColorSpec *cTable, SInt16 o
 extern "C" Bool RadeonHDSetHardwareCursor(void *cursorRef, GammaTbl *gTable);
 extern "C" Bool RadeonHDDrawHardwareCursor(SInt32 x, SInt32 y, Bool visible);
 extern "C" void RadeonHDGetHardwareCursorState(SInt32 *x, SInt32 *y, UInt32 *set, UInt32 *visible);
+extern "C" Bool RadeonHDDisplayPowerManagementSet(int PowerManagementMode, int flags);
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -58,36 +61,44 @@ IONDRV * NDRVHD::fromRegistryEntry( IORegistryEntry * regEntry, IOService * prov
  	inst->fNub = provider;
 	inst->IOMap = NULL;
 	inst->FBMap = NULL;
+	
+	inst->fLastPowerState = kAVPowerOn;
 
 	IOPCIDevice * pciDevice = OSDynamicCast(IOPCIDevice, regEntry);
 	if (!pciDevice) return NULL;
 	MAKE_REG_ENTRY(&inst->pciTag, pciDevice);
 
 	//get user options
+	OSBoolean *prop;
+	OSNumber *optionNum;
+	
 	OSDictionary *dict = OSDynamicCast(OSDictionary, provider->getProperty("UserOptions"));
 	
 	bzero(&inst->options, sizeof(UserOptions));
 	inst->options.HWCursorSupport = FALSE;
 	inst->options.enableGammaTable = FALSE;
 	inst->options.enableOSXI2C = FALSE;
-	
+
 	inst->debugMode = false;
-	inst->options.enableBacklight = true;
+	inst->options.BackLightLevel = 255;
+	inst->options.lowPowerMode = FALSE;
 	if (dict) {
-		OSBoolean *prop = OSDynamicCast(OSBoolean, dict->getObject("debugMode"));
+		prop = OSDynamicCast(OSBoolean, dict->getObject("debugMode"));
 		if (prop) inst->debugMode = prop->getValue();
-		prop = OSDynamicCast(OSBoolean, dict->getObject("enableBacklight"));
-		if (prop) inst->options.enableBacklight = prop->getValue();
+		optionNum = OSDynamicCast(OSNumber, dict->getObject("BackLightLevel"));
+		if (optionNum) inst->options.BackLightLevel = optionNum->unsigned32BitValue();
 		prop = OSDynamicCast(OSBoolean, dict->getObject("enableHWCursor"));
 		if (prop) inst->options.HWCursorSupport = prop->getValue();
 		prop = OSDynamicCast(OSBoolean, dict->getObject("enableGammaTable"));
 		if (prop) inst->options.enableGammaTable = prop->getValue();
+		prop = OSDynamicCast(OSBoolean, dict->getObject("lowPowerMode"));
+		if (prop) inst->options.lowPowerMode = prop->getValue();
 	}
 #ifndef USEIOLOG && defined DEBUG
 	xf86Msg.mVerbose = 1;
 	xf86Msg.mMsgBufferSize = 65535;
 	if (dict) {
-		OSNumber *optionNum = OSDynamicCast(OSNumber, dict->getObject("verboseLevel"));
+		optionNum = OSDynamicCast(OSNumber, dict->getObject("verboseLevel"));
 		if (optionNum) xf86Msg.mVerbose = optionNum->unsigned32BitValue();
 		optionNum = OSDynamicCast(OSNumber, dict->getObject("MsgBufferSize"));
 		if (optionNum) xf86Msg.mMsgBufferSize = optionNum->unsigned32BitValue();
@@ -231,7 +242,8 @@ IONDRV * NDRVHD::fromRegistryEntry( IORegistryEntry * regEntry, IOService * prov
 				inst->modeCount++;
 				mode = mode->next;
 			}
-			if (!inst->startMode) inst->startMode = BigestMode;
+			//if (!inst->startMode)	//use native mode better choice?
+				inst->startMode = BigestMode;
 			
 			inst->modeTimings = IONew(IODetailedTimingInformationV2, inst->modeCount);
 			inst->modeIDs = IONew(IODisplayModeID, inst->modeCount);
@@ -328,7 +340,7 @@ IOReturn NDRVHD::doDriverIO( UInt32 commandID, void * contents,
 {
     IONDRVControlParameters * pb = (IONDRVControlParameters *) contents;
     IOReturn	ret;
-	
+/*	
 	static UInt16 commandCodeCopy = 0;
 	static UInt16 pbCodeCopy = 0;
 	static UInt16 codeCount = 0;
@@ -341,7 +353,7 @@ IOReturn NDRVHD::doDriverIO( UInt32 commandID, void * contents,
 		pbCodeCopy = pb->code;
 		codeCount = 0;
 	}
-	
+*/	
     switch (commandCode)
     {
         case kIONDRVInitializeCommand:
@@ -500,17 +512,52 @@ IOReturn NDRVHD::doControl( UInt32 code, void * params )
 		}	
 			break;
 		case cscSetBackLightLevel:
-			if (RHDReady && options.enableBacklight)
+			if (RHDReady && options.BackLightLevel)
 		{
 			if (RadeonHDGetSetBKSV((UInt32 *)params, 1)) ret = kIOReturnSuccess;
 		}
 			break;
+		case cscSetPowerState:
+			if (RHDReady) 
+			{
+				VDPowerStateRec* vdPowerState = (VDPowerStateRec*)params;
+				LOG("cscSetPowerState: powerState %u powerFlags %u\n",
+					 (unsigned int)vdPowerState->powerState, (unsigned int)vdPowerState->powerFlags);
+				switch (vdPowerState->powerState) {
+					case kAVPowerOn:
+						LOG("Trying to select state DPMSModeOn\n");
+						RadeonHDDisplayPowerManagementSet(DPMSModeOn, 0);
+						fLastPowerState = kAVPowerOn;
+						ret = kIOReturnSuccess;
+						break;
+					case kAVPowerOff:
+						LOG("Trying to select state kAVPowerOff\n");
+						RadeonHDDisplayPowerManagementSet(DPMSModeOff, 0);
+						fLastPowerState = kAVPowerOff;
+						ret = kIOReturnSuccess;
+						break;
+					case kAVPowerStandby:
+						LOG("Trying to select state DPMSModeStandby\n");
+						RadeonHDDisplayPowerManagementSet(DPMSModeStandby, 0);
+						fLastPowerState = kAVPowerStandby;
+						ret = kIOReturnSuccess;
+						break;
+					case kAVPowerSuspend:
+						LOG("Trying to select state DPMSModeSuspend\n");
+						RadeonHDDisplayPowerManagementSet(DPMSModeSuspend, 0);
+						fLastPowerState = kAVPowerSuspend;
+						ret = kIOReturnSuccess;
+						break;
+					default:
+						break;
+				}
+			}
+            break;
 		case cscSetMode:
 		case cscSavePreferredConfiguration:
 		case cscSetMirror:
 		case cscSetFeatureConfiguration:
 		case cscSetSync:
-		case cscSetPowerState:
         default:
             break;
     }
@@ -854,10 +901,23 @@ IOReturn NDRVHD::doStatus( UInt32 code, void * params )
 		}
 			break;
 		case cscGetBackLightLevel:
-			if (RHDReady && options.enableBacklight)
+			if (RHDReady && options.BackLightLevel)
 		{
 			if (RadeonHDGetSetBKSV((UInt32 *)params, 0)) ret = kIOReturnSuccess;
 		}
+			break;
+			
+		case cscGetPowerState:
+			if (RHDReady)
+			{
+				VDPowerStateRec* vdPowerState = (VDPowerStateRec*)params;
+				LOG("cscGetPowerState: powerState %u powerFlags %u\n",
+					(unsigned int)vdPowerState->powerState, (unsigned int)vdPowerState->powerFlags);
+				vdPowerState->powerState = fLastPowerState;
+				vdPowerState->powerFlags = kPowerStateSleepCanPowerOffMask;
+				LOG("cscGetPowerState: returning state %u\n", (unsigned int)vdPowerState->powerState);
+				ret = kIOReturnSuccess;
+			}
 			break;
 		case cscProbeConnection:
 		case cscGetPreferredConfiguration:
@@ -867,8 +927,6 @@ IOReturn NDRVHD::doStatus( UInt32 code, void * params )
 		case cscGetSync:
 		case cscGetConnection:
 			//case cscGetFeatureList:	//defined in IONDRVFramebufferPrivate.h
-		case cscGetPowerState:
-			//case cscSleepWake:	//defined in IONDRVFramebufferPrivate.h
         default:
             break;
     }
@@ -1130,7 +1188,8 @@ IOReturn RadeonHD::setAttributeForConnection( IOIndex connectIndex, IOSelect att
 	return ret;
 }
 
-IOReturn RadeonHD::getAttributeForConnection( IOIndex connectIndex, IOSelect attribute, UInt32 * value ) {
+IOReturn RadeonHD::getAttributeForConnection( IOIndex connectIndex,
+											 IOSelect attribute, uintptr_t  * value ) {
 	IOReturn ret = kIOReturnUnsupported;
 	
 	switch (attribute) {

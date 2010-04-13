@@ -667,7 +667,7 @@ rhdBIOSScratchUpdateBIOSScratchForOutput(struct rhdOutput *Output)
 	rhdAtomBIOSScratchSetAcceleratorModeForDevice(rhdPtr, Device, Output->Active);
 	rhdAtomBIOSScratchUpdateAttachedState(rhdPtr, Device, TRUE);
 
-	while (devList[i].DeviceId != atomNone) {
+	while ((devList[i].DeviceId != atomNone) && (i < MaxAtomOutputDeviceList)) {
 	    if (devList[i].DeviceId != Device)
 		rhdAtomBIOSScratchUpdateOnState(rhdPtr, devList[i].DeviceId, FALSE);
 	        i++;
@@ -678,7 +678,7 @@ rhdBIOSScratchUpdateBIOSScratchForOutput(struct rhdOutput *Output)
 	Device = atomNone;
 	Output->OutputDriverPrivate->Device = Device;
 
-	while (devList[i].DeviceId != atomNone) {
+	while ((devList[i].DeviceId != atomNone) && (i < MaxAtomOutputDeviceList)) {
 	    rhdAtomBIOSScratchUpdateOnState(rhdPtr, devList[i].DeviceId, FALSE);
 	    rhdAtomBIOSScratchSetAcceleratorModeForDevice(rhdPtr,
 							  devList[i].DeviceId, FALSE);
@@ -720,8 +720,8 @@ rhdBIOSScratchDestroyOutputDriverPrivate(struct rhdOutput *Output)
 
     if (Output->OutputDriverPrivate) {
 	void (*Destroy) (struct rhdOutput *Output) = Output->OutputDriverPrivate->Destroy;
-
-	IOFree(Output->OutputDriverPrivate->OutputDevices, sizeof(struct rhdOutputDevices) * Output->OutputDriverPrivate->devicesCount);
+	//MemFix
+	IOFree(Output->OutputDriverPrivate->OutputDevices, sizeof(struct rhdOutputDevices) * MaxAtomOutputDeviceList);
 	IODelete(Output->OutputDriverPrivate, struct BIOSScratchOutputPrivate, 1);
 	Output->OutputDriverPrivate = NULL;
 	if (Destroy)
@@ -747,20 +747,25 @@ RHDAtomSetupOutputDriverPrivate(struct rhdAtomOutputDeviceList *Devices, struct 
 		LOG("Device list doesn't exist.\n");
 		return FALSE;
     }
+	//MemFix
+	if (!(od = IONew(struct rhdOutputDevices, MaxAtomOutputDeviceList))) {
+		LOG("Not enough meomory\n");
+		return FALSE;
+	} else bzero(od, sizeof(struct rhdOutputDevices) * MaxAtomOutputDeviceList);
 	
     LOG(" Output: %s[0x%2.2x] - adding devices:\n", Output->Name, Output->Id);
 	
-    while (Devices[i].DeviceId != atomNone) {
+    while ((Devices[i].DeviceId != atomNone) && (i < MaxAtomOutputDeviceList)) {
 		LOGV(" Looking at DeviceID: 0x%2.2x OutputType: 0x%2.2x ConnectorType: 0x%2.2x\n",
 		     Devices[i].DeviceId,Devices[i].OutputType,Devices[i].ConnectorType);
 		if (Devices[i].OutputType == Output->Id) {
-			//if (!(od = (struct rhdOutputDevices *)xrealloc(od, sizeof(struct rhdOutputDevices) * (cnt + 1))))
-			struct rhdOutputDevices *temp = (struct rhdOutputDevices *)IOMalloc(sizeof(struct rhdOutputDevices) * (cnt + 1));
-			if (temp == NULL) return FALSE;
-			bzero(temp, sizeof(struct rhdOutputDevices) * (cnt + 1));
-			bcopy(od, temp, sizeof(struct rhdOutputDevices) * cnt);
-			IOFree(od, sizeof(struct rhdOutputDevices) * cnt);
-			od = temp;
+			//MemFix
+			//struct rhdOutputDevices *temp = (struct rhdOutputDevices *)IOMalloc(sizeof(struct rhdOutputDevices) * (cnt + 1));
+			//if (temp == NULL) return FALSE;
+			//bzero(temp, sizeof(struct rhdOutputDevices) * (cnt + 1));
+			//bcopy(od, temp, sizeof(struct rhdOutputDevices) * cnt);
+			//IOFree(od, sizeof(struct rhdOutputDevices) * cnt);
+			//od = temp;
 			LOGV("  >> 0x%2.2x\n", Devices[i].DeviceId);
 			od[cnt].DeviceId = Devices[i].DeviceId;
 			od[cnt].ConnectorType = Devices[i].ConnectorType;
@@ -768,19 +773,20 @@ RHDAtomSetupOutputDriverPrivate(struct rhdAtomOutputDeviceList *Devices, struct 
 		}
 		i++;
     }
-    //if (!(od = (struct rhdOutputDevices *)xrealloc(od, sizeof(struct rhdOutputDevices) * (cnt + 1))))
-	struct rhdOutputDevices *temp = (struct rhdOutputDevices *)IOMalloc(sizeof(struct rhdOutputDevices) * (cnt + 1));
-	if (temp == NULL) return FALSE;
-	bzero(temp, sizeof(struct rhdOutputDevices) * (cnt + 1));
-	bcopy(od, temp, sizeof(struct rhdOutputDevices) * cnt);
-	IOFree(od, sizeof(struct rhdOutputDevices) * cnt);
-	od = temp;
-	od[cnt].DeviceId = atomNone;
-	cnt++;
-	
+    //MemFix
+	//struct rhdOutputDevices *temp = (struct rhdOutputDevices *)IOMalloc(sizeof(struct rhdOutputDevices) * (cnt + 1));
+	//if (temp == NULL) return FALSE;
+	//bzero(temp, sizeof(struct rhdOutputDevices) * (cnt + 1));
+	//bcopy(od, temp, sizeof(struct rhdOutputDevices) * cnt);
+	//IOFree(od, sizeof(struct rhdOutputDevices) * cnt);
+	//od = temp;
+	if (cnt < MaxAtomOutputDeviceList) {
+		od[cnt].DeviceId = atomNone;
+		cnt++;
+	}
 	OutputDriverPrivate = IONew(struct BIOSScratchOutputPrivate, 1);
     if (!(OutputDriverPrivate)) {
-		IOFree(od, sizeof(struct rhdOutputDevices) * cnt);
+		IOFree(od, sizeof(struct rhdOutputDevices) * MaxAtomOutputDeviceList);
 		return FALSE;
     }
     OutputDriverPrivate->OutputDevices = od;
@@ -816,7 +822,7 @@ RHDFindConnectorAndOutputTypesForDevice(RHDPtr rhdPtr, enum atomDevice Device, e
 	    continue;
 
 	DeviceList = Output->OutputDriverPrivate->OutputDevices;
-	while (DeviceList[i].DeviceId != atomNone) {
+	while ((DeviceList[i].DeviceId != atomNone) && (i < MaxAtomOutputDeviceList)) {
 	    if (DeviceList[i].DeviceId == Device) {
 		*ot = Output->Id;
 		*ct = DeviceList[i].ConnectorType;

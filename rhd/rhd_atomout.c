@@ -241,6 +241,12 @@ atomSetBacklightFromBIOSScratch(struct rhdOutput *Output)
 
     RHDFUNC(Output);
 
+	if (Private->BlLevel < 30) {
+		if (xf86Screens[0]->options->BackLightLevel < 30) return;
+		Private->BlLevel = xf86Screens[0]->options->BackLightLevel;
+	}
+	LOG("%s: trying to set BL_MOD_LEVEL to: %d\n", __func__, Private->BlLevel);
+	
     switch (Output->Id) {
 	case RHD_OUTPUT_KLDSKP_LVTMA:
 	case RHD_OUTPUT_UNIPHYA:
@@ -512,6 +518,7 @@ rhdAtomOutputSave(struct rhdOutput *Output)
 static void
 rhdAtomOutputRestore(struct rhdOutput *Output)
 {
+#ifdef SaveRestore
      struct rhdAtomOutputPrivate *Private = (struct rhdAtomOutputPrivate *) Output->Private;
      RHDPtr rhdPtr = RHDPTRI(Output);
      union AtomBiosArg data;
@@ -521,6 +528,7 @@ rhdAtomOutputRestore(struct rhdOutput *Output)
      if (Output->Connector && Output->Connector->Type == RHD_CONNECTOR_PANEL)
 	 atomSetBacklightFromBIOSScratch(Output);
      RHDHdmiRestore(Private->Hdmi);
+#endif
 }
 
 /*
@@ -761,7 +769,8 @@ rhdAtomOutputDestroy(struct rhdOutput *Output)
     if (Private)
 	IODelete(Private, struct rhdAtomOutputPrivate, 1);
     Output->Private = NULL;
-    IOFree(Output->Name, strlen(Output->Name) + 1);
+	//MemFix
+	//IOFree(Output->Name, strlen(Output->Name) + 1);
 }
 
 /*
@@ -857,20 +866,20 @@ RHDAtomOutputAllocFree(struct rhdOutput *Output, enum rhdOutputAllocation Alloc)
 struct rhdOutput *
 RHDAtomOutputInit(RHDPtr rhdPtr, rhdConnectorType ConnectorType,
 		  rhdOutputType OutputType)
-{
-	static char names[12][12] = {
-		"DACA",
-	    "DACB",
-	    "TMDSA",
-	    "LVTMA",
-	    "DVO",
-	    "KldskpLvtma",
-	    "UniphyA",
-	    "UniphyB",
-	    "UniphyC",
-	    "UniphyD",
-	    "UniphyE",
-	    "UniphyF"
+{	//MemFix
+	static char names[12][25] = {
+		"AtomOutput DACA",
+	    "AtomOutput DACB",
+	    "AtomOutput TMDSA",
+	    "AtomOutput LVTMA",
+	    "AtomOutput DVO",
+	    "AtomOutput KldskpLvtma",
+	    "AtomOutput UniphyA",
+	    "AtomOutput UniphyB",
+	    "AtomOutput UniphyC",
+	    "AtomOutput UniphyD",
+	    "AtomOutput UniphyE",
+	    "AtomOutput UniphyF"
 	};
 	
     struct rhdOutput *Output;
@@ -927,8 +936,10 @@ RHDAtomOutputInit(RHDPtr rhdPtr, rhdConnectorType ConnectorType,
 	bzero(Output, sizeof(struct rhdOutput));
     Output->scrnIndex = rhdPtr->scrnIndex;
 
-    Output->Name = RhdAppendString(NULL, "AtomOutput");
-    Output->Name = RhdAppendString(Output->Name, OutputName);
+	//MemFix
+    //Output->Name = RhdAppendString(NULL, "AtomOutput");
+    //Output->Name = RhdAppendString(Output->Name, OutputName);
+	Output->Name = OutputName;
 
     Output->Id = OutputType;
     Output->Sense = NULL;

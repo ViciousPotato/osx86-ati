@@ -50,6 +50,7 @@ struct rhdCrtcScalePrivate {
 static void
 rhdAtomCrtcRestore(struct rhdCrtc *Crtc, void *Store)
 {
+#ifdef SaveRestore
     ScrnInfoPtr pScrn = xf86Screens[Crtc->scrnIndex];
     RHDPtr rhdPtr = RHDPTR(pScrn);
     union AtomBiosArg data;
@@ -58,6 +59,7 @@ rhdAtomCrtcRestore(struct rhdCrtc *Crtc, void *Store)
 
     data.Address = Store;
     RHDAtomBiosFunc(Crtc->scrnIndex, rhdPtr->atomBIOS, ATOM_RESTORE_REGISTERS, &data);
+#endif
 }
 
 /*
@@ -327,6 +329,7 @@ rhdAtomCrtcBlank(struct rhdCrtc *Crtc, Bool Blank)
     RHDAtomBiosFunc(rhdPtr->scrnIndex, rhdPtr->atomBIOS, ATOM_SET_REGISTER_LIST_LOCATION, &data);
 
     rhdAtomBlankCRTC(rhdPtr->atomBIOS, AtomCrtc , &Config);
+	LOG("Screen is %s\n", (Blank)?"blanked":"unblanked");
 
     data.Address = NULL;
     RHDAtomBiosFunc(Crtc->scrnIndex, rhdPtr->atomBIOS, ATOM_SET_REGISTER_LIST_LOCATION, &data);

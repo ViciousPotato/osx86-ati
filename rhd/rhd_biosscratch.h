@@ -37,6 +37,9 @@ struct BIOSScratchOutputPrivate {
     enum atomDevice Device;
 };
 */
+//MemFix
+#define MaxAtomOutputDeviceList 32
+
 struct rhdAtomOutputDeviceList {
     enum atomDevice DeviceId;
     enum rhdOutputType OutputType;

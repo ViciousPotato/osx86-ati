@@ -1200,6 +1200,7 @@ rhdInitI2C(int scrnIndex)
     enum rhdDDClines sda = 0, scl = 0;
     CARD32 scl_reg = 0, sda_reg = 0;
     Bool valid;
+	char str[BUS_NAME_SIZE];
 
     RHDFUNCI(scrnIndex);
 
@@ -1312,13 +1313,13 @@ rhdInitI2C(int scrnIndex)
 	    goto error;
 	}
 	I2CPtr->DriverPrivate.ptr = (pointer)I2C;
-	if (!(I2CPtr->BusName = (char *)IOMalloc(BUS_NAME_SIZE))) {
+		snprintf(str,BUS_NAME_SIZE,"RHD I2C line %d",i);
+	if (!(I2CPtr->BusName = xstrdup(str))) {
 	    LOG("%s: Cannot allocate memory.\n",__func__);
 	    IODelete(I2C, rhdI2CRec, 1);
 	    xf86DestroyI2CBusRec(I2CPtr, TRUE, FALSE);
 	    goto error;
 	}
-	snprintf(I2CPtr->BusName,17,"RHD I2C line %d",i);
 	I2CPtr->scrnIndex = scrnIndex;
 	if (rhdPtr->ChipSet < RHD_RS600)
 	    I2CPtr->I2CWriteRead = rhd5xxWriteRead;
@@ -1333,7 +1334,7 @@ rhdInitI2C(int scrnIndex)
 
 	if (!(xf86I2CBusInit(I2CPtr))) {
 	    LOG("I2C BusInit failed for bus %d\n",i);
-	    IOFree(I2CPtr->BusName, BUS_NAME_SIZE);
+	    IOFree(I2CPtr->BusName, strlen(I2CPtr->BusName) + 1);
 	    IODelete(I2C, rhdI2CRec, 1);
 	    xf86DestroyI2CBusRec(I2CPtr, TRUE, FALSE);
 	    goto error;

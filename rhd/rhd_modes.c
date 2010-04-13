@@ -1705,8 +1705,8 @@ RHDSynthModes(int scrnIndex, DisplayModePtr Mode, DisplayModePtr NativeMode)
 	int x;
 	int y;
     } resolution_list[] = {
-	{  320,  200 },  /* CGA */
-	{  320,  240 },  /* QVGA */
+	//{  320,  200 },  /* CGA */
+	//{  320,  240 },  /* QVGA */
 	{  640,  480 },  /* VGA */
 	{  720,  480 },  /* NTSC */
 	{  854,  480 },  /* WVGA */

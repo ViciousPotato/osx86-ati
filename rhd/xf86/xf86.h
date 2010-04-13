@@ -82,18 +82,15 @@ typedef union _DevUnion {
 	pointer		(*fptr) (void);
 } DevUnion;
 
-#ifndef __IONDRV__
-	//	not declared in IOMacOSTypes.h for 10.5
+#ifndef __IONDRVLIBRARIES__
+/*	already declared in IOMacOSTypes.h
 	struct RegEntryID
 	{
 		void * opaque[4];
 	};
 	typedef struct RegEntryID RegEntryID;
-#endif	
-	
-#ifndef __IONDRVLIBRARIES__
 	typedef RegEntryID *                    RegEntryIDPtr;
-	
+*/
 	OSErr ExpMgrConfigReadLong(
 							   RegEntryIDPtr    node,
 							   LogicalAddress   configAddr,

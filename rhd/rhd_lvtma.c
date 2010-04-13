@@ -194,22 +194,26 @@ LVDSSetBacklight(struct rhdOutput *Output)
     int level = Private->BlLevel;
     RHDPtr rhdPtr = RHDPTRI(Output);
 
-    LOG("%s: trying to set BL_MOD_LEVEL to: %d\n",
-	       __func__, level);
-
-    if (rhdPtr->ChipSet >= RHD_RS600)
-	RHDRegMask(rhdPtr, LVTMA_BL_MOD_CNTL,
-		   0xFF << 16 | (level << 8) | 0x1,
-		   0xFFFF01);
-    else
-	RHDRegMask(rhdPtr, LVTMA_BL_MOD_CNTL,
-		   (level << 8) | 0x1,
-		   0xFF01);
-
-    /*
-     * Poor man's debug
-     */
-    LVDSDebugBacklight(Output);
+	if (level < 30) {
+		if (xf86Screens[0]->options->BackLightLevel < 30) return;
+		level = xf86Screens[0]->options->BackLightLevel;
+	}
+	LOG("%s: trying to set BL_MOD_LEVEL to: %d\n",
+		__func__, level);
+	
+	if (rhdPtr->ChipSet >= RHD_RS600)
+		RHDRegMask(rhdPtr, LVTMA_BL_MOD_CNTL,
+				   0xFF << 16 | (level << 8) | 0x1,
+				   0xFFFF01);
+	else
+		RHDRegMask(rhdPtr, LVTMA_BL_MOD_CNTL,
+				   (level << 8) | 0x1,
+				   0xFF01);
+	
+	/*
+	 * Poor man's debug
+	 */
+	LVDSDebugBacklight(Output);
 }
 
 /*
@@ -414,10 +418,7 @@ LVDSEnable(struct rhdOutput *Output)
 		   __func__, i, (int) tmp);
     }
 
-    if (Private->BlLevel >= 30) {
-		if (xf86Screens[0]->options->enableBacklight)
-			LVDSSetBacklight(Output);	// BackLight Debug
-    }
+	LVDSSetBacklight(Output);
 }
 
 /*
