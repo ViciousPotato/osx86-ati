@@ -2009,3 +2009,65 @@ Bool RadeonHDDisplayPowerManagementSet(int PowerManagementMode, int flags) {
 	RHDDisplayPowerManagementSet(pScrn, PowerManagementMode, flags);
 	return TRUE;
 }	
+
+int RadeonHDGetConnectionCount(void) {
+	ScrnInfoPtr pScrn;
+	RHDPtr rhdPtr;
+	struct rhdOutput *Output;
+	
+	pScrn = xf86Screens[0];
+	if (!pScrn) return FALSE;
+	rhdPtr = RHDPTR(pScrn);
+	
+	Output = rhdPtr->Outputs;
+	int count = 0;
+    while (Output) {
+		count++;
+		Output = Output->Next;
+	}
+	return count;
+}
+
+struct rhdOutput* RadeonHDGetOutput(unsigned int index) {
+	ScrnInfoPtr pScrn;
+	RHDPtr rhdPtr;
+	struct rhdOutput *Output;
+	
+	pScrn = xf86Screens[0];
+	if (!pScrn) return FALSE;
+	rhdPtr = RHDPTR(pScrn);
+	
+	Output = rhdPtr->Outputs;
+	unsigned int count = 0;
+    while (Output) {
+		if(count == index) {
+			break;
+		} else {
+			count++;
+			Output = Output->Next;
+		}
+	}
+	return Output;
+}
+
+Bool RadeonHDSave() {
+	ScrnInfoPtr pScrn;
+	RHDPtr rhdPtr;
+	
+	pScrn = xf86Screens[0];
+	if (!pScrn) return FALSE;
+	rhdPtr = RHDPTR(pScrn);
+	rhdSave(rhdPtr);
+	return TRUE;
+}
+
+Bool RadeonHDRestore() {
+	ScrnInfoPtr pScrn;
+	RHDPtr rhdPtr;
+	
+	pScrn = xf86Screens[0];
+	if (!pScrn) return FALSE;
+	rhdPtr = RHDPTR(pScrn);
+	rhdRestore(rhdPtr);
+	return TRUE;
+}

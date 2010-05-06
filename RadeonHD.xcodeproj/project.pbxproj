@@ -3,233 +3,208 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 44;
+	objectVersion = 45;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		32D94FC60562CBF700B6AF17 /* RadeonHD.h in Headers */ = {isa = PBXBuildFile; fileRef = 1A224C3EFF42367911CA2CB7 /* RadeonHD.h */; };
 		32D94FC80562CBF700B6AF17 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C167DFE841241C02AAC07 /* InfoPlist.strings */; };
 		32D94FCA0562CBF700B6AF17 /* RadeonHD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1A224C3FFF42367911CA2CB7 /* RadeonHD.cpp */; settings = {ATTRIBUTES = (); }; };
-		F5090344108D71F900DB82A2 /* RadeonDump.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5090343108D71F900DB82A2 /* RadeonDump.cpp */; };
-		F5090346108D720500DB82A2 /* RadeonDump.h in Headers */ = {isa = PBXBuildFile; fileRef = F5090345108D720500DB82A2 /* RadeonDump.h */; };
-		F5090349108D721900DB82A2 /* RadeonHDUserClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5090347108D721900DB82A2 /* RadeonHDUserClient.cpp */; };
-		F509034A108D721900DB82A2 /* RadeonHDUserClient.h in Headers */ = {isa = PBXBuildFile; fileRef = F5090348108D721900DB82A2 /* RadeonHDUserClient.h */; };
-		F5090350108D725900DB82A2 /* Shared.h in Headers */ = {isa = PBXBuildFile; fileRef = F509034F108D725900DB82A2 /* Shared.h */; };
-		F5AFB14E0E0C9FEB0016B5C5 /* IOMacOSTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = F5AFB1490E0C9FEB0016B5C5 /* IOMacOSTypes.h */; };
-		F5AFB14F0E0C9FEB0016B5C5 /* IOMacOSVideo.h in Headers */ = {isa = PBXBuildFile; fileRef = F5AFB14A0E0C9FEB0016B5C5 /* IOMacOSVideo.h */; };
-		F5AFB1500E0C9FEB0016B5C5 /* IONDRVFramebuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = F5AFB14B0E0C9FEB0016B5C5 /* IONDRVFramebuffer.h */; };
-		F5AFB1510E0C9FEB0016B5C5 /* IONDRVLibraries.h in Headers */ = {isa = PBXBuildFile; fileRef = F5AFB14C0E0C9FEB0016B5C5 /* IONDRVLibraries.h */; };
-		F5AFB1520E0C9FEB0016B5C5 /* IONDRVSupport.h in Headers */ = {isa = PBXBuildFile; fileRef = F5AFB14D0E0C9FEB0016B5C5 /* IONDRVSupport.h */; };
-		F5AFB1910E0CA2020016B5C5 /* IONDRV.h in Headers */ = {isa = PBXBuildFile; fileRef = F5AFB1900E0CA2020016B5C5 /* IONDRV.h */; };
-		F5D79550108403B4003108DB /* CD_Operations.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D794DC108403B4003108DB /* CD_Operations.c */; };
-		F5D79551108403B4003108DB /* Decoder.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D794DD108403B4003108DB /* Decoder.c */; };
-		F5D79552108403B4003108DB /* hwserv_drv.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D794DE108403B4003108DB /* hwserv_drv.c */; };
-		F5D79553108403B4003108DB /* atombios.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D794E0108403B4003108DB /* atombios.h */; };
-		F5D79554108403B4003108DB /* CD_binding.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D794E1108403B4003108DB /* CD_binding.h */; };
-		F5D79555108403B4003108DB /* CD_Common_Types.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D794E2108403B4003108DB /* CD_Common_Types.h */; };
-		F5D79556108403B4003108DB /* CD_Definitions.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D794E3108403B4003108DB /* CD_Definitions.h */; };
-		F5D79557108403B4003108DB /* CD_hw_services.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D794E4108403B4003108DB /* CD_hw_services.h */; };
-		F5D79558108403B4003108DB /* CD_Opcodes.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D794E5108403B4003108DB /* CD_Opcodes.h */; };
-		F5D79559108403B4003108DB /* CD_Structs.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D794E6108403B4003108DB /* CD_Structs.h */; };
-		F5D7955A108403B4003108DB /* Decoder.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D794E7108403B4003108DB /* Decoder.h */; };
-		F5D7955B108403B4003108DB /* ObjectID.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D794E8108403B4003108DB /* ObjectID.h */; };
-		F5D7955C108403B4003108DB /* regsdef.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D794E9108403B4003108DB /* regsdef.h */; };
-		F5D7955D108403B4003108DB /* atombios_rev.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D794EA108403B4003108DB /* atombios_rev.h */; };
-		F5D7955E108403B4003108DB /* r5xx_3dregs.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D794EB108403B4003108DB /* r5xx_3dregs.h */; };
-		F5D79562108403B4003108DB /* r5xx_regs.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D794EF108403B4003108DB /* r5xx_regs.h */; };
-		F5D79565108403B4003108DB /* r600_reg.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D794F2108403B4003108DB /* r600_reg.h */; };
-		F5D79566108403B4003108DB /* r600_reg_auto_r6xx.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D794F3108403B4003108DB /* r600_reg_auto_r6xx.h */; };
-		F5D79567108403B4003108DB /* r600_reg_r6xx.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D794F4108403B4003108DB /* r600_reg_r6xx.h */; };
-		F5D79568108403B4003108DB /* r600_reg_r7xx.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D794F5108403B4003108DB /* r600_reg_r7xx.h */; };
-		F5D79571108403B4003108DB /* radeon_drm.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D794FE108403B4003108DB /* radeon_drm.h */; };
-		F5D79574108403B4003108DB /* rhd.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D79501108403B4003108DB /* rhd.h */; };
-		F5D79575108403B4003108DB /* rhd_atombios.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D79502108403B4003108DB /* rhd_atombios.c */; };
-		F5D79576108403B4003108DB /* rhd_atombios.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D79503108403B4003108DB /* rhd_atombios.h */; };
-		F5D79577108403B4003108DB /* rhd_atomcrtc.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D79504108403B4003108DB /* rhd_atomcrtc.c */; };
-		F5D79578108403B4003108DB /* rhd_atomout.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D79505108403B4003108DB /* rhd_atomout.c */; };
-		F5D79579108403B4003108DB /* rhd_atomout.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D79506108403B4003108DB /* rhd_atomout.h */; };
-		F5D7957A108403B4003108DB /* rhd_atompll.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D79507108403B4003108DB /* rhd_atompll.c */; };
-		F5D7957B108403B4003108DB /* rhd_atomwrapper.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D79508108403B4003108DB /* rhd_atomwrapper.c */; };
-		F5D7957C108403B4003108DB /* rhd_atomwrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D79509108403B4003108DB /* rhd_atomwrapper.h */; };
-		F5D7957F108403B4003108DB /* rhd_biosscratch.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7950C108403B4003108DB /* rhd_biosscratch.c */; };
-		F5D79580108403B4003108DB /* rhd_biosscratch.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7950D108403B4003108DB /* rhd_biosscratch.h */; };
-		F5D79581108403B4003108DB /* rhd_card.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7950E108403B4003108DB /* rhd_card.h */; };
-		F5D79582108403B4003108DB /* rhd_connector.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7950F108403B4003108DB /* rhd_connector.c */; };
-		F5D79583108403B4003108DB /* rhd_connector.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D79510108403B4003108DB /* rhd_connector.h */; };
-		F5D79584108403B4003108DB /* rhd_crtc.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D79511108403B4003108DB /* rhd_crtc.c */; };
-		F5D79585108403B4003108DB /* rhd_crtc.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D79512108403B4003108DB /* rhd_crtc.h */; };
-		F5D79588108403B4003108DB /* rhd_cursor.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D79515108403B4003108DB /* rhd_cursor.c */; };
-		F5D79589108403B4003108DB /* rhd_cursor.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D79516108403B4003108DB /* rhd_cursor.h */; };
-		F5D7958A108403B4003108DB /* rhd_dac.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D79517108403B4003108DB /* rhd_dac.c */; };
-		F5D7958B108403B4003108DB /* rhd_ddia.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D79518108403B4003108DB /* rhd_ddia.c */; };
-		F5D7958C108403B4003108DB /* rhd_dig.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D79519108403B4003108DB /* rhd_dig.c */; };
-		F5D7958F108403B4003108DB /* rhd_driver.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7951C108403B4003108DB /* rhd_driver.c */; };
-		F5D79590108403B4003108DB /* rhd_edid.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7951D108403B4003108DB /* rhd_edid.c */; };
-		F5D79591108403B4003108DB /* rhd_hdmi.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7951E108403B4003108DB /* rhd_hdmi.c */; };
-		F5D79592108403B4003108DB /* rhd_hdmi.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7951F108403B4003108DB /* rhd_hdmi.h */; };
-		F5D79593108403B4003108DB /* rhd_helper.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D79520108403B4003108DB /* rhd_helper.c */; };
-		F5D79594108403B4003108DB /* rhd_i2c.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D79521108403B4003108DB /* rhd_i2c.c */; };
-		F5D79595108403B4003108DB /* rhd_i2c.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D79522108403B4003108DB /* rhd_i2c.h */; };
-		F5D79596108403B4003108DB /* rhd_id.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D79523108403B4003108DB /* rhd_id.c */; };
-		F5D79597108403B4003108DB /* rhd_lut.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D79524108403B4003108DB /* rhd_lut.c */; };
-		F5D79598108403B4003108DB /* rhd_lut.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D79525108403B4003108DB /* rhd_lut.h */; };
-		F5D79599108403B4003108DB /* rhd_lvtma.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D79526108403B4003108DB /* rhd_lvtma.c */; };
-		F5D7959A108403B4003108DB /* rhd_mc.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D79527108403B4003108DB /* rhd_mc.c */; };
-		F5D7959B108403B4003108DB /* rhd_mc.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D79528108403B4003108DB /* rhd_mc.h */; };
-		F5D7959C108403B4003108DB /* rhd_modes.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D79529108403B4003108DB /* rhd_modes.c */; };
-		F5D7959D108403B4003108DB /* rhd_modes.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7952A108403B4003108DB /* rhd_modes.h */; };
-		F5D7959E108403B4003108DB /* rhd_monitor.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7952B108403B4003108DB /* rhd_monitor.c */; };
-		F5D7959F108403B4003108DB /* rhd_monitor.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7952C108403B4003108DB /* rhd_monitor.h */; };
-		F5D795A0108403B4003108DB /* rhd_output.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7952D108403B4003108DB /* rhd_output.c */; };
-		F5D795A1108403B4003108DB /* rhd_output.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7952E108403B4003108DB /* rhd_output.h */; };
-		F5D795A2108403B4003108DB /* rhd_pll.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7952F108403B4003108DB /* rhd_pll.c */; };
-		F5D795A3108403B4003108DB /* rhd_pll.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D79530108403B4003108DB /* rhd_pll.h */; };
-		F5D795A4108403B4003108DB /* rhd_pm.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D79531108403B4003108DB /* rhd_pm.c */; };
-		F5D795A5108403B4003108DB /* rhd_pm.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D79532108403B4003108DB /* rhd_pm.h */; };
-		F5D795A8108403B4003108DB /* rhd_regs.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D79535108403B4003108DB /* rhd_regs.h */; };
-		F5D795AB108403B4003108DB /* rhd_tmds.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D79538108403B4003108DB /* rhd_tmds.c */; };
-		F5D795AC108403B4003108DB /* rhd_vga.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D79539108403B4003108DB /* rhd_vga.c */; };
-		F5D795AD108403B4003108DB /* rhd_vga.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7953A108403B4003108DB /* rhd_vga.h */; };
-		F5D795B0108403B4003108DB /* ddcPriv.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7953E108403B4003108DB /* ddcPriv.h */; };
-		F5D795B1108403B4003108DB /* edid.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7953F108403B4003108DB /* edid.c */; };
-		F5D795B2108403B4003108DB /* edid.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D79540108403B4003108DB /* edid.h */; };
-		F5D795B3108403B4003108DB /* interpret_edid.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D79541108403B4003108DB /* interpret_edid.c */; };
-		F5D795B6108403B4003108DB /* xf86.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D79544108403B4003108DB /* xf86.h */; };
-		F5D795B7108403B4003108DB /* xf86_helper.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D79545108403B4003108DB /* xf86_helper.c */; };
-		F5D795B8108403B4003108DB /* xf86DDC.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D79546108403B4003108DB /* xf86DDC.c */; };
-		F5D795B9108403B4003108DB /* xf86DDC.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D79547108403B4003108DB /* xf86DDC.h */; };
-		F5D795BA108403B4003108DB /* xf86i2c.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D79548108403B4003108DB /* xf86i2c.c */; };
-		F5D795BB108403B4003108DB /* xf86i2c.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D79549108403B4003108DB /* xf86i2c.h */; };
-		F5D795C0108403B4003108DB /* xf86Screens.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7954E108403B4003108DB /* xf86Screens.c */; };
-		F5D795C1108403B4003108DB /* xf86str.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7954F108403B4003108DB /* xf86str.h */; };
+		F5246149108D48DC0091DFC8 /* RadeonDump.h in Headers */ = {isa = PBXBuildFile; fileRef = F5246147108D48DC0091DFC8 /* RadeonDump.h */; };
+		F524614A108D48DC0091DFC8 /* RadeonDump.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5246148108D48DC0091DFC8 /* RadeonDump.cpp */; };
+		F533845A10AA20A600E48CFE /* Decoder.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BC92107BF0E2008C5372 /* Decoder.c */; };
+		F5D228C2108CCA8C007ABAA9 /* RadeonHDUserClient.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D228C0108CCA8C007ABAA9 /* RadeonHDUserClient.h */; };
+		F5D228C3108CCA8C007ABAA9 /* RadeonHDUserClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5D228C1108CCA8C007ABAA9 /* RadeonHDUserClient.cpp */; };
+		F5D228E9108CD887007ABAA9 /* Shared.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D228E8108CD887007ABAA9 /* Shared.h */; };
+		F5D7BCF2107BF0E2008C5372 /* IOMacOSTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BC89107BF0E2008C5372 /* IOMacOSTypes.h */; };
+		F5D7BCF3107BF0E2008C5372 /* IOMacOSVideo.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BC8A107BF0E2008C5372 /* IOMacOSVideo.h */; };
+		F5D7BCF4107BF0E2008C5372 /* IONDRVFramebuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BC8B107BF0E2008C5372 /* IONDRVFramebuffer.h */; };
+		F5D7BCF5107BF0E2008C5372 /* IONDRVLibraries.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BC8C107BF0E2008C5372 /* IONDRVLibraries.h */; };
+		F5D7BCF6107BF0E2008C5372 /* IONDRVSupport.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BC8D107BF0E2008C5372 /* IONDRVSupport.h */; };
+		F5D7BCF7107BF0E2008C5372 /* IONDRV.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BC8E107BF0E2008C5372 /* IONDRV.h */; };
+		F5D7BD05107BF0E2008C5372 /* atombios_rev.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BC9F107BF0E2008C5372 /* atombios_rev.h */; };
+		F5D7BD06107BF0E2008C5372 /* r5xx_3dregs.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BCA0107BF0E2008C5372 /* r5xx_3dregs.h */; };
+		F5D7BD0A107BF0E2008C5372 /* r5xx_regs.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BCA4107BF0E2008C5372 /* r5xx_regs.h */; };
+		F5D7BD0D107BF0E2008C5372 /* r600_reg.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BCA7107BF0E2008C5372 /* r600_reg.h */; };
+		F5D7BD0E107BF0E2008C5372 /* r600_reg_auto_r6xx.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BCA8107BF0E2008C5372 /* r600_reg_auto_r6xx.h */; };
+		F5D7BD0F107BF0E2008C5372 /* r600_reg_r6xx.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BCA9107BF0E2008C5372 /* r600_reg_r6xx.h */; };
+		F5D7BD10107BF0E2008C5372 /* r600_reg_r7xx.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BCAA107BF0E2008C5372 /* r600_reg_r7xx.h */; };
+		F5D7BD19107BF0E2008C5372 /* radeon_drm.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BCB3107BF0E2008C5372 /* radeon_drm.h */; };
+		F5D7BD1C107BF0E2008C5372 /* rhd.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BCB6107BF0E2008C5372 /* rhd.h */; };
+		F5D7BD1D107BF0E2008C5372 /* rhd_atombios.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BCB7107BF0E2008C5372 /* rhd_atombios.c */; };
+		F5D7BD1E107BF0E2008C5372 /* rhd_atombios.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BCB8107BF0E2008C5372 /* rhd_atombios.h */; };
+		F5D7BD1F107BF0E2008C5372 /* rhd_atomcrtc.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BCB9107BF0E2008C5372 /* rhd_atomcrtc.c */; };
+		F5D7BD20107BF0E2008C5372 /* rhd_atomout.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BCBA107BF0E2008C5372 /* rhd_atomout.c */; };
+		F5D7BD21107BF0E2008C5372 /* rhd_atomout.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BCBB107BF0E2008C5372 /* rhd_atomout.h */; };
+		F5D7BD22107BF0E2008C5372 /* rhd_atompll.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BCBC107BF0E2008C5372 /* rhd_atompll.c */; };
+		F5D7BD23107BF0E2008C5372 /* rhd_atomwrapper.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BCBD107BF0E2008C5372 /* rhd_atomwrapper.c */; };
+		F5D7BD24107BF0E2008C5372 /* rhd_atomwrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BCBE107BF0E2008C5372 /* rhd_atomwrapper.h */; };
+		F5D7BD27107BF0E2008C5372 /* rhd_biosscratch.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BCC1107BF0E2008C5372 /* rhd_biosscratch.c */; };
+		F5D7BD28107BF0E2008C5372 /* rhd_biosscratch.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BCC2107BF0E2008C5372 /* rhd_biosscratch.h */; };
+		F5D7BD29107BF0E2008C5372 /* rhd_card.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BCC3107BF0E2008C5372 /* rhd_card.h */; };
+		F5D7BD2A107BF0E2008C5372 /* rhd_connector.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BCC4107BF0E2008C5372 /* rhd_connector.c */; };
+		F5D7BD2B107BF0E2008C5372 /* rhd_connector.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BCC5107BF0E2008C5372 /* rhd_connector.h */; };
+		F5D7BD2C107BF0E2008C5372 /* rhd_crtc.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BCC6107BF0E2008C5372 /* rhd_crtc.c */; };
+		F5D7BD2D107BF0E2008C5372 /* rhd_crtc.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BCC7107BF0E2008C5372 /* rhd_crtc.h */; };
+		F5D7BD30107BF0E2008C5372 /* rhd_cursor.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BCCA107BF0E2008C5372 /* rhd_cursor.c */; };
+		F5D7BD31107BF0E2008C5372 /* rhd_cursor.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BCCB107BF0E2008C5372 /* rhd_cursor.h */; };
+		F5D7BD32107BF0E2008C5372 /* rhd_dac.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BCCC107BF0E2008C5372 /* rhd_dac.c */; };
+		F5D7BD33107BF0E2008C5372 /* rhd_ddia.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BCCD107BF0E2008C5372 /* rhd_ddia.c */; };
+		F5D7BD34107BF0E2008C5372 /* rhd_dig.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BCCE107BF0E2008C5372 /* rhd_dig.c */; };
+		F5D7BD37107BF0E2008C5372 /* rhd_driver.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BCD1107BF0E2008C5372 /* rhd_driver.c */; };
+		F5D7BD38107BF0E2008C5372 /* rhd_edid.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BCD2107BF0E2008C5372 /* rhd_edid.c */; };
+		F5D7BD39107BF0E2008C5372 /* rhd_hdmi.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BCD3107BF0E2008C5372 /* rhd_hdmi.c */; };
+		F5D7BD3A107BF0E2008C5372 /* rhd_hdmi.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BCD4107BF0E2008C5372 /* rhd_hdmi.h */; };
+		F5D7BD3B107BF0E2008C5372 /* rhd_helper.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BCD5107BF0E2008C5372 /* rhd_helper.c */; };
+		F5D7BD3C107BF0E2008C5372 /* rhd_i2c.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BCD6107BF0E2008C5372 /* rhd_i2c.c */; };
+		F5D7BD3D107BF0E2008C5372 /* rhd_i2c.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BCD7107BF0E2008C5372 /* rhd_i2c.h */; };
+		F5D7BD3E107BF0E2008C5372 /* rhd_id.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BCD8107BF0E2008C5372 /* rhd_id.c */; };
+		F5D7BD3F107BF0E2008C5372 /* rhd_lut.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BCD9107BF0E2008C5372 /* rhd_lut.c */; };
+		F5D7BD40107BF0E2008C5372 /* rhd_lut.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BCDA107BF0E2008C5372 /* rhd_lut.h */; };
+		F5D7BD41107BF0E2008C5372 /* rhd_lvtma.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BCDB107BF0E2008C5372 /* rhd_lvtma.c */; };
+		F5D7BD42107BF0E2008C5372 /* rhd_mc.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BCDC107BF0E2008C5372 /* rhd_mc.c */; };
+		F5D7BD43107BF0E2008C5372 /* rhd_mc.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BCDD107BF0E2008C5372 /* rhd_mc.h */; };
+		F5D7BD44107BF0E2008C5372 /* rhd_modes.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BCDE107BF0E2008C5372 /* rhd_modes.c */; };
+		F5D7BD45107BF0E2008C5372 /* rhd_modes.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BCDF107BF0E2008C5372 /* rhd_modes.h */; };
+		F5D7BD46107BF0E2008C5372 /* rhd_monitor.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BCE0107BF0E2008C5372 /* rhd_monitor.c */; };
+		F5D7BD47107BF0E2008C5372 /* rhd_monitor.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BCE1107BF0E2008C5372 /* rhd_monitor.h */; };
+		F5D7BD48107BF0E2008C5372 /* rhd_output.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BCE2107BF0E2008C5372 /* rhd_output.c */; };
+		F5D7BD49107BF0E2008C5372 /* rhd_output.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BCE3107BF0E2008C5372 /* rhd_output.h */; };
+		F5D7BD4A107BF0E2008C5372 /* rhd_pll.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BCE4107BF0E2008C5372 /* rhd_pll.c */; };
+		F5D7BD4B107BF0E2008C5372 /* rhd_pll.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BCE5107BF0E2008C5372 /* rhd_pll.h */; };
+		F5D7BD4C107BF0E2008C5372 /* rhd_pm.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BCE6107BF0E2008C5372 /* rhd_pm.c */; };
+		F5D7BD4D107BF0E2008C5372 /* rhd_pm.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BCE7107BF0E2008C5372 /* rhd_pm.h */; };
+		F5D7BD50107BF0E2008C5372 /* rhd_regs.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BCEA107BF0E2008C5372 /* rhd_regs.h */; };
+		F5D7BD53107BF0E2008C5372 /* rhd_tmds.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BCED107BF0E2008C5372 /* rhd_tmds.c */; };
+		F5D7BD54107BF0E2008C5372 /* rhd_vga.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BCEE107BF0E2008C5372 /* rhd_vga.c */; };
+		F5D7BD55107BF0E2008C5372 /* rhd_vga.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BCEF107BF0E2008C5372 /* rhd_vga.h */; };
+		F5D7BD73107BF22A008C5372 /* ddcPriv.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BD68107BF22A008C5372 /* ddcPriv.h */; };
+		F5D7BD74107BF22A008C5372 /* edid.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BD69107BF22A008C5372 /* edid.c */; };
+		F5D7BD75107BF22A008C5372 /* edid.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BD6A107BF22A008C5372 /* edid.h */; };
+		F5D7BD76107BF22A008C5372 /* interpret_edid.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BD6B107BF22A008C5372 /* interpret_edid.c */; };
+		F5D7BD77107BF22A008C5372 /* xf86.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BD6C107BF22A008C5372 /* xf86.h */; };
+		F5D7BD78107BF22A008C5372 /* xf86DDC.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BD6D107BF22A008C5372 /* xf86DDC.c */; };
+		F5D7BD79107BF22A008C5372 /* xf86DDC.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BD6E107BF22A008C5372 /* xf86DDC.h */; };
+		F5D7BD7A107BF22A008C5372 /* xf86i2c.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BD6F107BF22A008C5372 /* xf86i2c.c */; };
+		F5D7BD7B107BF22A008C5372 /* xf86i2c.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BD70107BF22A008C5372 /* xf86i2c.h */; };
+		F5D7BD7D107BF22A008C5372 /* xf86str.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BD72107BF22A008C5372 /* xf86str.h */; };
+		F5D7BDD2107C062C008C5372 /* xf86_helper.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BDD1107C062C008C5372 /* xf86_helper.c */; };
+		F5DABEF610877B0600E72F2B /* xf86Screens.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BD71107BF22A008C5372 /* xf86Screens.c */; };
+		F5F9C0BC1081078E00071706 /* CD_Operations.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BC91107BF0E2008C5372 /* CD_Operations.c */; };
+		F5F9C0BE1081078E00071706 /* hwserv_drv.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BC93107BF0E2008C5372 /* hwserv_drv.c */; };
+		F5F9C0BF1081078E00071706 /* atombios.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BC95107BF0E2008C5372 /* atombios.h */; };
+		F5F9C0C01081078E00071706 /* CD_binding.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BC96107BF0E2008C5372 /* CD_binding.h */; };
+		F5F9C0C11081078E00071706 /* CD_Common_Types.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BC97107BF0E2008C5372 /* CD_Common_Types.h */; };
+		F5F9C0C21081078E00071706 /* CD_Definitions.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BC98107BF0E2008C5372 /* CD_Definitions.h */; };
+		F5F9C0C31081078E00071706 /* CD_hw_services.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BC99107BF0E2008C5372 /* CD_hw_services.h */; };
+		F5F9C0C41081078E00071706 /* CD_Opcodes.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BC9A107BF0E2008C5372 /* CD_Opcodes.h */; };
+		F5F9C0C51081078E00071706 /* CD_Structs.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BC9B107BF0E2008C5372 /* CD_Structs.h */; };
+		F5F9C0C61081078E00071706 /* Decoder.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BC9C107BF0E2008C5372 /* Decoder.h */; };
+		F5F9C0C71081078E00071706 /* ObjectID.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BC9D107BF0E2008C5372 /* ObjectID.h */; };
+		F5F9C0C81081078E00071706 /* regsdef.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BC9E107BF0E2008C5372 /* regsdef.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		089C167EFE841241C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		089C167EFE841241C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		1A224C3EFF42367911CA2CB7 /* RadeonHD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RadeonHD.h; sourceTree = "<group>"; };
 		1A224C3FFF42367911CA2CB7 /* RadeonHD.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RadeonHD.cpp; sourceTree = "<group>"; };
 		32D94FCF0562CBF700B6AF17 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		32D94FD00562CBF700B6AF17 /* RadeonHD.kext */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RadeonHD.kext; sourceTree = BUILT_PRODUCTS_DIR; };
 		8DA8362C06AD9B9200E5AC22 /* Kernel.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Kernel.framework; path = /System/Library/Frameworks/Kernel.framework; sourceTree = "<absolute>"; };
-		F5090343108D71F900DB82A2 /* RadeonDump.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RadeonDump.cpp; sourceTree = "<group>"; };
-		F5090345108D720500DB82A2 /* RadeonDump.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RadeonDump.h; sourceTree = "<group>"; };
-		F5090347108D721900DB82A2 /* RadeonHDUserClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RadeonHDUserClient.cpp; sourceTree = "<group>"; };
-		F5090348108D721900DB82A2 /* RadeonHDUserClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RadeonHDUserClient.h; sourceTree = "<group>"; };
-		F509034F108D725900DB82A2 /* Shared.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Shared.h; sourceTree = "<group>"; };
-		F5AFB1490E0C9FEB0016B5C5 /* IOMacOSTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IOMacOSTypes.h; sourceTree = "<group>"; };
-		F5AFB14A0E0C9FEB0016B5C5 /* IOMacOSVideo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IOMacOSVideo.h; sourceTree = "<group>"; };
-		F5AFB14B0E0C9FEB0016B5C5 /* IONDRVFramebuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IONDRVFramebuffer.h; sourceTree = "<group>"; };
-		F5AFB14C0E0C9FEB0016B5C5 /* IONDRVLibraries.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IONDRVLibraries.h; sourceTree = "<group>"; };
-		F5AFB14D0E0C9FEB0016B5C5 /* IONDRVSupport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IONDRVSupport.h; sourceTree = "<group>"; };
-		F5AFB1900E0CA2020016B5C5 /* IONDRV.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IONDRV.h; sourceTree = "<group>"; };
-		F5D794DC108403B4003108DB /* CD_Operations.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = CD_Operations.c; sourceTree = "<group>"; };
-		F5D794DD108403B4003108DB /* Decoder.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Decoder.c; sourceTree = "<group>"; };
-		F5D794DE108403B4003108DB /* hwserv_drv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hwserv_drv.c; sourceTree = "<group>"; };
-		F5D794E0108403B4003108DB /* atombios.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = atombios.h; sourceTree = "<group>"; };
-		F5D794E1108403B4003108DB /* CD_binding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CD_binding.h; sourceTree = "<group>"; };
-		F5D794E2108403B4003108DB /* CD_Common_Types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CD_Common_Types.h; sourceTree = "<group>"; };
-		F5D794E3108403B4003108DB /* CD_Definitions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CD_Definitions.h; sourceTree = "<group>"; };
-		F5D794E4108403B4003108DB /* CD_hw_services.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CD_hw_services.h; sourceTree = "<group>"; };
-		F5D794E5108403B4003108DB /* CD_Opcodes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CD_Opcodes.h; sourceTree = "<group>"; };
-		F5D794E6108403B4003108DB /* CD_Structs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CD_Structs.h; sourceTree = "<group>"; };
-		F5D794E7108403B4003108DB /* Decoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Decoder.h; sourceTree = "<group>"; };
-		F5D794E8108403B4003108DB /* ObjectID.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ObjectID.h; sourceTree = "<group>"; };
-		F5D794E9108403B4003108DB /* regsdef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = regsdef.h; sourceTree = "<group>"; };
-		F5D794EA108403B4003108DB /* atombios_rev.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = atombios_rev.h; sourceTree = "<group>"; };
-		F5D794EB108403B4003108DB /* r5xx_3dregs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = r5xx_3dregs.h; sourceTree = "<group>"; };
-		F5D794EC108403B4003108DB /* r5xx_accel.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = r5xx_accel.c; sourceTree = "<group>"; };
-		F5D794ED108403B4003108DB /* r5xx_accel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = r5xx_accel.h; sourceTree = "<group>"; };
-		F5D794EE108403B4003108DB /* r5xx_exa.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = r5xx_exa.c; sourceTree = "<group>"; };
-		F5D794EF108403B4003108DB /* r5xx_regs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = r5xx_regs.h; sourceTree = "<group>"; };
-		F5D794F0108403B4003108DB /* r5xx_xaa.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = r5xx_xaa.c; sourceTree = "<group>"; };
-		F5D794F1108403B4003108DB /* r600_exa.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = r600_exa.c; sourceTree = "<group>"; };
-		F5D794F2108403B4003108DB /* r600_reg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = r600_reg.h; sourceTree = "<group>"; };
-		F5D794F3108403B4003108DB /* r600_reg_auto_r6xx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = r600_reg_auto_r6xx.h; sourceTree = "<group>"; };
-		F5D794F4108403B4003108DB /* r600_reg_r6xx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = r600_reg_r6xx.h; sourceTree = "<group>"; };
-		F5D794F5108403B4003108DB /* r600_reg_r7xx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = r600_reg_r7xx.h; sourceTree = "<group>"; };
-		F5D794F6108403B4003108DB /* r600_shader.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = r600_shader.c; sourceTree = "<group>"; };
-		F5D794F7108403B4003108DB /* r600_shader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = r600_shader.h; sourceTree = "<group>"; };
-		F5D794F8108403B4003108DB /* r600_state.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = r600_state.h; sourceTree = "<group>"; };
-		F5D794F9108403B4003108DB /* r600_textured_videofuncs.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = r600_textured_videofuncs.c; sourceTree = "<group>"; };
-		F5D794FA108403B4003108DB /* r6xx_accel.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = r6xx_accel.c; sourceTree = "<group>"; };
-		F5D794FB108403B4003108DB /* r6xx_accel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = r6xx_accel.h; sourceTree = "<group>"; };
-		F5D794FC108403B4003108DB /* radeon_3d.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = radeon_3d.c; sourceTree = "<group>"; };
-		F5D794FD108403B4003108DB /* radeon_dri.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = radeon_dri.h; sourceTree = "<group>"; };
-		F5D794FE108403B4003108DB /* radeon_drm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = radeon_drm.h; sourceTree = "<group>"; };
-		F5D794FF108403B4003108DB /* radeon_exa_render.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = radeon_exa_render.c; sourceTree = "<group>"; };
-		F5D79500108403B4003108DB /* radeon_textured_videofuncs.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = radeon_textured_videofuncs.c; sourceTree = "<group>"; };
-		F5D79501108403B4003108DB /* rhd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd.h; sourceTree = "<group>"; };
-		F5D79502108403B4003108DB /* rhd_atombios.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_atombios.c; sourceTree = "<group>"; };
-		F5D79503108403B4003108DB /* rhd_atombios.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_atombios.h; sourceTree = "<group>"; };
-		F5D79504108403B4003108DB /* rhd_atomcrtc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_atomcrtc.c; sourceTree = "<group>"; };
-		F5D79505108403B4003108DB /* rhd_atomout.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_atomout.c; sourceTree = "<group>"; };
-		F5D79506108403B4003108DB /* rhd_atomout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_atomout.h; sourceTree = "<group>"; };
-		F5D79507108403B4003108DB /* rhd_atompll.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_atompll.c; sourceTree = "<group>"; };
-		F5D79508108403B4003108DB /* rhd_atomwrapper.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_atomwrapper.c; sourceTree = "<group>"; };
-		F5D79509108403B4003108DB /* rhd_atomwrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_atomwrapper.h; sourceTree = "<group>"; };
-		F5D7950A108403B4003108DB /* rhd_audio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_audio.c; sourceTree = "<group>"; };
-		F5D7950B108403B4003108DB /* rhd_audio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_audio.h; sourceTree = "<group>"; };
-		F5D7950C108403B4003108DB /* rhd_biosscratch.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_biosscratch.c; sourceTree = "<group>"; };
-		F5D7950D108403B4003108DB /* rhd_biosscratch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_biosscratch.h; sourceTree = "<group>"; };
-		F5D7950E108403B4003108DB /* rhd_card.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_card.h; sourceTree = "<group>"; };
-		F5D7950F108403B4003108DB /* rhd_connector.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_connector.c; sourceTree = "<group>"; };
-		F5D79510108403B4003108DB /* rhd_connector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_connector.h; sourceTree = "<group>"; };
-		F5D79511108403B4003108DB /* rhd_crtc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_crtc.c; sourceTree = "<group>"; };
-		F5D79512108403B4003108DB /* rhd_crtc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_crtc.h; sourceTree = "<group>"; };
-		F5D79513108403B4003108DB /* rhd_cs.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_cs.c; sourceTree = "<group>"; };
-		F5D79514108403B4003108DB /* rhd_cs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_cs.h; sourceTree = "<group>"; };
-		F5D79515108403B4003108DB /* rhd_cursor.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_cursor.c; sourceTree = "<group>"; };
-		F5D79516108403B4003108DB /* rhd_cursor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_cursor.h; sourceTree = "<group>"; };
-		F5D79517108403B4003108DB /* rhd_dac.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_dac.c; sourceTree = "<group>"; };
-		F5D79518108403B4003108DB /* rhd_ddia.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_ddia.c; sourceTree = "<group>"; };
-		F5D79519108403B4003108DB /* rhd_dig.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_dig.c; sourceTree = "<group>"; };
-		F5D7951A108403B4003108DB /* rhd_dri.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_dri.c; sourceTree = "<group>"; };
-		F5D7951B108403B4003108DB /* rhd_dri.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_dri.h; sourceTree = "<group>"; };
-		F5D7951C108403B4003108DB /* rhd_driver.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_driver.c; sourceTree = "<group>"; };
-		F5D7951D108403B4003108DB /* rhd_edid.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_edid.c; sourceTree = "<group>"; };
-		F5D7951E108403B4003108DB /* rhd_hdmi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_hdmi.c; sourceTree = "<group>"; };
-		F5D7951F108403B4003108DB /* rhd_hdmi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_hdmi.h; sourceTree = "<group>"; };
-		F5D79520108403B4003108DB /* rhd_helper.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_helper.c; sourceTree = "<group>"; };
-		F5D79521108403B4003108DB /* rhd_i2c.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_i2c.c; sourceTree = "<group>"; };
-		F5D79522108403B4003108DB /* rhd_i2c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_i2c.h; sourceTree = "<group>"; };
-		F5D79523108403B4003108DB /* rhd_id.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_id.c; sourceTree = "<group>"; };
-		F5D79524108403B4003108DB /* rhd_lut.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_lut.c; sourceTree = "<group>"; };
-		F5D79525108403B4003108DB /* rhd_lut.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_lut.h; sourceTree = "<group>"; };
-		F5D79526108403B4003108DB /* rhd_lvtma.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_lvtma.c; sourceTree = "<group>"; };
-		F5D79527108403B4003108DB /* rhd_mc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_mc.c; sourceTree = "<group>"; };
-		F5D79528108403B4003108DB /* rhd_mc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_mc.h; sourceTree = "<group>"; };
-		F5D79529108403B4003108DB /* rhd_modes.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_modes.c; sourceTree = "<group>"; };
-		F5D7952A108403B4003108DB /* rhd_modes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_modes.h; sourceTree = "<group>"; };
-		F5D7952B108403B4003108DB /* rhd_monitor.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_monitor.c; sourceTree = "<group>"; };
-		F5D7952C108403B4003108DB /* rhd_monitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_monitor.h; sourceTree = "<group>"; };
-		F5D7952D108403B4003108DB /* rhd_output.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_output.c; sourceTree = "<group>"; };
-		F5D7952E108403B4003108DB /* rhd_output.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_output.h; sourceTree = "<group>"; };
-		F5D7952F108403B4003108DB /* rhd_pll.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_pll.c; sourceTree = "<group>"; };
-		F5D79530108403B4003108DB /* rhd_pll.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_pll.h; sourceTree = "<group>"; };
-		F5D79531108403B4003108DB /* rhd_pm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_pm.c; sourceTree = "<group>"; };
-		F5D79532108403B4003108DB /* rhd_pm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_pm.h; sourceTree = "<group>"; };
-		F5D79533108403B4003108DB /* rhd_randr.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_randr.c; sourceTree = "<group>"; };
-		F5D79534108403B4003108DB /* rhd_randr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_randr.h; sourceTree = "<group>"; };
-		F5D79535108403B4003108DB /* rhd_regs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_regs.h; sourceTree = "<group>"; };
-		F5D79536108403B4003108DB /* rhd_shadow.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_shadow.c; sourceTree = "<group>"; };
-		F5D79537108403B4003108DB /* rhd_shadow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_shadow.h; sourceTree = "<group>"; };
-		F5D79538108403B4003108DB /* rhd_tmds.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_tmds.c; sourceTree = "<group>"; };
-		F5D79539108403B4003108DB /* rhd_vga.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_vga.c; sourceTree = "<group>"; };
-		F5D7953A108403B4003108DB /* rhd_vga.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_vga.h; sourceTree = "<group>"; };
-		F5D7953B108403B4003108DB /* rhd_video.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_video.c; sourceTree = "<group>"; };
-		F5D7953C108403B4003108DB /* rhd_video.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_video.h; sourceTree = "<group>"; };
-		F5D7953E108403B4003108DB /* ddcPriv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ddcPriv.h; sourceTree = "<group>"; };
-		F5D7953F108403B4003108DB /* edid.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = edid.c; sourceTree = "<group>"; };
-		F5D79540108403B4003108DB /* edid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = edid.h; sourceTree = "<group>"; };
-		F5D79541108403B4003108DB /* interpret_edid.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = interpret_edid.c; sourceTree = "<group>"; };
-		F5D79544108403B4003108DB /* xf86.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xf86.h; sourceTree = "<group>"; };
-		F5D79545108403B4003108DB /* xf86_helper.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = xf86_helper.c; sourceTree = "<group>"; };
-		F5D79546108403B4003108DB /* xf86DDC.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = xf86DDC.c; sourceTree = "<group>"; };
-		F5D79547108403B4003108DB /* xf86DDC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xf86DDC.h; sourceTree = "<group>"; };
-		F5D79548108403B4003108DB /* xf86i2c.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = xf86i2c.c; sourceTree = "<group>"; };
-		F5D79549108403B4003108DB /* xf86i2c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xf86i2c.h; sourceTree = "<group>"; };
-		F5D7954E108403B4003108DB /* xf86Screens.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = xf86Screens.c; sourceTree = "<group>"; };
-		F5D7954F108403B4003108DB /* xf86str.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xf86str.h; sourceTree = "<group>"; };
+		F5246147108D48DC0091DFC8 /* RadeonDump.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RadeonDump.h; sourceTree = "<group>"; };
+		F5246148108D48DC0091DFC8 /* RadeonDump.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RadeonDump.cpp; sourceTree = "<group>"; };
+		F5D228C0108CCA8C007ABAA9 /* RadeonHDUserClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RadeonHDUserClient.h; sourceTree = "<group>"; };
+		F5D228C1108CCA8C007ABAA9 /* RadeonHDUserClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RadeonHDUserClient.cpp; sourceTree = "<group>"; };
+		F5D228E8108CD887007ABAA9 /* Shared.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Shared.h; sourceTree = "<group>"; };
+		F5D7BC89107BF0E2008C5372 /* IOMacOSTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IOMacOSTypes.h; sourceTree = "<group>"; };
+		F5D7BC8A107BF0E2008C5372 /* IOMacOSVideo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IOMacOSVideo.h; sourceTree = "<group>"; };
+		F5D7BC8B107BF0E2008C5372 /* IONDRVFramebuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IONDRVFramebuffer.h; sourceTree = "<group>"; };
+		F5D7BC8C107BF0E2008C5372 /* IONDRVLibraries.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IONDRVLibraries.h; sourceTree = "<group>"; };
+		F5D7BC8D107BF0E2008C5372 /* IONDRVSupport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IONDRVSupport.h; sourceTree = "<group>"; };
+		F5D7BC8E107BF0E2008C5372 /* IONDRV.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IONDRV.h; sourceTree = "<group>"; };
+		F5D7BC91107BF0E2008C5372 /* CD_Operations.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = CD_Operations.c; sourceTree = "<group>"; };
+		F5D7BC92107BF0E2008C5372 /* Decoder.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Decoder.c; sourceTree = "<group>"; };
+		F5D7BC93107BF0E2008C5372 /* hwserv_drv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hwserv_drv.c; sourceTree = "<group>"; };
+		F5D7BC95107BF0E2008C5372 /* atombios.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = atombios.h; sourceTree = "<group>"; };
+		F5D7BC96107BF0E2008C5372 /* CD_binding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CD_binding.h; sourceTree = "<group>"; };
+		F5D7BC97107BF0E2008C5372 /* CD_Common_Types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CD_Common_Types.h; sourceTree = "<group>"; };
+		F5D7BC98107BF0E2008C5372 /* CD_Definitions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CD_Definitions.h; sourceTree = "<group>"; };
+		F5D7BC99107BF0E2008C5372 /* CD_hw_services.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CD_hw_services.h; sourceTree = "<group>"; };
+		F5D7BC9A107BF0E2008C5372 /* CD_Opcodes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CD_Opcodes.h; sourceTree = "<group>"; };
+		F5D7BC9B107BF0E2008C5372 /* CD_Structs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CD_Structs.h; sourceTree = "<group>"; };
+		F5D7BC9C107BF0E2008C5372 /* Decoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Decoder.h; sourceTree = "<group>"; };
+		F5D7BC9D107BF0E2008C5372 /* ObjectID.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ObjectID.h; sourceTree = "<group>"; };
+		F5D7BC9E107BF0E2008C5372 /* regsdef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = regsdef.h; sourceTree = "<group>"; };
+		F5D7BC9F107BF0E2008C5372 /* atombios_rev.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = atombios_rev.h; sourceTree = "<group>"; };
+		F5D7BCA0107BF0E2008C5372 /* r5xx_3dregs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = r5xx_3dregs.h; sourceTree = "<group>"; };
+		F5D7BCA4107BF0E2008C5372 /* r5xx_regs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = r5xx_regs.h; sourceTree = "<group>"; };
+		F5D7BCA7107BF0E2008C5372 /* r600_reg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = r600_reg.h; sourceTree = "<group>"; };
+		F5D7BCA8107BF0E2008C5372 /* r600_reg_auto_r6xx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = r600_reg_auto_r6xx.h; sourceTree = "<group>"; };
+		F5D7BCA9107BF0E2008C5372 /* r600_reg_r6xx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = r600_reg_r6xx.h; sourceTree = "<group>"; };
+		F5D7BCAA107BF0E2008C5372 /* r600_reg_r7xx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = r600_reg_r7xx.h; sourceTree = "<group>"; };
+		F5D7BCB3107BF0E2008C5372 /* radeon_drm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = radeon_drm.h; sourceTree = "<group>"; };
+		F5D7BCB6107BF0E2008C5372 /* rhd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd.h; sourceTree = "<group>"; };
+		F5D7BCB7107BF0E2008C5372 /* rhd_atombios.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_atombios.c; sourceTree = "<group>"; };
+		F5D7BCB8107BF0E2008C5372 /* rhd_atombios.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_atombios.h; sourceTree = "<group>"; };
+		F5D7BCB9107BF0E2008C5372 /* rhd_atomcrtc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_atomcrtc.c; sourceTree = "<group>"; };
+		F5D7BCBA107BF0E2008C5372 /* rhd_atomout.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_atomout.c; sourceTree = "<group>"; };
+		F5D7BCBB107BF0E2008C5372 /* rhd_atomout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_atomout.h; sourceTree = "<group>"; };
+		F5D7BCBC107BF0E2008C5372 /* rhd_atompll.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_atompll.c; sourceTree = "<group>"; };
+		F5D7BCBD107BF0E2008C5372 /* rhd_atomwrapper.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_atomwrapper.c; sourceTree = "<group>"; };
+		F5D7BCBE107BF0E2008C5372 /* rhd_atomwrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_atomwrapper.h; sourceTree = "<group>"; };
+		F5D7BCBF107BF0E2008C5372 /* rhd_audio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_audio.c; sourceTree = "<group>"; };
+		F5D7BCC0107BF0E2008C5372 /* rhd_audio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_audio.h; sourceTree = "<group>"; };
+		F5D7BCC1107BF0E2008C5372 /* rhd_biosscratch.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_biosscratch.c; sourceTree = "<group>"; };
+		F5D7BCC2107BF0E2008C5372 /* rhd_biosscratch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_biosscratch.h; sourceTree = "<group>"; };
+		F5D7BCC3107BF0E2008C5372 /* rhd_card.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_card.h; sourceTree = "<group>"; };
+		F5D7BCC4107BF0E2008C5372 /* rhd_connector.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_connector.c; sourceTree = "<group>"; };
+		F5D7BCC5107BF0E2008C5372 /* rhd_connector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_connector.h; sourceTree = "<group>"; };
+		F5D7BCC6107BF0E2008C5372 /* rhd_crtc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_crtc.c; sourceTree = "<group>"; };
+		F5D7BCC7107BF0E2008C5372 /* rhd_crtc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_crtc.h; sourceTree = "<group>"; };
+		F5D7BCCA107BF0E2008C5372 /* rhd_cursor.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_cursor.c; sourceTree = "<group>"; };
+		F5D7BCCB107BF0E2008C5372 /* rhd_cursor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_cursor.h; sourceTree = "<group>"; };
+		F5D7BCCC107BF0E2008C5372 /* rhd_dac.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_dac.c; sourceTree = "<group>"; };
+		F5D7BCCD107BF0E2008C5372 /* rhd_ddia.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_ddia.c; sourceTree = "<group>"; };
+		F5D7BCCE107BF0E2008C5372 /* rhd_dig.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_dig.c; sourceTree = "<group>"; };
+		F5D7BCD1107BF0E2008C5372 /* rhd_driver.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_driver.c; sourceTree = "<group>"; };
+		F5D7BCD2107BF0E2008C5372 /* rhd_edid.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_edid.c; sourceTree = "<group>"; };
+		F5D7BCD3107BF0E2008C5372 /* rhd_hdmi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_hdmi.c; sourceTree = "<group>"; };
+		F5D7BCD4107BF0E2008C5372 /* rhd_hdmi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_hdmi.h; sourceTree = "<group>"; };
+		F5D7BCD5107BF0E2008C5372 /* rhd_helper.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_helper.c; sourceTree = "<group>"; };
+		F5D7BCD6107BF0E2008C5372 /* rhd_i2c.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_i2c.c; sourceTree = "<group>"; };
+		F5D7BCD7107BF0E2008C5372 /* rhd_i2c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_i2c.h; sourceTree = "<group>"; };
+		F5D7BCD8107BF0E2008C5372 /* rhd_id.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_id.c; sourceTree = "<group>"; };
+		F5D7BCD9107BF0E2008C5372 /* rhd_lut.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_lut.c; sourceTree = "<group>"; };
+		F5D7BCDA107BF0E2008C5372 /* rhd_lut.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_lut.h; sourceTree = "<group>"; };
+		F5D7BCDB107BF0E2008C5372 /* rhd_lvtma.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_lvtma.c; sourceTree = "<group>"; };
+		F5D7BCDC107BF0E2008C5372 /* rhd_mc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_mc.c; sourceTree = "<group>"; };
+		F5D7BCDD107BF0E2008C5372 /* rhd_mc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_mc.h; sourceTree = "<group>"; };
+		F5D7BCDE107BF0E2008C5372 /* rhd_modes.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_modes.c; sourceTree = "<group>"; };
+		F5D7BCDF107BF0E2008C5372 /* rhd_modes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_modes.h; sourceTree = "<group>"; };
+		F5D7BCE0107BF0E2008C5372 /* rhd_monitor.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_monitor.c; sourceTree = "<group>"; };
+		F5D7BCE1107BF0E2008C5372 /* rhd_monitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_monitor.h; sourceTree = "<group>"; };
+		F5D7BCE2107BF0E2008C5372 /* rhd_output.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_output.c; sourceTree = "<group>"; };
+		F5D7BCE3107BF0E2008C5372 /* rhd_output.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_output.h; sourceTree = "<group>"; };
+		F5D7BCE4107BF0E2008C5372 /* rhd_pll.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_pll.c; sourceTree = "<group>"; };
+		F5D7BCE5107BF0E2008C5372 /* rhd_pll.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_pll.h; sourceTree = "<group>"; };
+		F5D7BCE6107BF0E2008C5372 /* rhd_pm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_pm.c; sourceTree = "<group>"; };
+		F5D7BCE7107BF0E2008C5372 /* rhd_pm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_pm.h; sourceTree = "<group>"; };
+		F5D7BCEA107BF0E2008C5372 /* rhd_regs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_regs.h; sourceTree = "<group>"; };
+		F5D7BCED107BF0E2008C5372 /* rhd_tmds.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_tmds.c; sourceTree = "<group>"; };
+		F5D7BCEE107BF0E2008C5372 /* rhd_vga.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rhd_vga.c; sourceTree = "<group>"; };
+		F5D7BCEF107BF0E2008C5372 /* rhd_vga.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rhd_vga.h; sourceTree = "<group>"; };
+		F5D7BD68107BF22A008C5372 /* ddcPriv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ddcPriv.h; sourceTree = "<group>"; };
+		F5D7BD69107BF22A008C5372 /* edid.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = edid.c; sourceTree = "<group>"; };
+		F5D7BD6A107BF22A008C5372 /* edid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = edid.h; sourceTree = "<group>"; };
+		F5D7BD6B107BF22A008C5372 /* interpret_edid.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = interpret_edid.c; sourceTree = "<group>"; };
+		F5D7BD6C107BF22A008C5372 /* xf86.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xf86.h; sourceTree = "<group>"; };
+		F5D7BD6D107BF22A008C5372 /* xf86DDC.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = xf86DDC.c; sourceTree = "<group>"; };
+		F5D7BD6E107BF22A008C5372 /* xf86DDC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xf86DDC.h; sourceTree = "<group>"; };
+		F5D7BD6F107BF22A008C5372 /* xf86i2c.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = xf86i2c.c; sourceTree = "<group>"; };
+		F5D7BD70107BF22A008C5372 /* xf86i2c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xf86i2c.h; sourceTree = "<group>"; };
+		F5D7BD71107BF22A008C5372 /* xf86Screens.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = xf86Screens.c; sourceTree = "<group>"; };
+		F5D7BD72107BF22A008C5372 /* xf86str.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xf86str.h; sourceTree = "<group>"; };
+		F5D7BDD1107C062C008C5372 /* xf86_helper.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = xf86_helper.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -274,175 +249,150 @@
 		247142CAFF3F8F9811CA285C /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				F5AFB1470E0C9FEB0016B5C5 /* IOKit */,
-				F5D794DA108403B4003108DB /* rhd */,
-				F5AFB1900E0CA2020016B5C5 /* IONDRV.h */,
+				F5D7BC87107BF0E2008C5372 /* IOKit */,
+				F5D7BC8F107BF0E2008C5372 /* rhd */,
+				F5D7BC8E107BF0E2008C5372 /* IONDRV.h */,
 				1A224C3EFF42367911CA2CB7 /* RadeonHD.h */,
 				1A224C3FFF42367911CA2CB7 /* RadeonHD.cpp */,
-				F509034F108D725900DB82A2 /* Shared.h */,
-				F5090345108D720500DB82A2 /* RadeonDump.h */,
-				F5090343108D71F900DB82A2 /* RadeonDump.cpp */,
-				F5090347108D721900DB82A2 /* RadeonHDUserClient.cpp */,
-				F5090348108D721900DB82A2 /* RadeonHDUserClient.h */,
+				F5D228E8108CD887007ABAA9 /* Shared.h */,
+				F5246147108D48DC0091DFC8 /* RadeonDump.h */,
+				F5246148108D48DC0091DFC8 /* RadeonDump.cpp */,
+				F5D228C0108CCA8C007ABAA9 /* RadeonHDUserClient.h */,
+				F5D228C1108CCA8C007ABAA9 /* RadeonHDUserClient.cpp */,
 			);
 			name = Source;
 			sourceTree = "<group>";
 		};
-		F5AFB1470E0C9FEB0016B5C5 /* IOKit */ = {
+		F5D7BC87107BF0E2008C5372 /* IOKit */ = {
 			isa = PBXGroup;
 			children = (
-				F5AFB1480E0C9FEB0016B5C5 /* ndrvsupport */,
+				F5D7BC88107BF0E2008C5372 /* ndrvsupport */,
 			);
 			path = IOKit;
 			sourceTree = "<group>";
 		};
-		F5AFB1480E0C9FEB0016B5C5 /* ndrvsupport */ = {
+		F5D7BC88107BF0E2008C5372 /* ndrvsupport */ = {
 			isa = PBXGroup;
 			children = (
-				F5AFB1490E0C9FEB0016B5C5 /* IOMacOSTypes.h */,
-				F5AFB14A0E0C9FEB0016B5C5 /* IOMacOSVideo.h */,
-				F5AFB14B0E0C9FEB0016B5C5 /* IONDRVFramebuffer.h */,
-				F5AFB14C0E0C9FEB0016B5C5 /* IONDRVLibraries.h */,
-				F5AFB14D0E0C9FEB0016B5C5 /* IONDRVSupport.h */,
+				F5D7BC89107BF0E2008C5372 /* IOMacOSTypes.h */,
+				F5D7BC8A107BF0E2008C5372 /* IOMacOSVideo.h */,
+				F5D7BC8B107BF0E2008C5372 /* IONDRVFramebuffer.h */,
+				F5D7BC8C107BF0E2008C5372 /* IONDRVLibraries.h */,
+				F5D7BC8D107BF0E2008C5372 /* IONDRVSupport.h */,
 			);
 			path = ndrvsupport;
 			sourceTree = "<group>";
 		};
-		F5D794DA108403B4003108DB /* rhd */ = {
+		F5D7BC8F107BF0E2008C5372 /* rhd */ = {
 			isa = PBXGroup;
 			children = (
-				F5D7953D108403B4003108DB /* xf86 */,
-				F5D794DB108403B4003108DB /* AtomBios */,
-				F5D794EA108403B4003108DB /* atombios_rev.h */,
-				F5D794EB108403B4003108DB /* r5xx_3dregs.h */,
-				F5D794EC108403B4003108DB /* r5xx_accel.c */,
-				F5D794ED108403B4003108DB /* r5xx_accel.h */,
-				F5D794EE108403B4003108DB /* r5xx_exa.c */,
-				F5D794EF108403B4003108DB /* r5xx_regs.h */,
-				F5D794F0108403B4003108DB /* r5xx_xaa.c */,
-				F5D794F1108403B4003108DB /* r600_exa.c */,
-				F5D794F2108403B4003108DB /* r600_reg.h */,
-				F5D794F3108403B4003108DB /* r600_reg_auto_r6xx.h */,
-				F5D794F4108403B4003108DB /* r600_reg_r6xx.h */,
-				F5D794F5108403B4003108DB /* r600_reg_r7xx.h */,
-				F5D794F6108403B4003108DB /* r600_shader.c */,
-				F5D794F7108403B4003108DB /* r600_shader.h */,
-				F5D794F8108403B4003108DB /* r600_state.h */,
-				F5D794F9108403B4003108DB /* r600_textured_videofuncs.c */,
-				F5D794FA108403B4003108DB /* r6xx_accel.c */,
-				F5D794FB108403B4003108DB /* r6xx_accel.h */,
-				F5D794FC108403B4003108DB /* radeon_3d.c */,
-				F5D794FD108403B4003108DB /* radeon_dri.h */,
-				F5D794FE108403B4003108DB /* radeon_drm.h */,
-				F5D794FF108403B4003108DB /* radeon_exa_render.c */,
-				F5D79500108403B4003108DB /* radeon_textured_videofuncs.c */,
-				F5D79501108403B4003108DB /* rhd.h */,
-				F5D79502108403B4003108DB /* rhd_atombios.c */,
-				F5D79503108403B4003108DB /* rhd_atombios.h */,
-				F5D79504108403B4003108DB /* rhd_atomcrtc.c */,
-				F5D79505108403B4003108DB /* rhd_atomout.c */,
-				F5D79506108403B4003108DB /* rhd_atomout.h */,
-				F5D79507108403B4003108DB /* rhd_atompll.c */,
-				F5D79508108403B4003108DB /* rhd_atomwrapper.c */,
-				F5D79509108403B4003108DB /* rhd_atomwrapper.h */,
-				F5D7950A108403B4003108DB /* rhd_audio.c */,
-				F5D7950B108403B4003108DB /* rhd_audio.h */,
-				F5D7950C108403B4003108DB /* rhd_biosscratch.c */,
-				F5D7950D108403B4003108DB /* rhd_biosscratch.h */,
-				F5D7950E108403B4003108DB /* rhd_card.h */,
-				F5D7950F108403B4003108DB /* rhd_connector.c */,
-				F5D79510108403B4003108DB /* rhd_connector.h */,
-				F5D79511108403B4003108DB /* rhd_crtc.c */,
-				F5D79512108403B4003108DB /* rhd_crtc.h */,
-				F5D79513108403B4003108DB /* rhd_cs.c */,
-				F5D79514108403B4003108DB /* rhd_cs.h */,
-				F5D79515108403B4003108DB /* rhd_cursor.c */,
-				F5D79516108403B4003108DB /* rhd_cursor.h */,
-				F5D79517108403B4003108DB /* rhd_dac.c */,
-				F5D79518108403B4003108DB /* rhd_ddia.c */,
-				F5D79519108403B4003108DB /* rhd_dig.c */,
-				F5D7951A108403B4003108DB /* rhd_dri.c */,
-				F5D7951B108403B4003108DB /* rhd_dri.h */,
-				F5D7951C108403B4003108DB /* rhd_driver.c */,
-				F5D7951D108403B4003108DB /* rhd_edid.c */,
-				F5D7951E108403B4003108DB /* rhd_hdmi.c */,
-				F5D7951F108403B4003108DB /* rhd_hdmi.h */,
-				F5D79520108403B4003108DB /* rhd_helper.c */,
-				F5D79521108403B4003108DB /* rhd_i2c.c */,
-				F5D79522108403B4003108DB /* rhd_i2c.h */,
-				F5D79523108403B4003108DB /* rhd_id.c */,
-				F5D79524108403B4003108DB /* rhd_lut.c */,
-				F5D79525108403B4003108DB /* rhd_lut.h */,
-				F5D79526108403B4003108DB /* rhd_lvtma.c */,
-				F5D79527108403B4003108DB /* rhd_mc.c */,
-				F5D79528108403B4003108DB /* rhd_mc.h */,
-				F5D79529108403B4003108DB /* rhd_modes.c */,
-				F5D7952A108403B4003108DB /* rhd_modes.h */,
-				F5D7952B108403B4003108DB /* rhd_monitor.c */,
-				F5D7952C108403B4003108DB /* rhd_monitor.h */,
-				F5D7952D108403B4003108DB /* rhd_output.c */,
-				F5D7952E108403B4003108DB /* rhd_output.h */,
-				F5D7952F108403B4003108DB /* rhd_pll.c */,
-				F5D79530108403B4003108DB /* rhd_pll.h */,
-				F5D79531108403B4003108DB /* rhd_pm.c */,
-				F5D79532108403B4003108DB /* rhd_pm.h */,
-				F5D79533108403B4003108DB /* rhd_randr.c */,
-				F5D79534108403B4003108DB /* rhd_randr.h */,
-				F5D79535108403B4003108DB /* rhd_regs.h */,
-				F5D79536108403B4003108DB /* rhd_shadow.c */,
-				F5D79537108403B4003108DB /* rhd_shadow.h */,
-				F5D79538108403B4003108DB /* rhd_tmds.c */,
-				F5D79539108403B4003108DB /* rhd_vga.c */,
-				F5D7953A108403B4003108DB /* rhd_vga.h */,
-				F5D7953B108403B4003108DB /* rhd_video.c */,
-				F5D7953C108403B4003108DB /* rhd_video.h */,
+				F5D7BD67107BF22A008C5372 /* xf86 */,
+				F5D7BC90107BF0E2008C5372 /* AtomBios */,
+				F5D7BC9F107BF0E2008C5372 /* atombios_rev.h */,
+				F5D7BCA0107BF0E2008C5372 /* r5xx_3dregs.h */,
+				F5D7BCA4107BF0E2008C5372 /* r5xx_regs.h */,
+				F5D7BCA7107BF0E2008C5372 /* r600_reg.h */,
+				F5D7BCA8107BF0E2008C5372 /* r600_reg_auto_r6xx.h */,
+				F5D7BCA9107BF0E2008C5372 /* r600_reg_r6xx.h */,
+				F5D7BCAA107BF0E2008C5372 /* r600_reg_r7xx.h */,
+				F5D7BCB3107BF0E2008C5372 /* radeon_drm.h */,
+				F5D7BCB6107BF0E2008C5372 /* rhd.h */,
+				F5D7BCB7107BF0E2008C5372 /* rhd_atombios.c */,
+				F5D7BCB8107BF0E2008C5372 /* rhd_atombios.h */,
+				F5D7BCB9107BF0E2008C5372 /* rhd_atomcrtc.c */,
+				F5D7BCBA107BF0E2008C5372 /* rhd_atomout.c */,
+				F5D7BCBB107BF0E2008C5372 /* rhd_atomout.h */,
+				F5D7BCBC107BF0E2008C5372 /* rhd_atompll.c */,
+				F5D7BCBD107BF0E2008C5372 /* rhd_atomwrapper.c */,
+				F5D7BCBE107BF0E2008C5372 /* rhd_atomwrapper.h */,
+				F5D7BCBF107BF0E2008C5372 /* rhd_audio.c */,
+				F5D7BCC0107BF0E2008C5372 /* rhd_audio.h */,
+				F5D7BCC1107BF0E2008C5372 /* rhd_biosscratch.c */,
+				F5D7BCC2107BF0E2008C5372 /* rhd_biosscratch.h */,
+				F5D7BCC3107BF0E2008C5372 /* rhd_card.h */,
+				F5D7BCC4107BF0E2008C5372 /* rhd_connector.c */,
+				F5D7BCC5107BF0E2008C5372 /* rhd_connector.h */,
+				F5D7BCC6107BF0E2008C5372 /* rhd_crtc.c */,
+				F5D7BCC7107BF0E2008C5372 /* rhd_crtc.h */,
+				F5D7BCCA107BF0E2008C5372 /* rhd_cursor.c */,
+				F5D7BCCB107BF0E2008C5372 /* rhd_cursor.h */,
+				F5D7BCCC107BF0E2008C5372 /* rhd_dac.c */,
+				F5D7BCCD107BF0E2008C5372 /* rhd_ddia.c */,
+				F5D7BCCE107BF0E2008C5372 /* rhd_dig.c */,
+				F5D7BCD1107BF0E2008C5372 /* rhd_driver.c */,
+				F5D7BCD2107BF0E2008C5372 /* rhd_edid.c */,
+				F5D7BCD3107BF0E2008C5372 /* rhd_hdmi.c */,
+				F5D7BCD4107BF0E2008C5372 /* rhd_hdmi.h */,
+				F5D7BCD5107BF0E2008C5372 /* rhd_helper.c */,
+				F5D7BCD6107BF0E2008C5372 /* rhd_i2c.c */,
+				F5D7BCD7107BF0E2008C5372 /* rhd_i2c.h */,
+				F5D7BCD8107BF0E2008C5372 /* rhd_id.c */,
+				F5D7BCD9107BF0E2008C5372 /* rhd_lut.c */,
+				F5D7BCDA107BF0E2008C5372 /* rhd_lut.h */,
+				F5D7BCDB107BF0E2008C5372 /* rhd_lvtma.c */,
+				F5D7BCDC107BF0E2008C5372 /* rhd_mc.c */,
+				F5D7BCDD107BF0E2008C5372 /* rhd_mc.h */,
+				F5D7BCDE107BF0E2008C5372 /* rhd_modes.c */,
+				F5D7BCDF107BF0E2008C5372 /* rhd_modes.h */,
+				F5D7BCE0107BF0E2008C5372 /* rhd_monitor.c */,
+				F5D7BCE1107BF0E2008C5372 /* rhd_monitor.h */,
+				F5D7BCE2107BF0E2008C5372 /* rhd_output.c */,
+				F5D7BCE3107BF0E2008C5372 /* rhd_output.h */,
+				F5D7BCE4107BF0E2008C5372 /* rhd_pll.c */,
+				F5D7BCE5107BF0E2008C5372 /* rhd_pll.h */,
+				F5D7BCE6107BF0E2008C5372 /* rhd_pm.c */,
+				F5D7BCE7107BF0E2008C5372 /* rhd_pm.h */,
+				F5D7BCEA107BF0E2008C5372 /* rhd_regs.h */,
+				F5D7BCED107BF0E2008C5372 /* rhd_tmds.c */,
+				F5D7BCEE107BF0E2008C5372 /* rhd_vga.c */,
+				F5D7BCEF107BF0E2008C5372 /* rhd_vga.h */,
 			);
 			path = rhd;
 			sourceTree = "<group>";
 		};
-		F5D794DB108403B4003108DB /* AtomBios */ = {
+		F5D7BC90107BF0E2008C5372 /* AtomBios */ = {
 			isa = PBXGroup;
 			children = (
-				F5D794DC108403B4003108DB /* CD_Operations.c */,
-				F5D794DD108403B4003108DB /* Decoder.c */,
-				F5D794DE108403B4003108DB /* hwserv_drv.c */,
-				F5D794DF108403B4003108DB /* includes */,
+				F5D7BC91107BF0E2008C5372 /* CD_Operations.c */,
+				F5D7BC92107BF0E2008C5372 /* Decoder.c */,
+				F5D7BC93107BF0E2008C5372 /* hwserv_drv.c */,
+				F5D7BC94107BF0E2008C5372 /* includes */,
 			);
 			path = AtomBios;
 			sourceTree = "<group>";
 		};
-		F5D794DF108403B4003108DB /* includes */ = {
+		F5D7BC94107BF0E2008C5372 /* includes */ = {
 			isa = PBXGroup;
 			children = (
-				F5D794E0108403B4003108DB /* atombios.h */,
-				F5D794E1108403B4003108DB /* CD_binding.h */,
-				F5D794E2108403B4003108DB /* CD_Common_Types.h */,
-				F5D794E3108403B4003108DB /* CD_Definitions.h */,
-				F5D794E4108403B4003108DB /* CD_hw_services.h */,
-				F5D794E5108403B4003108DB /* CD_Opcodes.h */,
-				F5D794E6108403B4003108DB /* CD_Structs.h */,
-				F5D794E7108403B4003108DB /* Decoder.h */,
-				F5D794E8108403B4003108DB /* ObjectID.h */,
-				F5D794E9108403B4003108DB /* regsdef.h */,
+				F5D7BC95107BF0E2008C5372 /* atombios.h */,
+				F5D7BC96107BF0E2008C5372 /* CD_binding.h */,
+				F5D7BC97107BF0E2008C5372 /* CD_Common_Types.h */,
+				F5D7BC98107BF0E2008C5372 /* CD_Definitions.h */,
+				F5D7BC99107BF0E2008C5372 /* CD_hw_services.h */,
+				F5D7BC9A107BF0E2008C5372 /* CD_Opcodes.h */,
+				F5D7BC9B107BF0E2008C5372 /* CD_Structs.h */,
+				F5D7BC9C107BF0E2008C5372 /* Decoder.h */,
+				F5D7BC9D107BF0E2008C5372 /* ObjectID.h */,
+				F5D7BC9E107BF0E2008C5372 /* regsdef.h */,
 			);
 			path = includes;
 			sourceTree = "<group>";
 		};
-		F5D7953D108403B4003108DB /* xf86 */ = {
+		F5D7BD67107BF22A008C5372 /* xf86 */ = {
 			isa = PBXGroup;
 			children = (
-				F5D7953E108403B4003108DB /* ddcPriv.h */,
-				F5D7953F108403B4003108DB /* edid.c */,
-				F5D79540108403B4003108DB /* edid.h */,
-				F5D79541108403B4003108DB /* interpret_edid.c */,
-				F5D79544108403B4003108DB /* xf86.h */,
-				F5D79545108403B4003108DB /* xf86_helper.c */,
-				F5D79546108403B4003108DB /* xf86DDC.c */,
-				F5D79547108403B4003108DB /* xf86DDC.h */,
-				F5D79548108403B4003108DB /* xf86i2c.c */,
-				F5D79549108403B4003108DB /* xf86i2c.h */,
-				F5D7954E108403B4003108DB /* xf86Screens.c */,
-				F5D7954F108403B4003108DB /* xf86str.h */,
+				F5D7BD68107BF22A008C5372 /* ddcPriv.h */,
+				F5D7BD69107BF22A008C5372 /* edid.c */,
+				F5D7BD6A107BF22A008C5372 /* edid.h */,
+				F5D7BD6B107BF22A008C5372 /* interpret_edid.c */,
+				F5D7BD6C107BF22A008C5372 /* xf86.h */,
+				F5D7BD6D107BF22A008C5372 /* xf86DDC.c */,
+				F5D7BD6E107BF22A008C5372 /* xf86DDC.h */,
+				F5D7BD6F107BF22A008C5372 /* xf86i2c.c */,
+				F5D7BD70107BF22A008C5372 /* xf86i2c.h */,
+				F5D7BD71107BF22A008C5372 /* xf86Screens.c */,
+				F5D7BD72107BF22A008C5372 /* xf86str.h */,
+				F5D7BDD1107C062C008C5372 /* xf86_helper.c */,
 			);
 			path = xf86;
 			sourceTree = "<group>";
@@ -455,59 +405,59 @@
 			buildActionMask = 2147483647;
 			files = (
 				32D94FC60562CBF700B6AF17 /* RadeonHD.h in Headers */,
-				F5AFB14E0E0C9FEB0016B5C5 /* IOMacOSTypes.h in Headers */,
-				F5AFB14F0E0C9FEB0016B5C5 /* IOMacOSVideo.h in Headers */,
-				F5AFB1500E0C9FEB0016B5C5 /* IONDRVFramebuffer.h in Headers */,
-				F5AFB1510E0C9FEB0016B5C5 /* IONDRVLibraries.h in Headers */,
-				F5AFB1520E0C9FEB0016B5C5 /* IONDRVSupport.h in Headers */,
-				F5AFB1910E0CA2020016B5C5 /* IONDRV.h in Headers */,
-				F5D79553108403B4003108DB /* atombios.h in Headers */,
-				F5D79554108403B4003108DB /* CD_binding.h in Headers */,
-				F5D79555108403B4003108DB /* CD_Common_Types.h in Headers */,
-				F5D79556108403B4003108DB /* CD_Definitions.h in Headers */,
-				F5D79557108403B4003108DB /* CD_hw_services.h in Headers */,
-				F5D79558108403B4003108DB /* CD_Opcodes.h in Headers */,
-				F5D79559108403B4003108DB /* CD_Structs.h in Headers */,
-				F5D7955A108403B4003108DB /* Decoder.h in Headers */,
-				F5D7955B108403B4003108DB /* ObjectID.h in Headers */,
-				F5D7955C108403B4003108DB /* regsdef.h in Headers */,
-				F5D7955D108403B4003108DB /* atombios_rev.h in Headers */,
-				F5D7955E108403B4003108DB /* r5xx_3dregs.h in Headers */,
-				F5D79562108403B4003108DB /* r5xx_regs.h in Headers */,
-				F5D79565108403B4003108DB /* r600_reg.h in Headers */,
-				F5D79566108403B4003108DB /* r600_reg_auto_r6xx.h in Headers */,
-				F5D79567108403B4003108DB /* r600_reg_r6xx.h in Headers */,
-				F5D79568108403B4003108DB /* r600_reg_r7xx.h in Headers */,
-				F5D79571108403B4003108DB /* radeon_drm.h in Headers */,
-				F5D79574108403B4003108DB /* rhd.h in Headers */,
-				F5D79576108403B4003108DB /* rhd_atombios.h in Headers */,
-				F5D79579108403B4003108DB /* rhd_atomout.h in Headers */,
-				F5D7957C108403B4003108DB /* rhd_atomwrapper.h in Headers */,
-				F5D79580108403B4003108DB /* rhd_biosscratch.h in Headers */,
-				F5D79581108403B4003108DB /* rhd_card.h in Headers */,
-				F5D79583108403B4003108DB /* rhd_connector.h in Headers */,
-				F5D79585108403B4003108DB /* rhd_crtc.h in Headers */,
-				F5D79589108403B4003108DB /* rhd_cursor.h in Headers */,
-				F5D79592108403B4003108DB /* rhd_hdmi.h in Headers */,
-				F5D79595108403B4003108DB /* rhd_i2c.h in Headers */,
-				F5D79598108403B4003108DB /* rhd_lut.h in Headers */,
-				F5D7959B108403B4003108DB /* rhd_mc.h in Headers */,
-				F5D7959D108403B4003108DB /* rhd_modes.h in Headers */,
-				F5D7959F108403B4003108DB /* rhd_monitor.h in Headers */,
-				F5D795A1108403B4003108DB /* rhd_output.h in Headers */,
-				F5D795A3108403B4003108DB /* rhd_pll.h in Headers */,
-				F5D795A5108403B4003108DB /* rhd_pm.h in Headers */,
-				F5D795A8108403B4003108DB /* rhd_regs.h in Headers */,
-				F5D795AD108403B4003108DB /* rhd_vga.h in Headers */,
-				F5D795B0108403B4003108DB /* ddcPriv.h in Headers */,
-				F5D795B2108403B4003108DB /* edid.h in Headers */,
-				F5D795B6108403B4003108DB /* xf86.h in Headers */,
-				F5D795B9108403B4003108DB /* xf86DDC.h in Headers */,
-				F5D795BB108403B4003108DB /* xf86i2c.h in Headers */,
-				F5D795C1108403B4003108DB /* xf86str.h in Headers */,
-				F5090346108D720500DB82A2 /* RadeonDump.h in Headers */,
-				F509034A108D721900DB82A2 /* RadeonHDUserClient.h in Headers */,
-				F5090350108D725900DB82A2 /* Shared.h in Headers */,
+				F5D7BCF2107BF0E2008C5372 /* IOMacOSTypes.h in Headers */,
+				F5D7BCF3107BF0E2008C5372 /* IOMacOSVideo.h in Headers */,
+				F5D7BCF4107BF0E2008C5372 /* IONDRVFramebuffer.h in Headers */,
+				F5D7BCF5107BF0E2008C5372 /* IONDRVLibraries.h in Headers */,
+				F5D7BCF6107BF0E2008C5372 /* IONDRVSupport.h in Headers */,
+				F5D7BCF7107BF0E2008C5372 /* IONDRV.h in Headers */,
+				F5D7BD05107BF0E2008C5372 /* atombios_rev.h in Headers */,
+				F5D7BD06107BF0E2008C5372 /* r5xx_3dregs.h in Headers */,
+				F5D7BD0A107BF0E2008C5372 /* r5xx_regs.h in Headers */,
+				F5D7BD0D107BF0E2008C5372 /* r600_reg.h in Headers */,
+				F5D7BD0E107BF0E2008C5372 /* r600_reg_auto_r6xx.h in Headers */,
+				F5D7BD0F107BF0E2008C5372 /* r600_reg_r6xx.h in Headers */,
+				F5D7BD10107BF0E2008C5372 /* r600_reg_r7xx.h in Headers */,
+				F5D7BD19107BF0E2008C5372 /* radeon_drm.h in Headers */,
+				F5D7BD1C107BF0E2008C5372 /* rhd.h in Headers */,
+				F5D7BD1E107BF0E2008C5372 /* rhd_atombios.h in Headers */,
+				F5D7BD21107BF0E2008C5372 /* rhd_atomout.h in Headers */,
+				F5D7BD24107BF0E2008C5372 /* rhd_atomwrapper.h in Headers */,
+				F5D7BD28107BF0E2008C5372 /* rhd_biosscratch.h in Headers */,
+				F5D7BD29107BF0E2008C5372 /* rhd_card.h in Headers */,
+				F5D7BD2B107BF0E2008C5372 /* rhd_connector.h in Headers */,
+				F5D7BD2D107BF0E2008C5372 /* rhd_crtc.h in Headers */,
+				F5D7BD31107BF0E2008C5372 /* rhd_cursor.h in Headers */,
+				F5D7BD3A107BF0E2008C5372 /* rhd_hdmi.h in Headers */,
+				F5D7BD3D107BF0E2008C5372 /* rhd_i2c.h in Headers */,
+				F5D7BD40107BF0E2008C5372 /* rhd_lut.h in Headers */,
+				F5D7BD43107BF0E2008C5372 /* rhd_mc.h in Headers */,
+				F5D7BD45107BF0E2008C5372 /* rhd_modes.h in Headers */,
+				F5D7BD47107BF0E2008C5372 /* rhd_monitor.h in Headers */,
+				F5D7BD49107BF0E2008C5372 /* rhd_output.h in Headers */,
+				F5D7BD4B107BF0E2008C5372 /* rhd_pll.h in Headers */,
+				F5D7BD4D107BF0E2008C5372 /* rhd_pm.h in Headers */,
+				F5D7BD50107BF0E2008C5372 /* rhd_regs.h in Headers */,
+				F5D7BD55107BF0E2008C5372 /* rhd_vga.h in Headers */,
+				F5D7BD73107BF22A008C5372 /* ddcPriv.h in Headers */,
+				F5D7BD75107BF22A008C5372 /* edid.h in Headers */,
+				F5D7BD77107BF22A008C5372 /* xf86.h in Headers */,
+				F5D7BD79107BF22A008C5372 /* xf86DDC.h in Headers */,
+				F5D7BD7B107BF22A008C5372 /* xf86i2c.h in Headers */,
+				F5D7BD7D107BF22A008C5372 /* xf86str.h in Headers */,
+				F5F9C0BF1081078E00071706 /* atombios.h in Headers */,
+				F5F9C0C01081078E00071706 /* CD_binding.h in Headers */,
+				F5F9C0C11081078E00071706 /* CD_Common_Types.h in Headers */,
+				F5F9C0C21081078E00071706 /* CD_Definitions.h in Headers */,
+				F5F9C0C31081078E00071706 /* CD_hw_services.h in Headers */,
+				F5F9C0C41081078E00071706 /* CD_Opcodes.h in Headers */,
+				F5F9C0C51081078E00071706 /* CD_Structs.h in Headers */,
+				F5F9C0C61081078E00071706 /* Decoder.h in Headers */,
+				F5F9C0C71081078E00071706 /* ObjectID.h in Headers */,
+				F5F9C0C81081078E00071706 /* regsdef.h in Headers */,
+				F5D228C2108CCA8C007ABAA9 /* RadeonHDUserClient.h in Headers */,
+				F5D228E9108CD887007ABAA9 /* Shared.h in Headers */,
+				F5246149108D48DC0091DFC8 /* RadeonDump.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -540,7 +490,7 @@
 		089C1669FE841209C02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = 1DEB91DD08733DB10010E9CD /* Build configuration list for PBXProject "RadeonHD" */;
-			compatibilityVersion = "Xcode 3.0";
+			compatibilityVersion = "Xcode 3.1";
 			hasScannedForEncodings = 1;
 			mainGroup = 089C166AFE841209C02AAC07 /* RadeonHD */;
 			projectDirPath = "";
@@ -578,45 +528,45 @@
 			buildActionMask = 2147483647;
 			files = (
 				32D94FCA0562CBF700B6AF17 /* RadeonHD.cpp in Sources */,
-				F5D79550108403B4003108DB /* CD_Operations.c in Sources */,
-				F5D79551108403B4003108DB /* Decoder.c in Sources */,
-				F5D79552108403B4003108DB /* hwserv_drv.c in Sources */,
-				F5D79575108403B4003108DB /* rhd_atombios.c in Sources */,
-				F5D79577108403B4003108DB /* rhd_atomcrtc.c in Sources */,
-				F5D79578108403B4003108DB /* rhd_atomout.c in Sources */,
-				F5D7957A108403B4003108DB /* rhd_atompll.c in Sources */,
-				F5D7957B108403B4003108DB /* rhd_atomwrapper.c in Sources */,
-				F5D7957F108403B4003108DB /* rhd_biosscratch.c in Sources */,
-				F5D79582108403B4003108DB /* rhd_connector.c in Sources */,
-				F5D79584108403B4003108DB /* rhd_crtc.c in Sources */,
-				F5D79588108403B4003108DB /* rhd_cursor.c in Sources */,
-				F5D7958A108403B4003108DB /* rhd_dac.c in Sources */,
-				F5D7958B108403B4003108DB /* rhd_ddia.c in Sources */,
-				F5D7958C108403B4003108DB /* rhd_dig.c in Sources */,
-				F5D7958F108403B4003108DB /* rhd_driver.c in Sources */,
-				F5D79590108403B4003108DB /* rhd_edid.c in Sources */,
-				F5D79591108403B4003108DB /* rhd_hdmi.c in Sources */,
-				F5D79593108403B4003108DB /* rhd_helper.c in Sources */,
-				F5D79594108403B4003108DB /* rhd_i2c.c in Sources */,
-				F5D79596108403B4003108DB /* rhd_id.c in Sources */,
-				F5D79597108403B4003108DB /* rhd_lut.c in Sources */,
-				F5D79599108403B4003108DB /* rhd_lvtma.c in Sources */,
-				F5D7959A108403B4003108DB /* rhd_mc.c in Sources */,
-				F5D7959C108403B4003108DB /* rhd_modes.c in Sources */,
-				F5D7959E108403B4003108DB /* rhd_monitor.c in Sources */,
-				F5D795A0108403B4003108DB /* rhd_output.c in Sources */,
-				F5D795A2108403B4003108DB /* rhd_pll.c in Sources */,
-				F5D795A4108403B4003108DB /* rhd_pm.c in Sources */,
-				F5D795AB108403B4003108DB /* rhd_tmds.c in Sources */,
-				F5D795AC108403B4003108DB /* rhd_vga.c in Sources */,
-				F5D795B1108403B4003108DB /* edid.c in Sources */,
-				F5D795B3108403B4003108DB /* interpret_edid.c in Sources */,
-				F5D795B7108403B4003108DB /* xf86_helper.c in Sources */,
-				F5D795B8108403B4003108DB /* xf86DDC.c in Sources */,
-				F5D795BA108403B4003108DB /* xf86i2c.c in Sources */,
-				F5D795C0108403B4003108DB /* xf86Screens.c in Sources */,
-				F5090344108D71F900DB82A2 /* RadeonDump.cpp in Sources */,
-				F5090349108D721900DB82A2 /* RadeonHDUserClient.cpp in Sources */,
+				F5D7BD1D107BF0E2008C5372 /* rhd_atombios.c in Sources */,
+				F5D7BD1F107BF0E2008C5372 /* rhd_atomcrtc.c in Sources */,
+				F5D7BD20107BF0E2008C5372 /* rhd_atomout.c in Sources */,
+				F5D7BD22107BF0E2008C5372 /* rhd_atompll.c in Sources */,
+				F5D7BD23107BF0E2008C5372 /* rhd_atomwrapper.c in Sources */,
+				F5D7BD27107BF0E2008C5372 /* rhd_biosscratch.c in Sources */,
+				F5D7BD2A107BF0E2008C5372 /* rhd_connector.c in Sources */,
+				F5D7BD2C107BF0E2008C5372 /* rhd_crtc.c in Sources */,
+				F5D7BD30107BF0E2008C5372 /* rhd_cursor.c in Sources */,
+				F5D7BD32107BF0E2008C5372 /* rhd_dac.c in Sources */,
+				F5D7BD33107BF0E2008C5372 /* rhd_ddia.c in Sources */,
+				F5D7BD34107BF0E2008C5372 /* rhd_dig.c in Sources */,
+				F5D7BD37107BF0E2008C5372 /* rhd_driver.c in Sources */,
+				F5D7BD38107BF0E2008C5372 /* rhd_edid.c in Sources */,
+				F5D7BD39107BF0E2008C5372 /* rhd_hdmi.c in Sources */,
+				F5D7BD3B107BF0E2008C5372 /* rhd_helper.c in Sources */,
+				F5D7BD3C107BF0E2008C5372 /* rhd_i2c.c in Sources */,
+				F5D7BD3E107BF0E2008C5372 /* rhd_id.c in Sources */,
+				F5D7BD3F107BF0E2008C5372 /* rhd_lut.c in Sources */,
+				F5D7BD41107BF0E2008C5372 /* rhd_lvtma.c in Sources */,
+				F5D7BD42107BF0E2008C5372 /* rhd_mc.c in Sources */,
+				F5D7BD44107BF0E2008C5372 /* rhd_modes.c in Sources */,
+				F5D7BD46107BF0E2008C5372 /* rhd_monitor.c in Sources */,
+				F5D7BD48107BF0E2008C5372 /* rhd_output.c in Sources */,
+				F5D7BD4A107BF0E2008C5372 /* rhd_pll.c in Sources */,
+				F5D7BD4C107BF0E2008C5372 /* rhd_pm.c in Sources */,
+				F5D7BD53107BF0E2008C5372 /* rhd_tmds.c in Sources */,
+				F5D7BD54107BF0E2008C5372 /* rhd_vga.c in Sources */,
+				F5D7BD74107BF22A008C5372 /* edid.c in Sources */,
+				F5D7BD76107BF22A008C5372 /* interpret_edid.c in Sources */,
+				F5D7BD78107BF22A008C5372 /* xf86DDC.c in Sources */,
+				F5D7BD7A107BF22A008C5372 /* xf86i2c.c in Sources */,
+				F5D7BDD2107C062C008C5372 /* xf86_helper.c in Sources */,
+				F5F9C0BC1081078E00071706 /* CD_Operations.c in Sources */,
+				F5F9C0BE1081078E00071706 /* hwserv_drv.c in Sources */,
+				F5DABEF610877B0600E72F2B /* xf86Screens.c in Sources */,
+				F5D228C3108CCA8C007ABAA9 /* RadeonHDUserClient.cpp in Sources */,
+				F524614A108D48DC0091DFC8 /* RadeonDump.cpp in Sources */,
+				F533845A10AA20A600E48CFE /* Decoder.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -637,17 +587,19 @@
 		1DEB91DA08733DB10010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1.0.0d1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INFOPLIST_FILE = Info.plist;
-				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(SYSTEM_LIBRARY_DIR)/Extensions";
 				MODULE_NAME = com.yourcompany.driver.RadeonHD;
 				MODULE_VERSION = 1.0.0d1;
 				PRODUCT_NAME = RadeonHD;
+				VALID_ARCHS = "i386 x86_64";
 				WRAPPER_EXTENSION = kext;
 			};
 			name = Debug;
@@ -655,17 +607,15 @@
 		1DEB91DB08733DB10010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
 				CURRENT_PROJECT_VERSION = 1.0.0d1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
 				INFOPLIST_FILE = Info.plist;
-				INFOPLIST_PREPROCESS = NO;
 				INSTALL_PATH = "$(SYSTEM_LIBRARY_DIR)/Extensions";
 				MODULE_NAME = com.yourcompany.driver.RadeonHD;
 				MODULE_VERSION = 1.0.0d1;
-				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = RadeonHD;
-				VALID_ARCHS = "i386 x86_64";
 				WRAPPER_EXTENSION = kext;
 			};
 			name = Release;
@@ -673,24 +623,26 @@
 		1DEB91DE08733DB10010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
+				SDKROOT = macosx10.6;
 			};
 			name = Debug;
 		};
 		1DEB91DF08733DB10010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					ppc,
-					i386,
-				);
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
+				SDKROOT = macosx10.6;
 			};
 			name = Release;
 		};

@@ -686,8 +686,19 @@ static SInt32 cursorY = 0;
 //static RGBColor rgbData[2];
 
 //static UInt32 cursorColorEncodings1[2] = {0, 1};	//black and white
-//static HardwareCursorDescriptorRec hardwareCursorDescriptor1 = {1, 0, 64, 64, 2, 0, 2, cursorColorEncodings1, 0, 5, 2, 3, 0,};
-static HardwareCursorDescriptorRec hwcDescDirect32 = {1, 0, 64, 64, 32, 0, 0, 0, 0, 1, 0,};
+static HardwareCursorDescriptorRec hwcDescDirect32 =           {
+	kHardwareCursorDescriptorMajorVersion,		//majorVersion
+	0,		//minorVersion
+	64,		//height
+	64,		//width
+	32,		//bitDepth
+	0,		//maskBitDepth (unused)
+	0,		//numColors - Number of colors for indexed pixel types
+	0,		//colorEncodings - An array pointer specifying the pixel values corresponding to the indices into the color table, for indexed pixel types.
+	0,		//flags (None defined, set to zero)
+	kTransparentEncodedPixel | kInvertingEncodedPixel,		//supportedSpecialEncodings Mask of supported special pixel values, eg. kTransparentEncodedPixel, kInvertingEncodedPixel.
+	0,		//specialEncodings Array of pixel values for each supported special encoding
+};
 static HardwareCursorInfoRec hardwareCursorInfo = {1, 0, };
 
 void ProgramCrsrState(RHDPtr rhdPtr, SInt32 x, SInt32 y, Bool visible, UInt8 index) {
@@ -829,27 +840,10 @@ Bool RadeonHDSetHardwareCursor(void *cursorRef, GammaTbl *gTable) {
 		if (VSLPrepareCursorForHardwareCursor(cursorRef, &hwcDescDirect32, &hardwareCursorInfo)) {
 			bitDepth = 32;
 			cursorMode = 3;
+		} else {
+			LOG("Problems preparing HW cursor\n");
 		}
-		/*
-		else if (VSLPrepareCursorForHardwareCursor(cursorRef, &hardwareCursorDescriptor1, &hardwareCursorInfo)) {
-			bitDepth = 2;
-			cursorMode = 1;
-		} */
-		
-		/**
-		 * Dong's original code.
-
-		int i, j;
-		for (i = 63;i >= 0;i--)
-			for (j = 63;j >= 0;j--) {
-				if ((i >= hardwareCursorInfo.cursorHeight) || (j >= hardwareCursorInfo.cursorWidth))
-					rhdPtr->CursorImage[i * 64 + j] = 0;
-				else
-					rhdPtr->CursorImage[i * 64 + j] = rhdPtr->CursorImage[i * hardwareCursorInfo.cursorWidth + j];
-				rhdPtr->CursorImage[i * 64 + j] = GammaCorrectARGB32(gTable, rhdPtr->CursorImage[i * 64 + j]);
-			}
-		 */
-		
+			
 		/**
 		 * Fix by semantics. 
 		 *
@@ -875,12 +869,15 @@ Bool RadeonHDSetHardwareCursor(void *cursorRef, GammaTbl *gTable) {
 		}
 		/* end of fix */
 		
-		if (cursorMode) rhdCrtcLoadCursorARGB(rhdPtr->Crtc[k], rhdPtr->CursorImage);
-		if (bitDepth) cursorSet = TRUE;
-		else {
+		if (cursorMode) 
+			rhdCrtcLoadCursorARGB(rhdPtr->Crtc[k], rhdPtr->CursorImage);
+		if (bitDepth) {
+			cursorSet = TRUE;
+		} else {
 			cursorVisible = FALSE;
 			SetCrsrState(rhdPtr, 0, 0, FALSE, k);
 			ret = FALSE;
+			LOG("Problems drawing HW cursor (bitDepth)\n");
 		}
 	}
 	return ret;

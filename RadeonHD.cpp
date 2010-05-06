@@ -32,6 +32,10 @@ extern "C" Bool RadeonHDSetHardwareCursor(void *cursorRef, GammaTbl *gTable);
 extern "C" Bool RadeonHDDrawHardwareCursor(SInt32 x, SInt32 y, Bool visible);
 extern "C" void RadeonHDGetHardwareCursorState(SInt32 *x, SInt32 *y, UInt32 *set, UInt32 *visible);
 extern "C" Bool RadeonHDDisplayPowerManagementSet(int PowerManagementMode, int flags);
+extern "C" int RadeonHDGetConnectionCount(void);
+extern "C" rhdOutput* RadeonHDGetOutput(unsigned int index);
+extern "C" Bool RadeonHDSave();
+extern "C" Bool RadeonHDRestore();
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -435,6 +439,7 @@ IOReturn NDRVHD::doControl( UInt32 code, void * params )
 		}
 			break;
 		case cscSetGray:
+			LOG("cscSetGray\n");
 			break;
 		case cscSetClutBehavior:
 			if (RHDReady && options.enableGammaTable)
@@ -521,43 +526,66 @@ IOReturn NDRVHD::doControl( UInt32 code, void * params )
 			if (RHDReady) 
 			{
 				VDPowerStateRec* vdPowerState = (VDPowerStateRec*)params;
-				LOG("cscSetPowerState: powerState %u powerFlags %u\n",
-					 (unsigned int)vdPowerState->powerState, (unsigned int)vdPowerState->powerFlags);
 				switch (vdPowerState->powerState) {
 					case kAVPowerOn:
-						LOG("Trying to select state DPMSModeOn\n");
+						LOG("kAVPowerOn: Trying to select state DPMSModeOn\n");
 						RadeonHDDisplayPowerManagementSet(DPMSModeOn, 0);
 						fLastPowerState = kAVPowerOn;
 						ret = kIOReturnSuccess;
 						break;
 					case kAVPowerOff:
-						LOG("Trying to select state kAVPowerOff\n");
+						LOG("kAVPowerOff: Trying to select state kAVPowerOff\n");
 						RadeonHDDisplayPowerManagementSet(DPMSModeOff, 0);
 						fLastPowerState = kAVPowerOff;
 						ret = kIOReturnSuccess;
 						break;
 					case kAVPowerStandby:
-						LOG("Trying to select state DPMSModeStandby\n");
+						LOG("kAVPowerStandby: Trying to select state DPMSModeStandby\n");
 						RadeonHDDisplayPowerManagementSet(DPMSModeStandby, 0);
 						fLastPowerState = kAVPowerStandby;
 						ret = kIOReturnSuccess;
 						break;
 					case kAVPowerSuspend:
-						LOG("Trying to select state DPMSModeSuspend\n");
+						LOG("kAVPowerSuspend: Trying to select state DPMSModeSuspend\n");
 						RadeonHDDisplayPowerManagementSet(DPMSModeSuspend, 0);
 						fLastPowerState = kAVPowerSuspend;
 						ret = kIOReturnSuccess;
 						break;
+					case kHardwareSleep:
+						LOG("HW SLEEP: Trying to select state DPMSModeOff\n");
+						RadeonHDDisplayPowerManagementSet(DPMSModeOff, 0);
+						RadeonHDSave();
+						fLastPowerState = kHardwareSleep;
+						ret = kIOReturnSuccess;
+						break;
+					case kHardwareWake:
+						LOG("HW WAKE: Trying to select state DPMSModeOn\n");
+						RadeonHDRestore();
+						RadeonHDDisplayPowerManagementSet(DPMSModeOn, 0);
+						fLastPowerState = kHardwareWake;
+						ret = kIOReturnSuccess;
+						break;
 					default:
+						LOG("PowerManagemet: unhandled event %u\n", (unsigned int)vdPowerState->powerState);
 						break;
 				}
 			}
             break;
 		case cscSetMode:
+			LOG("cscSetMode\n");
+			break;
 		case cscSavePreferredConfiguration:
+			LOG("cscSavePreferredConfiguration\n");
+			break;
 		case cscSetMirror:
+			LOG("cscSetMirror\n");
+			break;
 		case cscSetFeatureConfiguration:
+			LOG("cscSetFeatureConfiguration\n");
+			break;
 		case cscSetSync:
+			LOG("cscSetSync\n");
+			break;
         default:
             break;
     }
@@ -848,6 +876,7 @@ IOReturn NDRVHD::doStatus( UInt32 code, void * params )
 		}
 			break;
 		case cscGetScalerInfo:
+			LOG("cscGetScalerInfo\n");
 			/*
 			if (RHDReady)
 		{
@@ -911,22 +940,61 @@ IOReturn NDRVHD::doStatus( UInt32 code, void * params )
 			if (RHDReady)
 			{
 				VDPowerStateRec* vdPowerState = (VDPowerStateRec*)params;
-				LOG("cscGetPowerState: powerState %u powerFlags %u\n",
-					(unsigned int)vdPowerState->powerState, (unsigned int)vdPowerState->powerFlags);
 				vdPowerState->powerState = fLastPowerState;
 				vdPowerState->powerFlags = kPowerStateSleepCanPowerOffMask;
-				LOG("cscGetPowerState: returning state %u\n", (unsigned int)vdPowerState->powerState);
+				ret = kIOReturnSuccess;
+			}
+			break;
+		case cscGetMultiConnect:
+			LOG("cscGetMultiConnect...\n");
+			if (RHDReady) {
+				VDMultiConnectInfoPtr vdMultiConnectInfo = (VDMultiConnectInfoPtr)params;
+				switch (vdMultiConnectInfo->csDisplayCountOrNumber) {
+					case kGetConnectionCount:
+						LOG("cscGetMultiConnect query for connections count\n");
+						vdMultiConnectInfo->csDisplayCountOrNumber = RadeonHDGetConnectionCount();
+						LOG("cscGetMultiConnect query for connections count returning %u\n", (unsigned int)vdMultiConnectInfo->csDisplayCountOrNumber);
+						ret = kIOReturnSuccess;
+						break;
+					default:
+						//TODO: return connectin info for connection at csDisplayCountOrNumber position
+						break;
+				}
+			}
+			break;
+		case cscGetConnection:
+			LOG("cscGetConnection...\n");
+			if (RHDReady) {
+				LOG("cscGetConnection query for connection 0\n");
+				VDDisplayConnectInfoPtr vdDisplayConnectInfo = (VDDisplayConnectInfoPtr)params;
+				//struct rhdOutput* output = RadeonHDGetOutput(0);
+				vdDisplayConnectInfo->csDisplayType = kUnknownConnect; //Really??
+				vdDisplayConnectInfo->csConnectFlags = kAllModesSafe; //Really??
 				ret = kIOReturnSuccess;
 			}
 			break;
 		case cscProbeConnection:
+			LOG("cscProbeConnection\n");
+			break;
 		case cscGetPreferredConfiguration:
+			LOG("cscGetPreferredConfiguration\n");
+			break;
 		case cscGetMirror:
-		case cscGetMultiConnect:
+		{
+			LOG("cscGetMirror\n");
+			VDMirrorRec* vdMirror = (VDMirrorRec*)params;
+			vdMirror->csMirrorFeatures = kMirrorSameDepthOnlyMirrorMask;
+			vdMirror->csMirrorSupportedFlags = kMirrorCanMirrorMask;
+			vdMirror->csMirrorFlags = kMirrorCanMirrorMask;
+			ret = kIOReturnSuccess;
+		}
+			break;
 		case cscGetFeatureConfiguration:
+			LOG("cscGetFeatureConfiguration\n");
+			break;
 		case cscGetSync:
-		case cscGetConnection:
-			//case cscGetFeatureList:	//defined in IONDRVFramebufferPrivate.h
+			LOG("cscGetSync\n");
+			break;
         default:
             break;
     }
@@ -1009,6 +1077,8 @@ IOReturn RadeonHD::getAttribute( IOSelect attribute, uintptr_t * value )
 			pb.params = value;
 			err = doDriverIO(1, &pb, kIONDRVStatusCommand, kIONDRVImmediateIOCommandKind );
 			break;
+		case kIOMirrorAttribute:
+			LOG("kIOMirrorAttribute requested\n");
         default:
             err = super::getAttribute( attribute, value );
     }
@@ -1108,7 +1178,7 @@ IOReturn RadeonHD::updateCursorState(CursorInfo  const *crsrInfo) {
 }
 */
 
-IOReturn RadeonHD::setAttributeForConnection( IOIndex connectIndex, IOSelect attribute, unsigned long value ) {
+IOReturn RadeonHD::setAttributeForConnection( IOIndex connectIndex, IOSelect attribute, uintptr_t value ) {
 	IOReturn ret = kIOReturnUnsupported;
 	
 	switch (attribute) {
@@ -1191,7 +1261,6 @@ IOReturn RadeonHD::setAttributeForConnection( IOIndex connectIndex, IOSelect att
 IOReturn RadeonHD::getAttributeForConnection( IOIndex connectIndex,
 											 IOSelect attribute, uintptr_t  * value ) {
 	IOReturn ret = kIOReturnUnsupported;
-	
 	switch (attribute) {
 			/*
 		case 'enab':
@@ -1208,7 +1277,19 @@ IOReturn RadeonHD::getAttributeForConnection( IOIndex connectIndex,
 		case 'auw ':
 		case 'aur ':
 			//ret = getHdcpAttribute(attribute, *value);
-			break; */
+			break; 
+		case kConnectionFlags:
+			if (value != NULL) {
+				
+				if (Connector != NULL) {
+					UInt32 var_38[2];
+					Connector->getSenseInfo(var_38);
+					*value = var_38[1];
+				} else *value = 0;
+			}
+			ret = kIOReturnSuccess;
+			break;
+			 */
 		case 'bklt':
 		{
 			UInt32 bklt = 0;
