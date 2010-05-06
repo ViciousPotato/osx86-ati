@@ -156,8 +156,9 @@ xf86DoEDID_DDC2(int scrnIndex, I2CBusPtr pBus)
 	return NULL;
     }
     if (!tmp)
-	LOGV("Cannot interpret EDID block\n");
-    LOGV("Sections to follow: %d\n",tmp->no_sections);
+		LOGV("Cannot interpret EDID block\n");
+	else
+		LOGV("Sections to follow: %d\n",tmp->no_sections);
 
     return tmp;
 }

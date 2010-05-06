@@ -123,6 +123,7 @@ void logMsg(const char *format, ...)
 {
 	va_list args;
 	va_start(args, format);
+	messageHandler(kVoodooHDAMessageTypeGeneral, "[RadeonHD]: ", args);
 	messageHandler(kVoodooHDAMessageTypeGeneral, format, args);
 	va_end(args);
 }
@@ -131,6 +132,7 @@ void errorMsg(const char *format, ...)
 {
 	va_list args;
 	va_start(args, format);
+	messageHandler(kVoodooHDAMessageTypeError, "[RadeonHD]: ", args);
 	messageHandler(kVoodooHDAMessageTypeError, format, args);
 	va_end(args);
 }
@@ -139,6 +141,7 @@ void dumpMsg(const char *format, ...)
 {
 	va_list args;
 	va_start(args, format);
+	messageHandler(kVoodooHDAMessageTypeDump, "[RadeonHD]: ", args);
 	messageHandler(kVoodooHDAMessageTypeDump, format, args);
 	va_end(args);
 }
