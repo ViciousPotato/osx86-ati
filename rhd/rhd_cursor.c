@@ -683,9 +683,25 @@ static Bool cursorVisible = FALSE;
 static IOColorEntry *colorMap = NULL;
 static SInt32 cursorX = 0;
 static SInt32 cursorY = 0;
-//static RGBColor rgbData[2];
+static RGBColor rgbData[2] = {{0xFFFF, 0xFFFF, 0xFFFF}, {0, 0, 0}};	//actually not being used
 
-//static UInt32 cursorColorEncodings1[2] = {0, 1};	//black and white
+static UInt32 cursorColorEncodings1[2] = {0, 1};	//black and white
+static HardwareCursorDescriptorRec hardwareCursorDescriptor1 = {
+	kHardwareCursorDescriptorMajorVersion,
+	kHardwareCursorDescriptorMinorVersion,
+	64, 
+	64, 
+	2,		//bitDepth
+	0,
+	2,		//numColors - Number of colors for indexed pixel types
+	cursorColorEncodings1,		//colorEncodings - An array pointer specifying the pixel values corresponding to the indices into the color table, for indexed pixel types.
+	0, 
+	kTransparentEncodedPixel | kInvertingEncodedPixel,		//supportedSpecialEncodings Mask of supported special pixel values, eg. kTransparentEncodedPixel, kInvertingEncodedPixel.
+	2,		//specialEncodings Array of pixel values for each supported special encoding
+	3, 
+	0,
+};
+
 static HardwareCursorDescriptorRec hwcDescDirect32 =           {
 	kHardwareCursorDescriptorMajorVersion,		//majorVersion
 	0,		//minorVersion
@@ -696,7 +712,7 @@ static HardwareCursorDescriptorRec hwcDescDirect32 =           {
 	0,		//numColors - Number of colors for indexed pixel types
 	0,		//colorEncodings - An array pointer specifying the pixel values corresponding to the indices into the color table, for indexed pixel types.
 	0,		//flags (None defined, set to zero)
-	kTransparentEncodedPixel | kInvertingEncodedPixel,		//supportedSpecialEncodings Mask of supported special pixel values, eg. kTransparentEncodedPixel, kInvertingEncodedPixel.
+	kTransparentEncodedPixel,		//supportedSpecialEncodings Mask of supported special pixel values, eg. kTransparentEncodedPixel, kInvertingEncodedPixel.
 	0,		//specialEncodings Array of pixel values for each supported special encoding
 };
 static HardwareCursorInfoRec hardwareCursorInfo = {1, 0, };
@@ -748,6 +764,8 @@ static void SetCrsrState(RHDPtr rhdPtr, SInt32 x, SInt32 y, Bool visible, UInt8 
 	//ProgramCrsrState(rhdPtr, x, y, visible, index);
 }
 
+#define bitswap(x) (((x) << 24) & 0xFF000000) | (((x) << 8) & 0x00FF0000) | (((x) >> 8) & 0x0000FF00) | (((x) >> 24) & 0x000000FF);
+
 static void DrawCrsr(RHDPtr rhdPtr, UInt8 index) {
 	//var_1E = 0;
 	//var_1D = 0;
@@ -759,64 +777,70 @@ static void DrawCrsr(RHDPtr rhdPtr, UInt8 index) {
 	UInt32 *crsrImage = (UInt32 *)rhdPtr->CursorImage;
 	UInt32 pixelData = (cursorMode == 1)?0x80000000:0;
 	//clear arear outside cursor
-	int i, j;
+	int i, j, m, n, leftBits;
 	for (i = 0;i < 64;i++)
 	for (j = (i < hardwareCursorInfo.cursorHeight)?hardwareCursorInfo.cursorWidth:0;j < 64;j++)
 		crsrImage[i * 64 + j] = pixelData;
-/*	
+	m = 0;
+	n = 0;
 	for (i = 0;i < hardwareCursorInfo.cursorHeight;i++) {
 		for (j = 0;j < bitDepth * hardwareCursorInfo.cursorWidth / 32;j++) {
-			UInt8 leftBits = 32 - bitDepth;	//var_28
-			int k = 0;
+			leftBits = 32 - bitDepth;	//var_28
 			while (leftBits >= 0) {
-				if (bitDepth == 2) {
-					UInt32 temp = crsrImage[k];
-					bitswap(&temp);
+				if (bitDepth == 2) {	//2 bits cursor handling
+					
+					UInt32 temp = tempCursorImage[n];
+					temp = bitswap(temp);	//get the 2 bits in order, needed for intel machine
 					UInt8 mode = (temp >> leftBits) & 3;
+					
 					if (mode == 2) pixelData = 0x80000000;
 					else if (mode == 3) pixelData = 0x80FFFFFF;
 					else {
+						LOG("2 bits cursor use preset rgbData\n");
 						mode &= 1;
 						pixelData = ((rgbData[mode].red >> 8) << 16)
-									| ((rgbData[mode].green >> 8) << 8)
-									| (rgbData[mode].blue >> 8);
+						| ((rgbData[mode].green >> 8) << 8)
+						| (rgbData[mode].blue >> 8);
 					}
-				} else pixelData = crsrImage[k];
-				if (((cursorMode == 1) && (pixelData != 0x80000000))
-					|| ((cursorMode != 1) && (pixelData != 0))) {
-					var_6C = (32 * j - bitDepth - leftBits + 32) / bitDepth;
-					var_1E = (var_1E > var_6C)?var_1E:var_6C;
-					var_1D = (var_1D < i)?i:var_1D;
-				}
-				crsrImage[k] = pixelData;
-				k++;
+				} else pixelData = tempCursorImage[n];
+				/* for software cursor usage only
+				 if (((cursorMode == 1) && (pixelData != 0x80000000))
+				 || ((cursorMode != 1) && (pixelData != 0))) {
+				 var_6C = (32 * j - bitDepth - leftBits + 32) / bitDepth;
+				 var_1E = (var_1E > var_6C)?var_1E:var_6C;
+				 var_1D = (var_1D < i)?i:var_1D;
+				 } */
+				crsrImage[m] = pixelData;
+				m++;
 				leftBits -= bitDepth;
 			}
-			crsrImage2 += 4;		//point to next value
+			n++;		//point to next value
 		}
-		crsrImage1 += (64 - hardwareCursorInfo.cursorWidth) * 4;
+		m += (64 - hardwareCursorInfo.cursorWidth);	//point to next line
 	}
-	if ((aDriverRecPtr->driverFlags >> 15 & 1) == 1) {
-		var_44 = aDriverRecPtr->SWscaledPara.width;
-		var_48 = aDriverRecPtr->SWscaledPara.height;
-		if (ScaleUpARGB32(aDriverRecPtr, &aDriverRecPtr->crsrImage3, &aDriverRecPtr->crsrImage4, 64, var_1E + 1, var_1D + 1, 64, 64,
-						  aDriverRecPtr->width, aDriverRecPtr->height, &var_44, &var_48, cursorMode) == 0) {
-			bitDepth = 0;
-			return;
-		}
-		if (aDriverRecPtr->SWscaledPara.width != var_44) {
-			aDriverRecPtr->unknown14 = data[0] - data[0] * var_44 / aDriverRecPtr->SWscaledPara.width;
-			aDriverRecPtr->unknown15 = data[1] - data[1] * var_44 / aDriverRecPtr->SWscaledPara.width;
-		}
-	}
- 	UInt8 var_2D = HW_GetApertureSwapping(aDriverRecPtr);	//not used here
- 
-	for (i = 0;i < 64 * 64;i++) {
-		pixelData = crsrImage[i];
-		if ((cursorMode != 1) || (pixelData & (1 << 31)))
-			pixelData = GammaCorrectARGB32(aDriverRecPtr, pixelData);
-		crsrImage[i] = pixelData;
-	} */
+	/*
+	 if ((aDriverRecPtr->driverFlags >> 15 & 1) == 1) {
+	 var_44 = aDriverRecPtr->SWscaledPara.width;
+	 var_48 = aDriverRecPtr->SWscaledPara.height;
+	 if (ScaleUpARGB32(aDriverRecPtr, &aDriverRecPtr->crsrImage3, &aDriverRecPtr->crsrImage4, 64, var_1E + 1, var_1D + 1, 64, 64,
+	 aDriverRecPtr->width, aDriverRecPtr->height, &var_44, &var_48, cursorMode) == 0) {
+	 bitDepth = 0;
+	 return;
+	 }
+	 if (aDriverRecPtr->SWscaledPara.width != var_44) {
+	 aDriverRecPtr->unknown14 = data[0] - data[0] * var_44 / aDriverRecPtr->SWscaledPara.width;
+	 aDriverRecPtr->unknown15 = data[1] - data[1] * var_44 / aDriverRecPtr->SWscaledPara.width;
+	 }
+	 }
+	 UInt8 var_2D = HW_GetApertureSwapping(aDriverRecPtr);	//not used here
+	 */
+	/*
+	 for (i = 0;i < 64 * 64;i++) {
+	 pixelData = crsrImage[i];
+	 if ((cursorMode != 1) || (pixelData & (1 << 31)))
+	 pixelData = GammaCorrectARGB32(aDriverRecPtr, pixelData);
+	 crsrImage[i] = pixelData;
+	 } */
 	BlockCopy(crsrImage, crsrMapBase, 0x4000);	//copy crsrImage data to Vram addr
 }
 
@@ -824,38 +848,47 @@ extern UInt32 GammaCorrectARGB32(GammaTbl *gTable, UInt32 data);
 
 Bool RadeonHDSetHardwareCursor(void *cursorRef, GammaTbl *gTable) {
 	RHDPtr rhdPtr = RHDPTR(xf86Screens[0]);
-	Bool ret;
-	UInt8 k;
-	for (k = 0;k < 2;k++) {
-		ret = TRUE;
-		if (!rhdPtr->Crtc[k]->Active) continue;
-		cursorMode = 0;
-		bitDepth = 0;
-		cursorSet = FALSE;
-		if (!rhdPtr->FbBase) return FALSE;
-		hardwareCursorInfo.colorMap = colorMap;
-		//hardwareCursorInfo.hardwareCursorData = (UInt8 *)rhdPtr->CursorImage;		
-		hardwareCursorInfo.hardwareCursorData = (UInt8 *)tempCursorImage;
-		
-		if (VSLPrepareCursorForHardwareCursor(cursorRef, &hwcDescDirect32, &hardwareCursorInfo)) {
-			bitDepth = 32;
-			cursorMode = 3;
-		} else {
-			LOG("Problems preparing HW cursor\n");
-		}
-			
-		/**
-		 * Fix by semantics. 
-		 *
-		 * The hardwareCurosrData returned is not laid out in 64x64 fashion,
-		 * but in cursorWidth x cursorHeight. When copying it to the
-		 * cursorImage buffer for use by hardware, proper padding should be
-		 * manually added.
-		 */
-		int i, j;
-		UInt32 h = hardwareCursorInfo.cursorHeight;
-		UInt32 w = hardwareCursorInfo.cursorWidth;
-		UInt32 *p = (UInt32*)hardwareCursorInfo.hardwareCursorData;
+	if (!rhdPtr->FbBase) return FALSE;
+	
+	cursorSet = FALSE;
+	cursorVisible = FALSE;
+	cursorMode = 0;
+	bitDepth = 0;
+	
+	hardwareCursorInfo.colorMap = colorMap;
+	//hardwareCursorInfo.hardwareCursorData = (UInt8 *)rhdPtr->CursorImage;		
+	hardwareCursorInfo.hardwareCursorData = (UInt8 *)tempCursorImage;
+	if (VSLPrepareCursorForHardwareCursor(cursorRef, &hwcDescDirect32, &hardwareCursorInfo)) {
+		bitDepth = 32;
+		cursorMode = 3;
+		//LOG("32 bits Cursor selected\n");
+	} else if (VSLPrepareCursorForHardwareCursor(cursorRef, &hardwareCursorDescriptor1, &hardwareCursorInfo)) {
+		bitDepth = 2;
+		cursorMode = 1;
+		//LOG("2 bits Cursor selected\n");
+	} else {
+		LOG("Prepare Hardware cursor failed\n");
+	}
+	
+	if (bitDepth) {
+		cursorSet = TRUE;
+		cursorVisible = TRUE;
+	}	
+	
+	int i, j;
+	UInt32 h = hardwareCursorInfo.cursorHeight;
+	UInt32 w = hardwareCursorInfo.cursorWidth;
+	UInt32 *p = (UInt32*)hardwareCursorInfo.hardwareCursorData;
+
+	/** 32 bits cursor padding
+	 * Fix by semantics. 
+	 *
+	 * The hardwareCurosrData returned is not laid out in 64x64 fashion,
+	 * but in cursorWidth x cursorHeight. When copying it to the
+	 * cursorImage buffer for use by hardware, proper padding should be
+	 * manually added.
+	 */
+	if (bitDepth == 32) {
 		for (i = 0; i<64; i++) {
 			for (j=0; j<64; j++) {
 				if (i < h && j < w) {
@@ -867,20 +900,60 @@ Bool RadeonHDSetHardwareCursor(void *cursorRef, GammaTbl *gTable) {
 				rhdPtr->CursorImage[i * 64 + j] = GammaCorrectARGB32(gTable, rhdPtr->CursorImage[i * 64 + j]);					
 			}
 		}
-		/* end of fix */
+	}
+	/* end of fix */
 		
-		if (cursorMode) 
-			rhdCrtcLoadCursorARGB(rhdPtr->Crtc[k], rhdPtr->CursorImage);
-		if (bitDepth) {
-			cursorSet = TRUE;
-		} else {
-			cursorVisible = FALSE;
-			SetCrsrState(rhdPtr, 0, 0, FALSE, k);
-			ret = FALSE;
-			LOG("Problems drawing HW cursor (bitDepth)\n");
+	/* 2 bits cursor padding
+	 * Reversed code use 0x80FFFFFF and 0x80000000 for black and transparent
+	 * I have to use 0xFF000000 and 0x00FFFFFF instead, did not figure out the reason yet
+	 * dong
+	 */
+	if (bitDepth == 2) {
+		UInt32 pixelData;
+		int m, n, leftBits;
+		
+		//clear arear outside cursor
+		for (i = 0;i < 64;i++)
+			for (j = (i < h)?w:0;j < 64;j++)
+				rhdPtr->CursorImage[i * 64 + j] = 0x00FFFFFF;
+		
+		m = 0;
+		n = 0;
+		for (i = 0;i < h;i++) {
+			for (j = 0;j < bitDepth * w / 32;j++) {
+				leftBits = 32 - bitDepth;	//var_28
+				while (leftBits >= 0) {						
+					UInt32 temp = p[n];
+					temp = bitswap(temp);
+					UInt8 mode = (temp >> leftBits) & 3;
+					
+					if (mode == 2) pixelData = 0x00FFFFFF;
+					else if (mode == 3) pixelData = 0xFF000000;
+					else {
+						LOG("2 bits cursor use preset rgbData\n");	//not reached here for me dong
+						mode &= 1;
+						pixelData = ((rgbData[mode].red >> 8) << 16)
+						| ((rgbData[mode].green >> 8) << 8)
+						| (rgbData[mode].blue >> 8);
+					}
+					rhdPtr->CursorImage[m] = pixelData;
+					m++;
+					leftBits -= bitDepth;
+				}
+				n++;		//point to next value
+			}
+			m += (64 - w);	//point to next line
 		}
 	}
-	return ret;
+	
+	UInt8 k;
+	for (k = 0;k < 2;k++) {	//k = 0 is enough for me since only one head is supported
+		if (!rhdPtr->Crtc[k]->Active) continue;
+		if (cursorMode) rhdCrtcLoadCursorARGB(rhdPtr->Crtc[k], rhdPtr->CursorImage);
+		if (!bitDepth) SetCrsrState(rhdPtr, 0, 0, FALSE, k);
+	}
+	if (bitDepth) return TRUE;
+	else return FALSE;
 }
 
 Bool RadeonHDDrawHardwareCursor(SInt32 x, SInt32 y, Bool visible) {
@@ -890,7 +963,7 @@ Bool RadeonHDDrawHardwareCursor(SInt32 x, SInt32 y, Bool visible) {
 	cursorX = x;
 	cursorY = y;
 	UInt8 k;
-	for (k = 0;k < 2;k++)
+	for (k = 0;k < 2;k++)	//k = 0 is enough for me since only one head is supported
 		if (rhdPtr->Crtc[k]->Active)
 			SetCrsrState(rhdPtr, x, y, visible, k);
 	return TRUE;
