@@ -683,39 +683,6 @@ static Bool cursorVisible = FALSE;
 static IOColorEntry *colorMap = NULL;
 static SInt32 cursorX = 0;
 static SInt32 cursorY = 0;
-static RGBColor rgbData[2] = {{0xFFFF, 0xFFFF, 0xFFFF}, {0, 0, 0}};	//actually not being used
-
-static UInt32 cursorColorEncodings1[2] = {0, 1};	//black and white
-static HardwareCursorDescriptorRec hardwareCursorDescriptor1 = {
-	kHardwareCursorDescriptorMajorVersion,
-	kHardwareCursorDescriptorMinorVersion,
-	64, 
-	64, 
-	2,		//bitDepth
-	0,
-	2,		//numColors - Number of colors for indexed pixel types
-	cursorColorEncodings1,		//colorEncodings - An array pointer specifying the pixel values corresponding to the indices into the color table, for indexed pixel types.
-	0, 
-	kTransparentEncodedPixel | kInvertingEncodedPixel,		//supportedSpecialEncodings Mask of supported special pixel values, eg. kTransparentEncodedPixel, kInvertingEncodedPixel.
-	2,		//specialEncodings Array of pixel values for each supported special encoding
-	3, 
-	0,
-};
-
-static HardwareCursorDescriptorRec hwcDescDirect32 =           {
-	kHardwareCursorDescriptorMajorVersion,		//majorVersion
-	0,		//minorVersion
-	64,		//height
-	64,		//width
-	32,		//bitDepth
-	0,		//maskBitDepth (unused)
-	0,		//numColors - Number of colors for indexed pixel types
-	0,		//colorEncodings - An array pointer specifying the pixel values corresponding to the indices into the color table, for indexed pixel types.
-	0,		//flags (None defined, set to zero)
-	kTransparentEncodedPixel,		//supportedSpecialEncodings Mask of supported special pixel values, eg. kTransparentEncodedPixel, kInvertingEncodedPixel.
-	0,		//specialEncodings Array of pixel values for each supported special encoding
-};
-static HardwareCursorInfoRec hardwareCursorInfo = {1, 0, };
 
 void ProgramCrsrState(RHDPtr rhdPtr, SInt32 x, SInt32 y, Bool visible, UInt8 index) {
 	UInt32 hotSpotX = 0;
@@ -765,7 +732,7 @@ static void SetCrsrState(RHDPtr rhdPtr, SInt32 x, SInt32 y, Bool visible, UInt8 
 }
 
 #define bitswap(x) (((x) << 24) & 0xFF000000) | (((x) << 8) & 0x00FF0000) | (((x) >> 8) & 0x0000FF00) | (((x) >> 24) & 0x000000FF);
-
+/*
 static void DrawCrsr(RHDPtr rhdPtr, UInt8 index) {
 	//var_1E = 0;
 	//var_1D = 0;
@@ -803,13 +770,13 @@ static void DrawCrsr(RHDPtr rhdPtr, UInt8 index) {
 						| (rgbData[mode].blue >> 8);
 					}
 				} else pixelData = tempCursorImage[n];
-				/* for software cursor usage only
-				 if (((cursorMode == 1) && (pixelData != 0x80000000))
-				 || ((cursorMode != 1) && (pixelData != 0))) {
-				 var_6C = (32 * j - bitDepth - leftBits + 32) / bitDepth;
-				 var_1E = (var_1E > var_6C)?var_1E:var_6C;
-				 var_1D = (var_1D < i)?i:var_1D;
-				 } */
+				// for software cursor usage only
+				// if (((cursorMode == 1) && (pixelData != 0x80000000))
+				// || ((cursorMode != 1) && (pixelData != 0))) {
+				// var_6C = (32 * j - bitDepth - leftBits + 32) / bitDepth;
+				// var_1E = (var_1E > var_6C)?var_1E:var_6C;
+				// var_1D = (var_1D < i)?i:var_1D;
+				// }
 				crsrImage[m] = pixelData;
 				m++;
 				leftBits -= bitDepth;
@@ -840,11 +807,46 @@ static void DrawCrsr(RHDPtr rhdPtr, UInt8 index) {
 	 if ((cursorMode != 1) || (pixelData & (1 << 31)))
 	 pixelData = GammaCorrectARGB32(aDriverRecPtr, pixelData);
 	 crsrImage[i] = pixelData;
-	 } */
+	 } *//*
 	BlockCopy(crsrImage, crsrMapBase, 0x4000);	//copy crsrImage data to Vram addr
 }
-
+*/
 extern UInt32 GammaCorrectARGB32(GammaTbl *gTable, UInt32 data);
+
+static RGBColor rgbData[2] = {{0xFFFF, 0xFFFF, 0xFFFF}, {0, 0, 0}};	//actually not being used
+
+static UInt32 cursorColorEncodings1[2] = {0, 1};	//black and white
+static HardwareCursorDescriptorRec hardwareCursorDescriptor1 = {
+	kHardwareCursorDescriptorMajorVersion,
+	kHardwareCursorDescriptorMinorVersion,
+	64, 
+	64, 
+	2,		//bitDepth
+	0,
+	2,		//numColors - Number of colors for indexed pixel types
+	cursorColorEncodings1,		//colorEncodings - An array pointer specifying the pixel values corresponding to the indices into the color table, for indexed pixel types.
+	0, 
+	kTransparentEncodedPixel | kInvertingEncodedPixel,		//supportedSpecialEncodings Mask of supported special pixel values, eg. kTransparentEncodedPixel, kInvertingEncodedPixel.
+	2,		//specialEncodings Array of pixel values for each supported special encoding
+	3, 
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
+
+static HardwareCursorDescriptorRec hwcDescDirect32 =           {
+	kHardwareCursorDescriptorMajorVersion,		//majorVersion
+	kHardwareCursorDescriptorMinorVersion,		//minorVersion
+	64,		//height
+	64,		//width
+	32,		//bitDepth
+	0,		//maskBitDepth (unused)
+	0,		//numColors - Number of colors for indexed pixel types
+	0,		//colorEncodings - An array pointer specifying the pixel values corresponding to the indices into the color table, for indexed pixel types.
+	0,		//flags (None defined, set to zero)
+	kTransparentEncodedPixel,		//supportedSpecialEncodings Mask of supported special pixel values, eg. kTransparentEncodedPixel, kInvertingEncodedPixel.
+	0,		//specialEncodings Array of pixel values for each supported special encoding
+};
+static HardwareCursorInfoRec hardwareCursorInfo = {kHardwareCursorDescriptorMajorVersion, kHardwareCursorDescriptorMinorVersion, };
+
 
 Bool RadeonHDSetHardwareCursor(void *cursorRef, GammaTbl *gTable) {
 	RHDPtr rhdPtr = RHDPTR(xf86Screens[0]);
@@ -856,18 +858,22 @@ Bool RadeonHDSetHardwareCursor(void *cursorRef, GammaTbl *gTable) {
 	bitDepth = 0;
 	
 	hardwareCursorInfo.colorMap = colorMap;
-	//hardwareCursorInfo.hardwareCursorData = (UInt8 *)rhdPtr->CursorImage;		
 	hardwareCursorInfo.hardwareCursorData = (UInt8 *)tempCursorImage;
 	if (VSLPrepareCursorForHardwareCursor(cursorRef, &hwcDescDirect32, &hardwareCursorInfo)) {
 		bitDepth = 32;
 		cursorMode = 3;
 		//LOG("32 bits Cursor selected\n");
-	} else if (VSLPrepareCursorForHardwareCursor(cursorRef, &hardwareCursorDescriptor1, &hardwareCursorInfo)) {
-		bitDepth = 2;
-		cursorMode = 1;
-		//LOG("2 bits Cursor selected\n");
 	} else {
-		LOG("Prepare Hardware cursor failed\n");
+		//Color map is needed to avoid KP: use a simple one for black and white pixels
+		IOColorEntry colors[2] = {{0, 0, 0, 0}, {1, 0xFFFF, 0xFFFF, 0xFFFF}};
+		hardwareCursorInfo.colorMap = &colors;
+		if (VSLPrepareCursorForHardwareCursor(cursorRef, &hardwareCursorDescriptor1, &hardwareCursorInfo)) {
+			bitDepth = 2;
+			cursorMode = 1;
+			//LOG("2 bits Cursor selected\n");
+		} else {
+			LOG("Prepare Hardware cursor failed\n");
+		}
 	}
 	
 	if (bitDepth) {
@@ -916,7 +922,7 @@ Bool RadeonHDSetHardwareCursor(void *cursorRef, GammaTbl *gTable) {
 		for (i = 0;i < 64;i++)
 			for (j = (i < h)?w:0;j < 64;j++)
 				rhdPtr->CursorImage[i * 64 + j] = 0x00FFFFFF;
-		
+
 		m = 0;
 		n = 0;
 		for (i = 0;i < h;i++) {
@@ -927,15 +933,40 @@ Bool RadeonHDSetHardwareCursor(void *cursorRef, GammaTbl *gTable) {
 					temp = bitswap(temp);
 					UInt8 mode = (temp >> leftBits) & 3;
 					
+					//According with "Designing PCI Card Drivers" manual, using the current cursor
+					//hardware descriptor, four values can be used to draw 2 bit cursor:
+					//"A cursor pixel value of 0 will display the first color in the cursor’s color map, 
+					//and a pixel value of 1 will display the second color. A cursor pixel value of 2 will 
+					//display the color of the screen pixel underneath the cursor. A cursor pixel value 
+					//of 3 will display the inverse of the color of the screen pixel underneath the cursor."
+					switch (mode) {
+						case 0:
+							pixelData = 0xFF000000; //Black
+							break;
+						case 1:
+							pixelData = 0xFFFFFFFF; //White
+							break;
+						case 2:
+							pixelData = 0x00FFFFFF; //Transparent
+							break;
+						case 3:
+							pixelData = 0x80000000; //Transparent black (Inverted?)
+							break;
+						default:
+							break;
+					}
+					/*
 					if (mode == 2) pixelData = 0x00FFFFFF;
 					else if (mode == 3) pixelData = 0xFF000000;
+					else if (mode == 3) pixelData = 0xFF000000;
 					else {
-						LOG("2 bits cursor use preset rgbData\n");	//not reached here for me dong
+						LOG("2 bits cursor use preset rgbData (mode %d)\n", mode);	//not reached here for me dong
 						mode &= 1;
 						pixelData = ((rgbData[mode].red >> 8) << 16)
 						| ((rgbData[mode].green >> 8) << 8)
 						| (rgbData[mode].blue >> 8);
 					}
+					 */
 					rhdPtr->CursorImage[m] = pixelData;
 					m++;
 					leftBits -= bitDepth;
