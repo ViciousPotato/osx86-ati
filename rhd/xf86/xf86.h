@@ -14,6 +14,7 @@
 #include <IOKit/assert.h>
 #include <string.h>
 #include <IOKit/ndrvsupport/IOMacOSTypes.h>
+#include "OS_Version.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -82,15 +83,25 @@ typedef union _DevUnion {
 	pointer		(*fptr) (void);
 } DevUnion;
 
-#ifndef __IONDRVLIBRARIES__
-/*	already declared in IOMacOSTypes.h
+
+// 10.5 condition
+#ifdef MACOSX_10_5
+
+#ifndef __IONDRV__
 	struct RegEntryID
 	{
 		void * opaque[4];
 	};
 	typedef struct RegEntryID RegEntryID;
+#endif	
+
+#ifndef __IONDRVLIBRARIES__
 	typedef RegEntryID *                    RegEntryIDPtr;
-*/
+#endif
+	
+#endif
+	
+#ifndef __IONDRVLIBRARIES__
 	OSErr ExpMgrConfigReadLong(
 							   RegEntryIDPtr    node,
 							   LogicalAddress   configAddr,

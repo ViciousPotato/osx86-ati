@@ -1,0 +1,4 @@
+The same target can be compiled to 10.5 or 10.6.
+
+To compile 10.5 version, use 10.5 SDK and XCode on Mac OS X 10.5.
+To compile 10.6 version, use 10.6 SDK and Xcode on Mac OS X 10.6.

@@ -30,9 +30,15 @@
  * Bitmap cursors are converted to ARGB internally.
  */
 
-#include "IONDRVLibraries.h"
 /* All drivers should typically include these */
 #include "xf86.h"
+
+#ifdef MACOSX_10_5
+#include <IOKit/graphics/IOGraphicsTypes.h>
+#include <IOKit/ndrvsupport/IOMacOSVideo.h>
+#else
+#include <IOKit/ndrvsupport/IONDRVLibraries.h>
+#endif
 
 //#include "xf86Cursor.h"
 //#include "cursorstr.h"
@@ -675,7 +681,51 @@ rhdCrtcLoadCursorARGB(struct rhdCrtc *Crtc, CARD32 *Image)
     lockCursor       (Cursor, FALSE);
 }
 
-//code reversed Dong
+// 10.5 condition
+#ifdef MACOSX_10_5
+#ifndef __IONDRVLIBRARIES__
+typedef UInt32 *                        UInt32Ptr;
+
+struct HardwareCursorDescriptorRec {
+	UInt16              majorVersion;
+	UInt16              minorVersion;
+	UInt32              height;
+	UInt32              width;
+	UInt32              bitDepth;
+	UInt32              maskBitDepth;
+	UInt32              numColors;
+	UInt32Ptr           colorEncodings;
+	UInt32              flags;
+	UInt32              supportedSpecialEncodings;
+	UInt32              specialEncodings[16];
+};
+typedef struct HardwareCursorDescriptorRec HardwareCursorDescriptorRec;
+typedef HardwareCursorDescriptorRec *   HardwareCursorDescriptorPtr;
+
+struct IOHardwareCursorInfo {
+	UInt16		majorVersion;
+	UInt16		minorVersion;
+	UInt32		cursorHeight;
+	UInt32		cursorWidth;
+	// nil or big enough for hardware's max colors
+	IOColorEntry *	colorMap;
+	UInt8 *		hardwareCursorData;
+	UInt16		cursorHotSpotX;
+	UInt16		cursorHotSpotY;
+	UInt32		reserved[5];
+};
+typedef struct IOHardwareCursorInfo    HardwareCursorInfoRec;
+typedef HardwareCursorInfoRec *         HardwareCursorInfoPtr;
+
+extern Boolean
+VSLPrepareCursorForHardwareCursor(void *                        cursorRef,
+								  HardwareCursorDescriptorPtr   hardwareDescriptor,
+								  HardwareCursorInfoPtr         hwCursorInfo);
+
+#endif
+#endif
+
+// code reversed Dong
 static UInt8 cursorMode = 0;
 static UInt32 bitDepth = 0;
 static Bool cursorSet = FALSE;
@@ -683,6 +733,43 @@ static Bool cursorVisible = FALSE;
 static IOColorEntry colorMap[2] = {{0, 0, 0, 0}, {1, 0xFFFF, 0xFFFF, 0xFFFF}};
 static SInt32 cursorX = 0;
 static SInt32 cursorY = 0;
+
+#define bitswap(x) (((x) << 24) & 0xFF000000) | (((x) << 8) & 0x00FF0000) | (((x) >> 8) & 0x0000FF00) | (((x) >> 24) & 0x000000FF);
+
+//static RGBColor rgbData[2] = {{0xFFFF, 0xFFFF, 0xFFFF}, {0, 0, 0}};
+
+static UInt32 cursorColorEncodings1[2] = {0, 1};	//black and white
+static HardwareCursorDescriptorRec hardwareCursorDescriptor1 = {
+	kHardwareCursorDescriptorMajorVersion,
+	kHardwareCursorDescriptorMinorVersion,
+	64, 
+	64, 
+	2,		//bitDepth
+	0,
+	2,		//numColors - Number of colors for indexed pixel types
+	cursorColorEncodings1,		//colorEncodings - An array pointer specifying the pixel values corresponding to the indices into the color table, for indexed pixel types.
+	0, 
+	kTransparentEncodedPixel | kInvertingEncodedPixel,		//supportedSpecialEncodings Mask of supported special pixel values, eg. kTransparentEncodedPixel, kInvertingEncodedPixel.
+	2,		//specialEncodings Array of pixel values for each supported special encoding
+	3, 
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
+
+static HardwareCursorDescriptorRec hwcDescDirect32 =           {
+	kHardwareCursorDescriptorMajorVersion,		//majorVersion
+	kHardwareCursorDescriptorMinorVersion,		//minorVersion
+	64,		//height
+	64,		//width
+	32,		//bitDepth
+	0,		//maskBitDepth (unused)
+	0,		//numColors - Number of colors for indexed pixel types
+	0,		//colorEncodings - An array pointer specifying the pixel values corresponding to the indices into the color table, for indexed pixel types.
+	0,		//flags (None defined, set to zero)
+	kTransparentEncodedPixel,		//supportedSpecialEncodings Mask of supported special pixel values, eg. kTransparentEncodedPixel, kInvertingEncodedPixel.
+	0,		//specialEncodings Array of pixel values for each supported special encoding
+};
+static HardwareCursorInfoRec hardwareCursorInfo = {kHardwareCursorDescriptorMajorVersion, kHardwareCursorDescriptorMinorVersion, };
+
 
 void ProgramCrsrState(RHDPtr rhdPtr, SInt32 x, SInt32 y, Bool visible, UInt8 index) {
 	UInt32 hotSpotX = 0;
@@ -730,44 +817,7 @@ static void SetCrsrState(RHDPtr rhdPtr, SInt32 x, SInt32 y, Bool visible, UInt8 
 	//lockCursor(Cursor, FALSE);
 }
 
-#define bitswap(x) (((x) << 24) & 0xFF000000) | (((x) << 8) & 0x00FF0000) | (((x) >> 8) & 0x0000FF00) | (((x) >> 24) & 0x000000FF);
-
 extern UInt32 GammaCorrectARGB32(GammaTbl *gTable, UInt32 data);
-
-//static RGBColor rgbData[2] = {{0xFFFF, 0xFFFF, 0xFFFF}, {0, 0, 0}};	//actually not being used
-
-static UInt32 cursorColorEncodings1[2] = {0, 1};	//black and white
-static HardwareCursorDescriptorRec hardwareCursorDescriptor1 = {
-	kHardwareCursorDescriptorMajorVersion,
-	kHardwareCursorDescriptorMinorVersion,
-	64, 
-	64, 
-	2,		//bitDepth
-	0,
-	2,		//numColors - Number of colors for indexed pixel types
-	cursorColorEncodings1,		//colorEncodings - An array pointer specifying the pixel values corresponding to the indices into the color table, for indexed pixel types.
-	0, 
-	kTransparentEncodedPixel | kInvertingEncodedPixel,		//supportedSpecialEncodings Mask of supported special pixel values, eg. kTransparentEncodedPixel, kInvertingEncodedPixel.
-	2,		//specialEncodings Array of pixel values for each supported special encoding
-	3, 
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
-
-static HardwareCursorDescriptorRec hwcDescDirect32 =           {
-	kHardwareCursorDescriptorMajorVersion,		//majorVersion
-	kHardwareCursorDescriptorMinorVersion,		//minorVersion
-	64,		//height
-	64,		//width
-	32,		//bitDepth
-	0,		//maskBitDepth (unused)
-	0,		//numColors - Number of colors for indexed pixel types
-	0,		//colorEncodings - An array pointer specifying the pixel values corresponding to the indices into the color table, for indexed pixel types.
-	0,		//flags (None defined, set to zero)
-	kTransparentEncodedPixel,		//supportedSpecialEncodings Mask of supported special pixel values, eg. kTransparentEncodedPixel, kInvertingEncodedPixel.
-	0,		//specialEncodings Array of pixel values for each supported special encoding
-};
-static HardwareCursorInfoRec hardwareCursorInfo = {kHardwareCursorDescriptorMajorVersion, kHardwareCursorDescriptorMinorVersion, };
-
 
 Bool RadeonHDSetHardwareCursor(void *cursorRef, GammaTbl *gTable) {
 	RHDPtr rhdPtr = RHDPTR(xf86Screens[0]);
@@ -806,7 +856,7 @@ Bool RadeonHDSetHardwareCursor(void *cursorRef, GammaTbl *gTable) {
 	UInt32 h = hardwareCursorInfo.cursorHeight;
 	UInt32 w = hardwareCursorInfo.cursorWidth;
 	UInt32 *p = (UInt32*)hardwareCursorInfo.hardwareCursorData;
-
+	
 	/** 32 bits cursor padding
 	 * Fix by semantics. 
 	 *

@@ -11,7 +11,12 @@
 #define _RADEONHD_H
 
 #include <IOKit/ndrvsupport/IONDRVFramebuffer.h>
-#include "IONDRV.h"
+#include "OS_Version.h"
+#ifdef MACOSX_10_5
+#include "IOKit/10.5/IONDRV.h"
+#else
+#include "IOKit/10.6/IONDRV.h"
+#endif
 #include "xf86str.h"
 
 class NDRVHD : public IONDRV
