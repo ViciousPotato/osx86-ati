@@ -438,7 +438,7 @@ atomDebugPrintPspace(atomBiosHandlePtr handle, AtomBiosArgPtr data, int size)
 	LOGV(" Pspace[%d]: 0x%8.8x\n", i, *(pspace++));
 }
 
-#   define CAILFUNC(ptr) LOGV("CAIL: %s\n", __func__)
+#   define CAILFUNC(ptr) if (0) LOGV("CAIL: %s\n", __func__)
 
 #  endif
 
@@ -5629,6 +5629,7 @@ atomSaveRegisters(atomBiosHandlePtr handle, enum atomRegisterType Type, CARD32 a
     List->Last++;
 }
 
+#define CailLOG if (0) LOGV
 /*
  *
  */
@@ -5653,7 +5654,7 @@ CailDelayMicroSeconds(VOID *CAIL, UINT32 delay)
 
     IODelay(delay);
 
-    LOGV("Delay %d usec\n",delay);
+    CailLOG("Delay %d usec\n",delay);
 }
 
 UINT32
@@ -5663,7 +5664,7 @@ CailReadATIRegister(VOID* CAIL, UINT32 idx)
     CAILFUNC(CAIL);
 
     ret  =  RHDRegRead(((atomBiosHandlePtr)CAIL), idx << 2);
-    LOGV("%s(%x) = %x\n",__func__,idx << 2,ret);
+    CailLOG("%s(%x) = %x\n",__func__,idx << 2,ret);
     return ret;
 }
 
@@ -5676,7 +5677,7 @@ CailWriteATIRegister(VOID *CAIL, UINT32 idx, UINT32 data)
     atomSaveRegisters((atomBiosHandlePtr)CAIL, atomRegisterMMIO, idx << 2);
 #endif
     RHDRegWrite(((atomBiosHandlePtr)CAIL),idx << 2,data);
-    LOGV("%s(%x,%x)\n",__func__,idx << 2,data);
+    CailLOG("%s(%x,%x)\n",__func__,idx << 2,data);
 }
 
 UINT32
@@ -5690,12 +5691,12 @@ CailReadFBData(VOID* CAIL, UINT32 idx)
 	CARD8 *FBBase = (CARD8*)
 	    RHDPTRI((atomBiosHandlePtr)CAIL)->FbBase;
 	ret =  *((CARD32*)(FBBase + (((atomBiosHandlePtr)CAIL)->fbBase) + idx));
-	LOGV("%s(%x) = %x\n",__func__,idx,ret);
+	CailLOG("%s(%x) = %x\n",__func__,idx,ret);
     } else if (((atomBiosHandlePtr)CAIL)->scratchBase) {
 	ret = *(CARD32*)((CARD8*)(((atomBiosHandlePtr)CAIL)->scratchBase) + idx);
-	LOGV("%s(%x) = %x\n",__func__,idx,ret);
+	CailLOG("%s(%x) = %x\n",__func__,idx,ret);
     } else {
-	LOGV("%s: no fbbase set\n",__func__);
+	CailLOG("%s: no fbbase set\n",__func__);
 	return 0;
     }
     return ret;
@@ -5706,7 +5707,7 @@ CailWriteFBData(VOID *CAIL, UINT32 idx, UINT32 data)
 {
     CAILFUNC(CAIL);
 
-    LOGV("%s(%x,%x)\n",__func__,idx,data);
+    CailLOG("%s(%x,%x)\n",__func__,idx,data);
     if (((atomBiosHandlePtr)CAIL)->fbBase) {
 	CARD8 *FBBase = (CARD8*)
 	    RHDPTRI((atomBiosHandlePtr)CAIL)->FbBase;
@@ -5714,7 +5715,7 @@ CailWriteFBData(VOID *CAIL, UINT32 idx, UINT32 data)
     } else if (((atomBiosHandlePtr)CAIL)->scratchBase) {
 	*(CARD32*)((CARD8*)(((atomBiosHandlePtr)CAIL)->scratchBase) + idx) = data;
     } else
-	LOGV("%s: no fbbase set\n",__func__);
+	CailLOG("%s: no fbbase set\n",__func__);
 }
 
 ULONG
@@ -5725,7 +5726,7 @@ CailReadMC(VOID *CAIL, ULONG Address)
     CAILFUNC(CAIL);
 
     ret = RHDReadMC(((atomBiosHandlePtr)CAIL), Address | MC_IND_ALL);
-    LOGV("%s(%x) = %x\n",__func__,Address,ret);
+    CailLOG("%s(%x) = %x\n",__func__,Address,ret);
     return ret;
 }
 
@@ -5735,7 +5736,7 @@ CailWriteMC(VOID *CAIL, ULONG Address, ULONG data)
     CAILFUNC(CAIL);
 
 
-    LOGV("%s(%x,%x)\n",__func__,Address,data);
+    CailLOG("%s(%x,%x)\n",__func__,Address,data);
 
 #ifdef SaveRestore
     atomSaveRegisters((atomBiosHandlePtr)CAIL, atomRegisterMC, Address);
@@ -5766,7 +5767,7 @@ CailReadPCIConfigData(VOID*CAIL, VOID* ret, UINT32 idx,UINT16 size)
 	return;
 	    break;
     }
-    LOGV("%s(%x) = %x\n",__func__,idx,*(unsigned int*)ret);
+    CailLOG("%s(%x) = %x\n",__func__,idx,*(unsigned int*)ret);
 
 }
 
@@ -5777,7 +5778,7 @@ CailWritePCIConfigData(VOID*CAIL,VOID*src,UINT32 idx,UINT16 size)
 
     CAILFUNC(CAIL);
 
-    LOGV("%s(%x,%x)\n",__func__,idx,(*(unsigned int*)src));
+    CailLOG("%s(%x,%x)\n",__func__,idx,(*(unsigned int*)src));
 
 #ifdef SaveRestore
     atomSaveRegisters((atomBiosHandlePtr)CAIL, atomRegisterPCICFG, idx << 2);
@@ -5806,7 +5807,7 @@ CailReadPLL(VOID *CAIL, ULONG Address)
     CAILFUNC(CAIL);
 
     ret = _RHDReadPLL(((atomBiosHandlePtr)CAIL)->scrnIndex, Address);
-    LOGV("%s(%x) = %x\n",__func__,Address,ret);
+    CailLOG("%s(%x) = %x\n",__func__,Address,ret);
     return ret;
 }
 
@@ -5815,7 +5816,7 @@ CailWritePLL(VOID *CAIL, ULONG Address,ULONG Data)
 {
     CAILFUNC(CAIL);
 
-    LOGV("%s(%x,%x)\n",__func__,Address,Data);
+    CailLOG("%s(%x,%x)\n",__func__,Address,Data);
 #ifdef SaveRestore
     atomSaveRegisters((atomBiosHandlePtr)CAIL, atomRegisterPLL, Address);
 #endif

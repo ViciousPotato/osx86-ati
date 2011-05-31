@@ -10,7 +10,3 @@
 #include "xf86str.h"
 
 ScrnInfoRec * xf86Screens[] = {NULL};
-
-#ifndef USEIOLOG && defined DEBUG
-VoodooMsg xf86Msg = {0, false, NULL, 0, 0, NULL};
-#endif

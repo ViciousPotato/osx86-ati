@@ -8,12 +8,7 @@
  */
 #ifndef _OS_VERSION_H
 #define _OS_VERSION_H
-#include "/usr/include/AvailabilityMacros.h"
 
-#ifdef MAC_OS_X_VERSION_MAX_ALLOWED
-#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_5
-#define MACOSX_10_5
-#endif
-#endif
+//#define MACOSX_10_5
 
 #endif

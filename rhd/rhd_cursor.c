@@ -253,30 +253,27 @@ hasVisibleCursor(struct rhdCrtc *Crtc, int X, int Y)
  * Internal Driver + Xorg Interface
  */
 void
-rhdShowCursor(ScrnInfoPtr pScrn)
+rhdShowCursor(RHDPtr rhdPtr)
 {
-    RHDPtr rhdPtr = RHDPTR(pScrn);
     int i;
 
     for (i = 0; i < 2; i++) {
 	struct rhdCrtc *Crtc = rhdPtr->Crtc[i];
 
-	if (Crtc->Active && (Crtc->scrnIndex == pScrn->scrnIndex) &&
-	    hasVisibleCursor(Crtc, Crtc->Cursor->X, Crtc->Cursor->Y))
+	if (Crtc->Active)
             rhdCrtcShowCursor(Crtc);
     }
 }
 
 void
-rhdHideCursor(ScrnInfoPtr pScrn)
+rhdHideCursor(RHDPtr rhdPtr)
 {
-    RHDPtr rhdPtr = RHDPTR(pScrn);
     int i;
 
     for (i = 0; i < 2; i++) {
 	struct rhdCrtc *Crtc = rhdPtr->Crtc[i];
 
-	if (Crtc->Active && Crtc->scrnIndex == pScrn->scrnIndex) {
+	if (Crtc->Active) {
             rhdCrtcHideCursor(Crtc);
 	}
     }
@@ -352,9 +349,8 @@ rhdSetCursorPosition(ScrnInfoPtr pScrn, int x, int y)
 	struct rhdCrtc *Crtc = rhdPtr->Crtc[i];
 
 	/* Cursor here is relative to frame. */
-	if (Crtc->Active && (Crtc->scrnIndex == pScrn->scrnIndex) &&
-	    hasVisibleCursor(Crtc, x + pScrn->frameX0, y + pScrn->frameY0))
-	    rhdCrtcSetCursorPosition(Crtc, x + pScrn->frameX0, y + pScrn->frameY0);
+	if (Crtc->Active)
+	    rhdCrtcSetCursorPosition(Crtc, x + Crtc->X, y + Crtc->Y);
     }
 }
 
@@ -467,6 +463,7 @@ void
 RHDCursorsInit(RHDPtr rhdPtr)
 {
     int size = RHD_FB_CHUNK(MAX_CURSOR_WIDTH * MAX_CURSOR_HEIGHT * 4);
+	int Base = RHDAllocFb(rhdPtr, size, "Cursor Image");
     int i;
 
     RHDFUNC(rhdPtr);
@@ -481,7 +478,7 @@ RHDCursorsInit(RHDPtr rhdPtr)
 			Cursor->RegOffset = i * 0x0800;
 			
 			/* grab our cursor FB */
-			Cursor->Base = RHDAllocFb(rhdPtr, size, "Cursor Image");
+			Cursor->Base = Base;
 			//ASSERT(Cursor->Base != -1);
 		}
 		rhdPtr->Crtc[i]->Cursor = Cursor;	/* HW is fixed anyway */
@@ -599,10 +596,10 @@ rhdCrtcHideCursor(struct rhdCrtc *Crtc)
 void
 rhdCrtcSetCursorPosition(struct rhdCrtc *Crtc, int x, int y)
 {
-    RHDPtr rhdPtr = RHDPTRI(Crtc);
+	if (!Crtc || !Crtc->Active) return;
     struct rhdCursor *Cursor = Crtc->Cursor;
-    int hotx, hoty, width, cursor_end, frame_end;
-
+	int hotx, hoty;
+	
     Cursor->X = x;
     Cursor->Y = y;
 
@@ -626,7 +623,9 @@ rhdCrtcSetCursorPosition(struct rhdCrtc *Crtc, int x, int y)
      * For dual-screen:
      * - Cursor's right-edge must not end on multiples of 128px.
      * - For panning, cursor image cannot horizontally extend past end of viewport.
-     */
+     */ /*
+		 RHDPtr rhdPtr = RHDPTRI(Crtc);
+		 int width, cursor_end, frame_end;
     if (rhdPtr->Crtc[0]->Active && rhdPtr->Crtc[1]->Active) {
         width      = MAX_CURSOR_WIDTH;
         cursor_end = x + width;
@@ -639,7 +638,7 @@ rhdCrtcSetCursorPosition(struct rhdCrtc *Crtc, int x, int y)
         if (! (cursor_end & 0x7f)) {
             width--;
         }
-        /* If the cursor is effectively invisible, move it out of visible area */
+        // If the cursor is effectively invisible, move it out of visible area
         if (width <= 0) {
             width = 1;
             x = 0;
@@ -648,9 +647,10 @@ rhdCrtcSetCursorPosition(struct rhdCrtc *Crtc, int x, int y)
             hoty = 0;
         }
         setCursorSize(Cursor, width, MAX_CURSOR_HEIGHT);
-    }
+    } */
 
     setCursorPos (Cursor, x, y, hotx, hoty);
+	setCursorImage(Cursor);
     lockCursor   (Cursor, FALSE);
 }
 
@@ -672,6 +672,7 @@ rhdCrtcSetCursorColors(struct rhdCrtc *Crtc, int bg, int fg)
 void
 rhdCrtcLoadCursorARGB(struct rhdCrtc *Crtc, CARD32 *Image)
 {
+	if (!Crtc || !Crtc->Active) return;
     struct rhdCursor *Cursor = Crtc->Cursor;
 
     lockCursor       (Cursor, TRUE);
@@ -679,6 +680,7 @@ rhdCrtcLoadCursorARGB(struct rhdCrtc *Crtc, CARD32 *Image)
     setCursorImage   (Cursor);
     setCursorSize    (Cursor, MAX_CURSOR_WIDTH, MAX_CURSOR_HEIGHT);
     lockCursor       (Cursor, FALSE);
+	rhdShowCursor(RHDPTRI(Crtc));
 }
 
 // 10.5 condition
@@ -729,10 +731,10 @@ VSLPrepareCursorForHardwareCursor(void *                        cursorRef,
 static UInt8 cursorMode = 0;
 static UInt32 bitDepth = 0;
 static Bool cursorSet = FALSE;
-static Bool cursorVisible = FALSE;
+static Bool cursorVisible[2] = {FALSE, FALSE};
 static IOColorEntry colorMap[2] = {{0, 0, 0, 0}, {1, 0xFFFF, 0xFFFF, 0xFFFF}};
-static SInt32 cursorX = 0;
-static SInt32 cursorY = 0;
+static SInt32 cursorX[2] = {0, 0};
+static SInt32 cursorY[2] = {0, 0};
 
 #define bitswap(x) (((x) << 24) & 0xFF000000) | (((x) << 8) & 0x00FF0000) | (((x) >> 8) & 0x0000FF00) | (((x) >> 24) & 0x000000FF);
 
@@ -803,9 +805,9 @@ void ProgramCrsrState(RHDPtr rhdPtr, SInt32 x, SInt32 y, Bool visible, UInt8 ind
 }
 
 static void SetCrsrState(RHDPtr rhdPtr, SInt32 x, SInt32 y, Bool visible, UInt8 index) {
-	cursorVisible = FALSE;
+	cursorVisible[index] = FALSE;
 	if ((!bitDepth || !cursorSet) && visible) return;	//no way to show crsr
-	cursorVisible = visible;
+	cursorVisible[index] = visible;
 	if (!visible) {
 		x = 0x1FFF;
 		y = 0x1FFF;
@@ -824,7 +826,8 @@ Bool RadeonHDSetHardwareCursor(void *cursorRef, GammaTbl *gTable) {
 	if (!rhdPtr->FbBase) return FALSE;
 	
 	cursorSet = FALSE;
-	cursorVisible = FALSE;
+	cursorVisible[0] = FALSE;
+	cursorVisible[1] = FALSE;
 	cursorMode = 0;
 	bitDepth = 0;
 	
@@ -849,7 +852,8 @@ Bool RadeonHDSetHardwareCursor(void *cursorRef, GammaTbl *gTable) {
 	
 	if (bitDepth) {
 		cursorSet = TRUE;
-		cursorVisible = TRUE;
+		cursorVisible[0] = TRUE;
+		cursorVisible[1] = TRUE;
 	}	
 	
 	int i, j;
@@ -958,24 +962,22 @@ Bool RadeonHDSetHardwareCursor(void *cursorRef, GammaTbl *gTable) {
 	else return FALSE;
 }
 
-Bool RadeonHDDrawHardwareCursor(SInt32 x, SInt32 y, Bool visible) {
+Bool RadeonHDDrawHardwareCursor(SInt32 x, SInt32 y, Bool visible, int index) {
 	if (!cursorSet) return FALSE;
 	
 	RHDPtr rhdPtr = RHDPTR(xf86Screens[0]);
-	cursorX = x;
-	cursorY = y;
-	UInt8 k;
-	for (k = 0;k < 2;k++)	//k = 0 is enough for me since only one head is supported
-		if (rhdPtr->Crtc[k]->Active)
-			SetCrsrState(rhdPtr, x, y, visible, k);
+	cursorX[index] = x;
+	cursorY[index] = y;
+	if (rhdPtr->Crtc[index]->Active)
+		SetCrsrState(rhdPtr, x, y, visible, index);
 	return TRUE;
 }
 
-void RadeonHDGetHardwareCursorState(SInt32 *x, SInt32 *y, UInt32 *set, UInt32 *visible) {
+void RadeonHDGetHardwareCursorState(SInt32 *x, SInt32 *y, UInt32 *set, UInt32 *visible, int index) {
 	*set = cursorSet;	//typo fix
 	if (cursorSet) {
-		*x = cursorX;
-		*y = cursorY;
-		*visible = cursorVisible;
+		*x = cursorX[index];
+		*y = cursorY[index];
+		*visible = cursorVisible[index];
 	}
 }

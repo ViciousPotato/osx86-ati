@@ -506,7 +506,7 @@ rhdModeSanity(RHDPtr rhdPtr, DisplayModePtr Mode)
  * After we passed the initial sanity check, we need to fill out the CRTC
  * values.
  */
-static void
+void
 rhdModeFillOutCrtcValues(DisplayModePtr Mode)
 {
     /* do we need to bother at all? */
@@ -776,8 +776,8 @@ rhdModeValidateCrtc(struct rhdCrtc *Crtc, DisplayModePtr Mode, enum ValidationKi
 	if (ValidateScaleModeKind != VALIDATE_SCALE_TO) {
 
 	    Status = Crtc->FBValid(Crtc, Mode->CrtcHDisplay, Mode->CrtcVDisplay,
-				   pScrn->bitsPerPixel, rhdPtr->FbScanoutStart,
-				   rhdPtr->FbScanoutSize, NULL);
+				   pScrn->bitsPerPixel, rhdPtr->FbFreeStart,
+				   rhdPtr->FbFreeSize, NULL);
 	    if (Status != MODE_OK) {
 			LOG("FBValid failed\n");
             return Status;
@@ -927,13 +927,13 @@ rhdModeValidate(ScrnInfoPtr pScrn, DisplayModePtr Mode)
 	    return Status;
     } */
 
-    /* Did we set up virtual resolution already? */
+    /* Did we set up virtual resolution already?
     if ((pScrn->virtualX > 0) && (pScrn->virtualY > 0)) {
         if (pScrn->virtualX < Mode->CrtcHDisplay)
             return MODE_VIRTUAL_X;
         if (pScrn->virtualY < Mode->CrtcVDisplay)
             return MODE_VIRTUAL_Y;
-    }
+    } */
 
     return MODE_OK;
 }
@@ -1540,8 +1540,8 @@ RHDRRModeFixup(ScrnInfoPtr pScrn, DisplayModePtr Mode, struct rhdCrtc *Crtc,
 	    if (Crtc) {
 		/* Check FB */
 		Status = Crtc->FBValid(Crtc, Mode->CrtcHDisplay, Mode->CrtcVDisplay,
-				       pScrn->bitsPerPixel, rhdPtr->FbScanoutStart,
-				       rhdPtr->FbScanoutSize, NULL);
+				       pScrn->bitsPerPixel, rhdPtr->FbFreeStart,
+				       rhdPtr->FbFreeSize, NULL);
 		if (Status != MODE_OK)
 		    return Status;
 
@@ -1612,13 +1612,13 @@ RHDRRModeFixup(ScrnInfoPtr pScrn, DisplayModePtr Mode, struct rhdCrtc *Crtc,
 	}
     }
 
-    /* Did we set up virtual resolution already? */
+    /* Did we set up virtual resolution already?
     if ((pScrn->virtualX > 0) && (pScrn->virtualY > 0)) {
         if (pScrn->virtualX < Mode->CrtcHDisplay)
             return MODE_VIRTUAL_X;
         if (pScrn->virtualY < Mode->CrtcVDisplay)
             return MODE_VIRTUAL_Y;
-    }
+    } */
 
     return MODE_OK;
 }
@@ -1689,15 +1689,22 @@ RHDRRValidateScaledToMode(struct rhdOutput *Output, DisplayModePtr Mode)
     return MODE_OK;
 }
 
+static int existMode(int x, int y, DisplayModePtr modeList) {
+	DisplayModePtr mode = modeList;
+	while (mode) {
+		if ((mode->HDisplay == x) && (mode->VDisplay == y)) return 1;
+		mode = mode->next;
+	}
+	return 0;
+}
+
 /*
  * RHDSynthModes(): synthesize CVT modes for well known resolutions.
  * For now we assume we want reduced modes only.
  */
 void
-RHDSynthModes(int scrnIndex, DisplayModePtr Mode, DisplayModePtr NativeMode)
+RHDSynthModes(DisplayModePtr Mode, DisplayModePtr NativeMode)
 {
-    ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
-    RHDPtr rhdPtr = RHDPTR(pScrn);
     DisplayModePtr Tmp;
     unsigned int i;
 
@@ -1740,16 +1747,13 @@ RHDSynthModes(int scrnIndex, DisplayModePtr Mode, DisplayModePtr NativeMode)
 		 *  Don't tell me it's ugly - I know this already.
 		 */
 		if (NativeMode && (resolution_list[i].x >= NativeMode->HDisplay) && (resolution_list[i].y >= NativeMode->VDisplay)) continue;
+		if (existMode(resolution_list[i].x, resolution_list[i].y, Mode)) continue;
 		Tmp = RHDCVTMode(resolution_list[i].x, resolution_list[i].y, 60, TRUE, FALSE);
 		Tmp->status = MODE_OK;
 		if ((Tmp->HDisplay * NativeMode->VDisplay) != (Tmp->VDisplay * NativeMode->HDisplay)) Tmp->Flags |= V_STRETCH;
 		rhdModeFillOutCrtcValues(Tmp);
-		snprintf(Tmp->name, MODE_NAME_LEN, "%dx%dScaled",resolution_list[i].x,resolution_list[i].y);
+		snprintf(Tmp->name, MODE_NAME_LEN, "%dx%d",resolution_list[i].x,resolution_list[i].y);
 		Tmp->type = M_T_BUILTIN;
-		if (rhdPtr->verbosity > 1) {
-			LOG("%s: Adding Modeline ",__func__);
-			RHDPrintModeline(Tmp);
-		}
 		RHDModesAdd(Mode, Tmp);
     }
 }

@@ -73,12 +73,12 @@
 
 /* Mandatory functions */
 static Bool     RHDPreInit(ScrnInfoPtr pScrn);
-static Bool     RHDScreenInit(ScrnInfoPtr pScrn, DisplayModePtr mode);
-static Bool     RHDEnterVT(ScrnInfoPtr pScrn, DisplayModePtr mode);
+static Bool     RHDScreenInit(ScrnInfoPtr pScrn);
+static Bool     RHDEnterVT(ScrnInfoPtr pScrn);
 static void     RHDLeaveVT(ScrnInfoPtr pScrn);
 static Bool     RHDCloseScreen(int scrnIndex);
 static void     RHDFreeScreen(int scrnIndex, int flags);
-static Bool     RHDSwitchMode(ScrnInfoPtr pScrn, DisplayModePtr mode);
+static Bool     RHDSwitchMode(ScrnInfoPtr pScrn);
 static void     RHDAdjustFrame(ScrnInfoPtr pScrn, int x, int y);
 static void     RHDDisplayPowerManagementSet(ScrnInfoPtr pScrn,
                                              int PowerManagementMode,
@@ -89,12 +89,12 @@ static Bool     RHDSaveScreen(ScrnInfoPtr pScrn, Bool unblank);
 
 static void     rhdSave(RHDPtr rhdPtr);
 static void     rhdRestore(RHDPtr rhdPtr);
-static Bool     rhdModeLayoutSelect(RHDPtr rhdPtr);
+static Bool     rhdModeLayoutSelect(ScrnInfoPtr pScrn);
 static void     rhdModeLayoutPrint(RHDPtr rhdPtr);
 static void     rhdModeDPISet(ScrnInfoPtr pScrn);
 static Bool     rhdAllIdle(RHDPtr rhdPtr);
-static void     rhdModeInit(ScrnInfoPtr pScrn, DisplayModePtr mode);
-static void	rhdSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode);
+static void     rhdModeInit(ScrnInfoPtr pScrn);
+static void	rhdSetMode(ScrnInfoPtr pScrn);
 static Bool     rhdMapFB(RHDPtr rhdPtr);
 static void     rhdUnmapFB(RHDPtr rhdPtr);
 static CARD32   rhdGetVideoRamSize(RHDPtr rhdPtr);
@@ -164,7 +164,6 @@ RHDPreInit(ScrnInfoPtr pScrn)
     RHDPtr rhdPtr;
     Bool ret = FALSE;
     RHDI2CDataArg i2cArg;
-    DisplayModePtr Modes;		/* Non-RandR-case only */
 
     /*
      * Allocate the RhdRec driverPrivate
@@ -395,11 +394,12 @@ RHDPreInit(ScrnInfoPtr pScrn)
 					//bcopy(OutputDeviceList, temp, sizeof (struct rhdAtomOutputDeviceList) * k);
 					//IOFree(OutputDeviceList, sizeof (struct rhdAtomOutputDeviceList) * k);
 					//OutputDeviceList = temp;
-					if (!OutputDeviceList &&
-						!(OutputDeviceList = IONew(struct rhdAtomOutputDeviceList, MaxAtomOutputDeviceList))) {
+					if (!OutputDeviceList) {
+						if (!(OutputDeviceList = IONew(struct rhdAtomOutputDeviceList, MaxAtomOutputDeviceList))) {
 						LOG("not enough memory\n");
 						goto error1;
-					} else bzero(OutputDeviceList, sizeof(struct rhdAtomOutputDeviceList) * MaxAtomOutputDeviceList);
+						} else bzero(OutputDeviceList, sizeof(struct rhdAtomOutputDeviceList) * MaxAtomOutputDeviceList);
+					}
 					
 					if (k < MaxAtomOutputDeviceList) {
 						OutputDeviceList[k].ConnectorType = rhdPtr->Card->ConnectorInfo[i].Type;
@@ -443,23 +443,24 @@ RHDPreInit(ScrnInfoPtr pScrn)
     rhdPtr->FbScanoutSize = rhdPtr->FbFreeSize;
 	pScrn->fbOffset = rhdPtr->FbFreeStart;
 	
+    if (!rhdMapFB(rhdPtr)) {
+		LOG("Failed to map FB.\n");
+		goto error1;
+    }
+	
 	/* Pick anything for now */	//here initialize ATIPanel
-	if (!rhdModeLayoutSelect(rhdPtr)) {
+	if (!rhdModeLayoutSelect(pScrn)) {
 		LOG("Failed to detect a connected monitor\n");
 		goto error1;
 	}
 	
 	rhdModeLayoutPrint(rhdPtr);
-	/*	
-	 if (pScrn->depth > 1) {
-	 Gamma zeros = {0.0, 0.0, 0.0};
-	 
-	 if (!xf86SetGamma(pScrn, zeros)) {
-	 goto error1;
-	 }
-	 }
-	 */	
-	
+	RHDLUTCopyForRR(rhdPtr->LUT[1]);	//for some reason, LUT1 is messed up
+
+	ret = RHDScreenInit(pScrn);
+	//ret = TRUE;
+	/*
+	 DisplayModePtr Modes;
 	Modes = RHDModesPoolCreate(pScrn, FALSE);
 	if (!Modes) {
 		LOG("No valid modes found\n");
@@ -476,20 +477,10 @@ RHDPreInit(ScrnInfoPtr pScrn)
 	LOG("Using %dx%d Framebuffer with %d pitch\n", pScrn->virtualX,
 		pScrn->virtualY, pScrn->displayWidth);
 	
-	//this is for accelaration, no need for osx
-	/* grab the real scanout area and adjust the free space */
-	/*
-	 rhdPtr->FbScanoutSize = RHD_FB_CHUNK(pScrn->displayWidth * pScrn->bitsPerPixel *
-	 pScrn->virtualY / 8);
-	 rhdPtr->FbScanoutStart = RHDAllocFb(rhdPtr, rhdPtr->FbScanoutSize,
-	 "ScanoutBuffer");
-	 //ASSERT(rhdPtr->FbScanoutStart != (unsigned)-1);
-	 */
-	
 	LOG("Free FB offset 0x%08X (size = 0x%08X)\n",
 		rhdPtr->FbFreeStart, rhdPtr->FbFreeSize);
-	
     ret = TRUE;
+	 */
 	
 error1:
 error0:
@@ -501,15 +492,10 @@ error0:
 
 /* Mandatory */
 static Bool
-RHDScreenInit(ScrnInfoPtr pScrn, DisplayModePtr mode)
+RHDScreenInit(ScrnInfoPtr pScrn)
 {
     RHDPtr rhdPtr = RHDPTR(pScrn);
     RHDFUNC(pScrn);
-
-    if (!rhdMapFB(rhdPtr)) {
-	LOG("Failed to map FB.\n");
-	return FALSE;
-    }
 
     /* save previous mode */
     //rhdSave(rhdPtr);	//we not going to restore yet (Dong)
@@ -529,10 +515,10 @@ RHDScreenInit(ScrnInfoPtr pScrn, DisplayModePtr mode)
 
     RHDPrepareMode(rhdPtr);
     /* now init the new mode */
-	rhdModeInit(pScrn, mode);
+	rhdModeInit(pScrn);
 	
     /* fix viewport */
-    RHDAdjustFrame(pScrn, pScrn->frameX0, pScrn->frameY0);
+    RHDAdjustFrame(pScrn, 0, 0);
 
     /* enable/disable audio */
     //RHDAudioSetEnable(rhdPtr, rhdPtr->audio);
@@ -614,7 +600,7 @@ RHDFreeScreen(int scrnIndex, int flags)
 
 /* Mandatory */
 static Bool
-RHDEnterVT(ScrnInfoPtr pScrn, DisplayModePtr mode)
+RHDEnterVT(ScrnInfoPtr pScrn)
 {
     RHDPtr rhdPtr = RHDPTR(pScrn);
 
@@ -636,14 +622,14 @@ RHDEnterVT(ScrnInfoPtr pScrn, DisplayModePtr mode)
     //RHDAtomBIOSScratchSetAccelratorMode(rhdPtr, TRUE);
 #endif
 
-	rhdModeInit(pScrn, mode);
+	rhdModeInit(pScrn);
 
     /* @@@ video overlays can be initialized here */
 
     if (rhdPtr->CursorInfo) rhdReloadCursor(pScrn);	//cursorImage should be set before this (Dong)
     /* rhdShowCursor() done by AdjustFrame */
 
-    RHDAdjustFrame(pScrn, pScrn->frameX0, pScrn->frameY0);
+    RHDAdjustFrame(pScrn, 0, 0);
 
     /* enable/disable audio */
     //RHDAudioSetEnable(rhdPtr, rhdPtr->audio);
@@ -669,7 +655,7 @@ RHDLeaveVT(ScrnInfoPtr pScrn)
 }
 
 static Bool
-RHDSwitchMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
+RHDSwitchMode(ScrnInfoPtr pScrn)
 {
     RHDPtr rhdPtr = RHDPTR(pScrn);
 	
@@ -683,7 +669,7 @@ RHDSwitchMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
     /* now set up the MC - has to be done before DRI init */
     RHDMCSetupFBLocation(rhdPtr, rhdPtr->FbIntAddress, rhdPtr->FbIntSize);
 	
-	rhdSetMode(pScrn, mode);
+	rhdSetMode(pScrn);
 	
     return TRUE;
 }
@@ -700,14 +686,14 @@ RHDAdjustFrame(ScrnInfoPtr pScrn, int x, int y)
 	
 	Crtc = rhdPtr->Crtc[0];
 	if (Crtc->Active)
-		Crtc->FrameSet(Crtc, x, y);
+		Crtc->FrameSet(Crtc, Crtc->X, Crtc->Y);
 	
 	Crtc = rhdPtr->Crtc[1];
 	if (Crtc->Active)
-		Crtc->FrameSet(Crtc, x, y);
+		Crtc->FrameSet(Crtc, Crtc->X, Crtc->Y);
 	
     if (rhdPtr->CursorInfo)
-		rhdShowCursor(pScrn);
+		rhdShowCursor(rhdPtr);
 }
 
 static void
@@ -881,8 +867,7 @@ RHDSaveScreen(ScrnInfoPtr pScrn, Bool unblank)
 
     rhdPtr = RHDPTR(pScrn);
 
-    if (!pScrn->vtSema)
-	return TRUE;
+    if (!pScrn->vtSema) return TRUE;
 
     Crtc = rhdPtr->Crtc[0];
  	Crtc->Blank(Crtc, !unblank);
@@ -902,8 +887,7 @@ RHDScalePolicy(struct rhdMonitor *Monitor, struct rhdConnector *Connector)
     if (!Monitor || !Monitor->UseFixedModes || !Monitor->NativeMode)
 	return FALSE;
 
-    if (Connector->Type != RHD_CONNECTOR_PANEL)
-	return FALSE;
+    if (Connector->Type != RHD_CONNECTOR_PANEL) return FALSE;
 
     return TRUE;
 }
@@ -945,9 +929,8 @@ rhdMapFB(RHDPtr rhdPtr)
 
     rhdPtr->FbBase = NULL;
 
-    //rhdPtr->FbPCIAddress = rhdPtr->PciInfo->memBase[RHD_FB_BAR];
-    //rhdPtr->FbMapSize = 1 << rhdPtr->PciInfo->size[RHD_FB_BAR];
 	rhdPtr->FbBase = pScrn->memoryMap->FbBase;
+	rhdPtr->FbPhysBase = pScrn->memoryMap->FbPhysBase;
 	rhdPtr->FbMapSize = pScrn->videoRam * 1024;
 
     /* some IGPs are special cases */
@@ -1089,12 +1072,117 @@ rhdOutputConnectorCheck(struct rhdConnector *Connector)
     }
 }
 
+static char * rhdStrstr(const char *in, const char *str)
+{
+    char c;
+    size_t len;
+	
+    c = *str++;
+    if (!c)
+        return (char *) in;	// Trivial empty string case
+	
+    len = strlen(str);
+    do {
+        char sc;
+		
+        do {
+            sc = *in++;
+            if (!sc)
+                return (char *) 0;
+        } while (sc != c);
+    } while (strncmp(in, str, len) != 0);
+	
+    return (char *) (in - 1);
+}
+
+static Bool isInternalOutput(struct rhdOutput *Output) {
+	if (!Output->Active) return FALSE;
+	if (Output->Id == RHD_OUTPUT_LVTMA) return TRUE;
+	if (Output->Id == RHD_OUTPUT_KLDSKP_LVTMA) return TRUE;
+	if (Output->Name && rhdStrstr(Output->Name, "LVDS")) return TRUE;
+	if (Output->Name && rhdStrstr(Output->Name, "TMDS B")) return TRUE;
+	if (Output->Name && rhdStrstr(Output->Name, "LVTMA")) return TRUE;
+	if (Output->Name && rhdStrstr(Output->Name, "KldskpLvtma")) return TRUE;
+	return FALSE;
+}
+
+Bool RHDIsInternalDisplay(int index) {
+	ScrnInfoPtr pScrn = xf86Screens[0];
+	if (!pScrn) return FALSE;
+	struct rhdOutput *Output;
+	for (Output= RHDPTR(pScrn)->Outputs;(Output != NULL);Output = Output->Next) {
+		if (!Output->Crtc || (Output->Crtc != RHDPTR(pScrn)->Crtc[index])) continue;
+		return isInternalOutput(Output);
+	}
+	return FALSE;
+}
+
+static void rhdSetupCrtcModes(ScrnInfoPtr pScrn) {
+	RHDPtr rhdPtr = RHDPTR(pScrn);
+	DisplayModePtr Mode, Modes;
+	struct rhdCrtc *Crtc;
+	struct rhdOutput *Output;
+	struct rhdConnector *Connector;
+	struct rhdMonitor *Monitor;
+	int i;
+	
+	/* ;) */	//assign crtc
+	i = 0;
+	for (Output = rhdPtr->Outputs; Output; Output = Output->Next)
+		if (Output->Active) {
+			Output->Crtc = rhdPtr->Crtc[i & 1];
+			i++;
+		}
+	// for some reason, the boot display (mostly internal one) must stick to the same VRAM area used by Crtc 0
+	// so we reassign crtc here in case needed
+	if ( !RHDIsInternalDisplay(0) && RHDIsInternalDisplay(1) ) {
+		i = 1;
+		for (Output = rhdPtr->Outputs; Output; Output = Output->Next)
+			if (Output->Active) {
+				Output->Crtc = rhdPtr->Crtc[i & 1];
+				i++;
+			}
+	}
+	
+    for (i = 0; i < 2; i++) {
+		Crtc = rhdPtr->Crtc[i];
+		Crtc->Modes = NULL;
+		Crtc->ScaledToMode = NULL;
+		Crtc->CurrentMode = NULL;
+	}
+	
+	for (Output = rhdPtr->Outputs; Output; Output = Output->Next)
+		if (Output->Active) {
+			Crtc = Output->Crtc;
+			Crtc->Active = TRUE;
+			Connector = Output->Connector;
+			Monitor = Connector->Monitor;
+			
+			if (!Crtc->Modes && Connector && Monitor) {
+				Modes = Monitor->Modes;
+				if (Modes)
+					LOG("Add Modes from Monitor \"%s\" on \"%s\"\n", Monitor->Name, Connector->Name);
+				else continue;
+				for (Mode = Modes;Mode;Mode = Mode->next)
+					Crtc->Modes = RHDModesAdd(Crtc->Modes, RHDModeCopy(Mode));
+				Crtc->CurrentMode = Crtc->Modes;
+			}
+			if (!Crtc->ScaledToMode && RHDScalePolicy(Monitor, Connector)) {
+				//Crtc->ScaledToMode = RHDModeCopy(Monitor->NativeMode);
+				Crtc->ScaledToMode = Crtc->CurrentMode;	//NativeMode has been moved to first one
+				LOG("Crtc[%d]: found native mode from Monitor[%s]: \n", Crtc->Id, Monitor->Name);
+				RHDPrintModeline(Crtc->ScaledToMode);
+			}
+		}
+}
+
 /*
  *
  */
 static Bool
-rhdModeLayoutSelect(RHDPtr rhdPtr)
+rhdModeLayoutSelect(ScrnInfoPtr pScrn)
 {
+	RHDPtr rhdPtr = RHDPTR(pScrn);
     struct rhdOutput *Output;
     struct rhdConnector *Connector;
     Bool Found = FALSE;
@@ -1104,12 +1192,17 @@ rhdModeLayoutSelect(RHDPtr rhdPtr)
     RHDFUNC(rhdPtr);
 
     /* housekeeping */
-    rhdPtr->Crtc[0]->PLL = rhdPtr->PLLs[0];
-    rhdPtr->Crtc[0]->LUT = rhdPtr->LUT[0];
-
-    rhdPtr->Crtc[1]->PLL = rhdPtr->PLLs[1];
-    rhdPtr->Crtc[1]->LUT = rhdPtr->LUT[1];
-
+	rhdPtr->Crtc[0]->Offset = rhdPtr->FbFreeStart;
+	rhdPtr->Crtc[1]->Offset = rhdPtr->FbMapSize / 2;
+	
+	for (i = 0;i < 2;i++) {
+		rhdPtr->Crtc[i]->PLL = rhdPtr->PLLs[i];
+		rhdPtr->Crtc[i]->LUT = rhdPtr->LUT[i];
+		rhdPtr->Crtc[i]->X = 0;
+		rhdPtr->Crtc[i]->Y = 0;
+		rhdPtr->Crtc[i]->FBPhyAddress = (char *) ((unsigned long)(rhdPtr->FbPhysBase) + rhdPtr->Crtc[i]->Offset);
+	}
+	
     /* start layout afresh */
     for (Output = rhdPtr->Outputs; Output; Output = Output->Next) {
 	Output->Active = FALSE;
@@ -1154,7 +1247,7 @@ rhdModeLayoutSelect(RHDPtr rhdPtr)
 
 	    Connector = Output->Connector;
 
-	    Monitor = RHDMonitorInit(Connector);
+	    Monitor = RHDMonitorInit(Output);
 
 	    if (!Monitor && (Connector->Type == RHD_CONNECTOR_PANEL)) {
 		LOG("Unable to attach a"
@@ -1164,18 +1257,6 @@ rhdModeLayoutSelect(RHDPtr rhdPtr)
 		Connector->Monitor = Monitor;
 
 		Output->Active = TRUE;
-
-		Output->Crtc = rhdPtr->Crtc[i & 1]; /* ;) */	//assign crtc here for ATIConnections
-		i++;
-
-		Output->Crtc->Active = TRUE;
-
-		if (RHDScalePolicy(Monitor, Connector)) {
-		    Output->Crtc->ScaledToMode = RHDModeCopy(Monitor->NativeMode);
-		    LOG("Crtc[%d]: found native mode from Monitor[%s]: \n",
-			       Output->Crtc->Id, Monitor->Name);
-		    RHDPrintModeline(Output->Crtc->ScaledToMode);
-		}
 
 		Found = TRUE;
 
@@ -1199,7 +1280,21 @@ rhdModeLayoutSelect(RHDPtr rhdPtr)
 	    }
 	}
 
-    /* Now validate the scaled modes attached to crtcs */
+	if (!Found && !pScrn->options->EDID_Length[0] && !pScrn->options->EDID_Length[1]) {
+		LOG("Auto detect Monitor failed\n");
+		LOG("Try add Monitor EDID to the UserOption of RadeonController's Info.plist\n");
+		LOG("For example:\n");
+		LOG("\"@0,TYPE\" = \"LVDS\", \"@0,EDID\" = LVDS Panel's EDID data\n");
+		LOG("\"@1,TYPE\" = \"DACA\", \"@1,EDID\" = DACA Monitor's EDID data\n");
+		LOG("Your card support below types:\n");
+		for (Output = rhdPtr->Outputs; Output; Output = Output->Next)
+			if (Output->Connector) LOG("Type \"%s\" attached to connector \"%s\"\n", Output->Name, Connector->Name);
+	}
+	
+	rhdSetupCrtcModes(pScrn);
+	
+	/* Now validate the scaled modes attached to crtcs */
+	/*
     for (i = 0; i < 2; i++) {
 		struct rhdCrtc *crtc = rhdPtr->Crtc[i];
 		if (crtc->ScaledToMode && (RHDValidateScaledToMode(crtc, crtc->ScaledToMode) != MODE_OK)) {
@@ -1212,7 +1307,7 @@ rhdModeLayoutSelect(RHDPtr rhdPtr)
 			IODelete(crtc->ScaledToMode, DisplayModeRec, 1);
 			crtc->ScaledToMode = NULL;
 		}
-    }
+    } */
 	
     return Found;
 }
@@ -1381,37 +1476,74 @@ RHDPrepareMode(RHDPtr rhdPtr)
  *
  */
 static void
-rhdModeInit(ScrnInfoPtr pScrn, DisplayModePtr mode)
+rhdModeInit(ScrnInfoPtr pScrn)
 {
     RHDFUNC(pScrn);
     pScrn->vtSema = TRUE;
 
-    rhdSetMode(pScrn, mode);
+    rhdSetMode(pScrn);
 }
 
+static void setupMirrorViewPort(ScrnInfoPtr pScrn, UInt32 *width, UInt32 *height) {
+	RHDPtr rhdPtr = RHDPTR(pScrn);
+	struct rhdCrtc *Crtc0, *Crtc1;
+	Crtc0 = rhdPtr->Crtc[0];
+	Crtc1 = rhdPtr->Crtc[1];
+	if (rhdPtr->mirrored && Crtc0 && Crtc0->Active && Crtc0->CurrentMode
+		&& Crtc1 && Crtc1->Active && Crtc1->CurrentMode) {
+		*width = min(Crtc0->CurrentMode->CrtcHDisplay, Crtc1->CurrentMode->CrtcHDisplay);
+		*height = min(Crtc0->CurrentMode->CrtcVDisplay, Crtc1->CurrentMode->CrtcVDisplay);
+		Crtc1->Offset = Crtc0->Offset;
+	} else if (Crtc1->Active) {
+		Crtc1->Offset = rhdPtr->FbMapSize/2;
+	}
+	if (Crtc1->Active)
+		Crtc1->FBPhyAddress = (char *) ((unsigned long)rhdPtr->FbPhysBase + Crtc1->Offset);
+}
+
+#ifndef __IOMACOSVIDEO__
+enum {
+    kDepthMode1                 = 128,
+    kDepthMode2                 = 129,
+    kDepthMode3                 = 130,
+    kDepthMode4                 = 131,
+    kDepthMode5                 = 132,
+    kDepthMode6                 = 133
+};
+#endif
 /*
  *
  */
 static void
-rhdSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
+rhdSetMode(ScrnInfoPtr pScrn)
 {
     RHDPtr rhdPtr = RHDPTR(pScrn);
+	DisplayModePtr mode;
+	DisplayModeRec copy;
     int i;
 
     RHDFUNC(rhdPtr);
 
-    LOG("Setting up \"%s\" (%dx%d@%dHz)\n",
-	       mode->name, mode->CrtcHDisplay, mode->CrtcVDisplay,
-	       (int)mode->VRefresh);
-
     /* Set up D1/D2 and appendages */
     for (i = 0; i < 2; i++) {
-		struct rhdCrtc *Crtc;
-		
-		Crtc = rhdPtr->Crtc[i];
-		if (Crtc->Active) {
-			Crtc->FBSet(Crtc, pScrn->displayWidth, pScrn->virtualX, pScrn->virtualY,
-						pScrn->depth, rhdPtr->FbScanoutStart);
+		struct rhdCrtc *Crtc = rhdPtr->Crtc[i];
+		if (Crtc->Active && Crtc->CurrentMode) {
+			bcopy(Crtc->CurrentMode, &copy, sizeof(DisplayModeRec));
+			mode = &copy;	//so that we can modify the mode safely
+			LOG("Crtc %d Setting up \"%s\" (%dx%d@%dHz)\n", Crtc->Id,
+				mode->name, mode->CrtcHDisplay, mode->CrtcVDisplay, (int)mode->VRefresh);
+			
+			UInt32 newWidth, newHeight, newRowBytes, newBitsPerPixel;
+			newWidth = mode->CrtcHDisplay;
+			newHeight = mode->CrtcVDisplay;
+			setupMirrorViewPort(pScrn, &newWidth, &newHeight);
+			mode->CrtcHDisplay = newWidth;
+			mode->CrtcVDisplay = newHeight;
+			newBitsPerPixel = pScrn->depth;
+			newRowBytes = getPitch(newWidth, newBitsPerPixel / 8);
+			
+			Crtc->FBSet(Crtc, newRowBytes * 8 / newBitsPerPixel, newWidth, newHeight,
+						pScrn->depth, Crtc->Offset);
 			if (Crtc->ScaledToMode) {
 				Crtc->ModeSet(Crtc, Crtc->ScaledToMode);
 				if (Crtc->ScaleSet)
@@ -1421,10 +1553,15 @@ rhdSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 				if (Crtc->ScaleSet)
 					Crtc->ScaleSet(Crtc, RHD_CRTC_SCALE_TYPE_NONE, mode, NULL);
 			}
-			RHDPLLSet(Crtc->PLL, mode->Clock);
+			RHDPLLSet(Crtc->PLL, Crtc->ScaledToMode ? Crtc->ScaledToMode->Clock : mode->Clock);
 			Crtc->LUTSelect(Crtc, Crtc->LUT);
 			RHDOutputsMode(rhdPtr, Crtc, Crtc->ScaledToMode
 						   ? Crtc->ScaledToMode : mode);
+			
+			Crtc->Pitch = newRowBytes;
+			Crtc->Width = newWidth;
+			Crtc->Height = newHeight;
+			Crtc->bpp = newBitsPerPixel;
 		}
     }
 	
@@ -1929,74 +2066,16 @@ void WaitForVBL(RHDPtr rhdPtr, UInt8 index, Bool noWait) {
 
 //Interface added by Dong
 
-Bool RadeonHDPreInit(ScrnInfoPtr pScrn, RegEntryIDPtr pciTag, RHDMemoryMap *pMemory, pciVideoPtr PciInfo, UserOptions *options) {
-	pScrn->PciTag = pciTag;
-	pScrn->PciInfo = PciInfo;
-	pScrn->options = options;
-	pScrn->memPhysBase = pMemory->FbPhysBase;
-	pScrn->fbOffset = 0;	//scanout offset
-	pScrn->bitsPerPixel = pMemory->bitsPerPixel;
-	pScrn->bitsPerComponent = pMemory->bitsPerComponent;
-	pScrn->colorFormat = pMemory->colorFormat;
-	pScrn->depth = pScrn->bitsPerPixel;
-	pScrn->memoryMap = pMemory;
-	
-	if (pScrn->memoryMap->EDID_Block) {
-		LOGV("EDID data (size %d) provided by user:\n", pScrn->memoryMap->EDID_Length);
-		LOGV("%02x: 0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F", 0);
-		int i;
-		for (i = 0; i < pScrn->memoryMap->EDID_Length; i++)
-		{
-			if (0 == (i & 15)) LOGV("\nRadeonHD: %02x: ", i);
-			LOGV("%02x ", pScrn->memoryMap->EDID_Block[i]);
-		}
-		LOGV("\n");
-	}
-	
+Bool RadeonHDPreInit(ScrnInfoPtr pScrn) {
 	return RHDPreInit(pScrn);
 }
 
 void RadeonHDFreeScrn(ScrnInfoPtr pScrn) {
-	if (pScrn)
-	{
-		RHDFreeRec(pScrn);
-		IODelete(pScrn, ScrnInfoRec, 1);
-		pScrn = NULL;
-	}
+	if (pScrn) RHDFreeRec(pScrn);
 }
 
-Bool RadeonHDSetMode(ScrnInfoPtr pScrn, UInt32 modeID, UInt16 depth) {
-	DisplayModePtr mode = pScrn->modes;
-	while (mode) {
-		if (mode->modeID == modeID) break;
-		mode = mode->next;
-	}
-	if (!mode) return FALSE;
-	if (!pScrn->vtSema) return RHDScreenInit(pScrn, mode);	//first time
-	else return RHDSwitchMode(pScrn, mode);
-}
-
-Bool RadeonHDGetSetBKSV(UInt32 *value, Bool set) {
-	ScrnInfoPtr pScrn;
-	RHDPtr rhdPtr;
-	struct rhdOutput *Output;
-	
-	pScrn = xf86Screens[0];
-	if (!pScrn) return FALSE;
-	rhdPtr = RHDPTR(pScrn);
-	
-	Output = rhdPtr->Outputs;
-    while (Output) {
-		if (Output->Active && Output->Property) {
-			if (set)
-				Output->Property(Output, rhdPropertySet, RHD_OUTPUT_BACKLIGHT, (union rhdPropertyData *)value);
-			else
-				Output->Property(Output, rhdPropertyGet, RHD_OUTPUT_BACKLIGHT, (union rhdPropertyData *)value);
-			return TRUE;
-		}
-		Output = Output->Next;
-    }
-	return FALSE;
+Bool RadeonHDSetMode(ScrnInfoPtr pScrn, UInt16 depth) {
+	return RHDSwitchMode(pScrn);
 }
 
 Bool RadeonHDDisplayPowerManagementSet(int PowerManagementMode, int flags) {
@@ -2069,5 +2148,25 @@ Bool RadeonHDRestore() {
 	if (!pScrn) return FALSE;
 	rhdPtr = RHDPTR(pScrn);
 	rhdRestore(rhdPtr);
+	return TRUE;
+}
+
+unsigned char * RHDGetEDIDRawData(int index) {
+	RHDPtr rhdPtr = RHDPTR(xf86Screens[0]);
+	struct rhdOutput *Output;
+	for (Output = rhdPtr->Outputs;(Output != NULL);Output = Output->Next) {
+		if (!Output->Active || (Output->Crtc != rhdPtr->Crtc[index])) continue;
+		if (!Output->Connector || !(Output->Connector->Monitor || !(Output->Connector->Monitor->EDID))) return NULL;
+		return (unsigned char *)Output->Connector->Monitor->EDID->rawData;
+	}
+	return NULL;
+}
+
+Bool RadeonHDSetMirror(Bool value) {
+	RHDPtr rhdPtr = RHDPTR(xf86Screens[0]);
+	int i;
+	for (i = 0;i < 2;i++)
+		if (!rhdPtr->Crtc[i] || !rhdPtr->Crtc[i]->Active || !rhdPtr->Crtc[i]->CurrentMode) return FALSE;
+	rhdPtr->mirrored = value;
 	return TRUE;
 }

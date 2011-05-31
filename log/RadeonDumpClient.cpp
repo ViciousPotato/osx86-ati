@@ -1,40 +1,53 @@
+/*
+ *  RadeonDumpClient.cpp
+ *  RadeonHD
+ *
+ *  Created by Dong Luo on 2/2/11.
+ *  Copyright 2011 Boston University. All rights reserved.
+ *
+ */
+
 #include <IOKit/IOBufferMemoryDescriptor.h>
-#include "xf86.h"
+#include "RadeonDumpClient.h"
 #include "Shared.h"
-#include "RadeonHDUserClient.h"
+#include "logMsg.h"
 
 #define super IOUserClient
-OSDefineMetaClassAndStructors(RadeonHDUserClient, IOUserClient);
+OSDefineMetaClassAndStructors(RadeonDumpClient, IOUserClient);
 
-IOReturn RadeonHDUserClient::clientMemoryForType(UInt32 type, IOOptionBits *options,
-												  IOMemoryDescriptor **memory)
+IOReturn RadeonDumpClient::clientMemoryForType(UInt32 type, IOOptionBits *options,
+											   IOMemoryDescriptor **memory)
 {
 	IOReturn result;
-	IOBufferMemoryDescriptor *memDesc;
-	char *msgBuffer;
-	
-	
 	*options = 0;
 	*memory = NULL;
 	
+#ifndef DEBUG
+	result = kIOReturnUnsupported;
+#else
+	IOBufferMemoryDescriptor *memDesc;
+	char *msgBuffer;
+	
 	switch (type) {
-		case kVoodooHDAMemoryMessageBuffer:
+		case kRadeonDumpMemoryMessageBuffer:
+			
 			lockMsgBuffer();
-			if (!xf86Msg.mMsgBufferSize) {
+			if (!DumpMsg.mMsgBufferSize) {
 				unlockMsgBuffer();
 				result = kIOReturnUnsupported;
 				break;
 			}
 			memDesc = IOBufferMemoryDescriptor::withOptions(kIOMemoryKernelUserShared,
-															xf86Msg.mMsgBufferSize);
+															DumpMsg.mMsgBufferSize);
 			if (!memDesc) {
 				unlockMsgBuffer();
 				result = kIOReturnVMError;
 				break;
 			}
 			msgBuffer = (char *) memDesc->getBytesNoCopy();
-			bcopy(xf86Msg.mMsgBuffer, msgBuffer, xf86Msg.mMsgBufferSize);
+			bcopy(DumpMsg.mMsgBuffer, msgBuffer, DumpMsg.mMsgBufferSize);
 			unlockMsgBuffer();
+			
 			*options |= kIOMapReadOnly;
 			*memory = memDesc; // automatically released after memory is mapped into task
 			result = kIOReturnSuccess;
@@ -43,6 +56,6 @@ IOReturn RadeonHDUserClient::clientMemoryForType(UInt32 type, IOOptionBits *opti
 			result = kIOReturnBadArgument;
 			break;
 	}
-	
+#endif
 	return result;
 }

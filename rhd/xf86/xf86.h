@@ -15,6 +15,7 @@
 #include <string.h>
 #include <IOKit/ndrvsupport/IOMacOSTypes.h>
 #include "OS_Version.h"
+#include "logMsg.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,51 +27,6 @@ typedef unsigned int CARD32;
 typedef unsigned short CARD16;
 typedef unsigned char CARD8;
 typedef char * pointer;
-
-//#define USEIOLOG
-#define DEBUG
-	
-#ifdef DEBUG
-#ifdef USEIOLOG
-#define LOG(fmt, args...) do { IOLog(fmt, ## args); } while (0)
-#define LOGE(fmt, args...) do { IOLog(fmt, ## args); } while (0)
-#define LOGV(fmt, args...) do {} while (0)
-#else
-#define LOG(fmt, args...) do { logMsg(fmt, ## args); } while (0)
-#define LOGE(fmt, args...) do { errorMsg(fmt, ## args); } while (0)
-#define LOGV(fmt, args...) do { dumpMsg(fmt, ## args); } while (0)
-#endif
-#else
-#define LOG(fmt, args...) do {} while (0)
-#define LOGE(fmt, args...) do {} while (0)
-#define LOGV(fmt, args...) do {} while (0)
-#endif
-	
-#ifndef USEIOLOG && defined DEBUG
-	//using the log code provided by VoodooHDA
-	enum {
-		kVoodooHDAMessageTypeGeneral = 0x2000,
-		kVoodooHDAMessageTypeError,
-		kVoodooHDAMessageTypeDump
-	};
-
-	typedef	struct {
-		UInt32 mVerbose;
-		bool mMsgBufferEnabled;
-		char *mMsgBuffer;
-		size_t mMsgBufferSize;
-		size_t mMsgBufferPos;
-		IOLock *mMessageLock;
-	} VoodooMsg;
-	extern VoodooMsg xf86Msg;
-	
-	extern void lockMsgBuffer();
-	extern void unlockMsgBuffer();
-	extern void enableMsgBuffer(bool isEnabled);
-	extern void logMsg(const char *format, ...) __attribute__ ((format (printf, 1, 2)));
-	extern void errorMsg(const char *format, ...) __attribute__ ((format (printf, 1, 2)));
-	extern void dumpMsg(const char *format, ...) __attribute__ ((format (printf, 1, 2)));
-#endif
 
 typedef struct {
 	unsigned short	red, green, blue;

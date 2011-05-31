@@ -191,6 +191,8 @@ typedef struct RHDRec {
     unsigned int        FbIntAddress; /* card internal address of FB */
     CARD32              FbIntSize; /* card internal FB aperture size */
     unsigned int        FbPCIAddress; /* physical address of FB */
+	unsigned long		FbPhysBase;
+	Bool		mirrored;
 
     /* Some simplistic memory handling */
 #define ALIGN(x,align)	(((x)+(align)-1)&~((align)-1))

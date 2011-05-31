@@ -345,6 +345,8 @@ RHDLUTCopyForRR(struct rhdLUT *LUT)
         green[i] = (entry >> 4) & 0xFFC0;
         blue[i] = (entry << 6) & 0xFFC0;
     }
+	
+	LUT->Set(LUT, red, green, blue);
 }
 
 //reversed code Dong
@@ -421,16 +423,18 @@ static UInt32 EncodeCLUTEntry2PixelColor(UInt8 value, UInt16 depth) {
 	return newValue;
 }
 
-void HALGrayPage(UInt16 depth) {
+void HALGrayPage(UInt16 depth, int index) {
 	ScrnInfoPtr pScrn = xf86Screens[0];
 	RHDPtr rhdPtr = RHDPTR(pScrn);
+	struct rhdCrtc *Crtc = rhdPtr->Crtc[index];
 	
-	if (!rhdPtr->FbBase || !pScrn->bitsPerPixel || (pScrn->bitsPerPixel > 32)) return;
-	UInt32 FBBase = (UInt32)rhdPtr->FbBase + pScrn->fbOffset;
+	if (!Crtc->Active || !rhdPtr->FbBase) return;
+	if (!pScrn->bitsPerPixel || (pScrn->bitsPerPixel > 32)) return;
+	UInt32 FBBase = (UInt32)rhdPtr->FbBase + Crtc->Offset;
 	UInt32 grayValue = 0xF9808080;
-	UInt16 bitsPerPixel = pScrn->bitsPerPixel;
-	UInt16 height = pScrn->virtualY;
-	UInt32 rowBytes = pScrn->displayWidth * bitsPerPixel / 8;
+	UInt16 bitsPerPixel = Crtc->bpp;
+	UInt16 height = Crtc->Height;
+	UInt32 rowBytes = Crtc->Pitch;
 	
 	UInt8 pixelUnit = bitsPerPixel / 32;
 	if (pixelUnit == 0) pixelUnit = 1;

@@ -24,10 +24,54 @@
 	<string>1</string>
 	<key>IOKitPersonalities</key>
 	<dict>
+		<key>RadeonController</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.dong.driver.${PRODUCT_NAME:rfc1034Identifier}</string>
+			<key>IOClass</key>
+			<string>RadeonController</string>
+			<key>IOMatchCategory</key>
+			<string>IOFramebuffer</string>
+			<key>IOPCIClassMatch</key>
+			<string>0x03000000&amp;0xFF000000</string>
+			<key>IOPCIMatch</key>
+			<string>0x00001002&amp;0x0000FFFF</string>
+			<key>IOProbeScore</key>
+			<integer>65000</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+			<key>UserOptions</key>
+			<dict>
+				<key>enableHWCursor</key>
+				<true/>
+				<key>lowPowerMode</key>
+				<true/>
+				<key>enableGammaTable</key>
+				<false/>
+				<key>debugMode</key>
+				<false/>
+				<key>verboseLevel</key>
+				<integer>2</integer>
+				<key>MsgBufferSize</key>
+				<integer>65535</integer>
+				<key>@0,TYPE</key>
+				<string></string>
+				<key>@1,TYPE</key>
+				<string></string>
+				<key>@0,EDID</key>
+				<data></data>
+				<key>@1,EDID</key>
+				<data></data>
+				<key>@0,UseFixedModes</key>
+				<false/>
+				<key>@1,UseFixedModes</key>
+				<false/>
+			</dict>
+		</dict>
 		<key>RadeonHD</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
-			<string>com.dong.driver.RadeonHD</string>
+			<string>com.dong.driver.${PRODUCT_NAME:rfc1034Identifier}</string>
 			<key>IOClass</key>
 			<string>RadeonHD</string>
 			<key>IOMatchCategory</key>
@@ -37,41 +81,24 @@
 			<key>IOProbeScore</key>
 			<integer>30000</integer>
 			<key>IOProviderClass</key>
-			<string>IOPCIDevice</string>
-			<key>UserOptions</key>
-			<dict>
-				<!--key>EDID</key>
-				<data>AP///////wAwriJAAAAAAC0QAQOAHRV46m+VnFRMhyYhUFQhCACBgAEBAQEBAQEBAQEBAQEBMCp4IFEaEEAwcBMAH9cQAAAYJSN4IFEaEEAwcBMAH9cQAAAYAAAADwCQQzKQQygPAQAwZJBVAAAA/gBMVEQxNDFFTjlCCiAgADU=</data-->
-				<key>BackLightLevel</key>
-				<integer>255</integer>
-				<key>enableHWCursor</key>
-				<true/>
-				<key>lowPowerMode</key>
-				<false/>
-				<key>enableGammaTable</key>
-				<false/>
-				<key>debugMode</key>
-				<false/>
-				<key>verboseLevel</key>
-				<integer>2</integer>
-				<key>MsgBufferSize</key>
-				<integer>65535</integer>
-			</dict>
+			<string>IOPlatformDevice</string>
 		</dict>
 		<key>RadeonDump</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
-			<string>com.dong.driver.RadeonHD</string>
+			<string>com.dong.driver.${PRODUCT_NAME:rfc1034Identifier}</string>
 			<key>IOClass</key>
 			<string>RadeonDump</string>
 			<key>IOMatchCategory</key>
 			<string>RadeonDump</string>
+			<key>IONameMatch</key>
+			<string>display</string>
 			<key>IOProbeScore</key>
 			<integer>0</integer>
 			<key>IOProviderClass</key>
-			<string>RadeonHD</string>
+			<string>IOPCIDevice</string>
 			<key>IOUserClientClass</key>
-			<string>RadeonHDUserClient</string>
+			<string>RadeonDumpClient</string>
 		</dict>
 	</dict>
 	<key>OSBundleLibraries</key>

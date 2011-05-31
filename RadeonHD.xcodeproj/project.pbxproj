@@ -23,12 +23,7 @@
 		F522B2DE1210A10D005D74D2 /* IONDRVLibraries.h in Headers */ = {isa = PBXBuildFile; fileRef = F522B2D81210A10D005D74D2 /* IONDRVLibraries.h */; };
 		F522B2DF1210A10D005D74D2 /* IONDRVSupport.h in Headers */ = {isa = PBXBuildFile; fileRef = F522B2D91210A10D005D74D2 /* IONDRVSupport.h */; };
 		F522B2E81210A167005D74D2 /* OS_Version.h in Headers */ = {isa = PBXBuildFile; fileRef = F522B2E71210A167005D74D2 /* OS_Version.h */; };
-		F5246149108D48DC0091DFC8 /* RadeonDump.h in Headers */ = {isa = PBXBuildFile; fileRef = F5246147108D48DC0091DFC8 /* RadeonDump.h */; };
-		F524614A108D48DC0091DFC8 /* RadeonDump.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5246148108D48DC0091DFC8 /* RadeonDump.cpp */; };
 		F533845A10AA20A600E48CFE /* Decoder.c in Sources */ = {isa = PBXBuildFile; fileRef = F5D7BC92107BF0E2008C5372 /* Decoder.c */; };
-		F5D228C2108CCA8C007ABAA9 /* RadeonHDUserClient.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D228C0108CCA8C007ABAA9 /* RadeonHDUserClient.h */; };
-		F5D228C3108CCA8C007ABAA9 /* RadeonHDUserClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5D228C1108CCA8C007ABAA9 /* RadeonHDUserClient.cpp */; };
-		F5D228E9108CD887007ABAA9 /* Shared.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D228E8108CD887007ABAA9 /* Shared.h */; };
 		F5D7BD05107BF0E2008C5372 /* atombios_rev.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BC9F107BF0E2008C5372 /* atombios_rev.h */; };
 		F5D7BD06107BF0E2008C5372 /* r5xx_3dregs.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BCA0107BF0E2008C5372 /* r5xx_3dregs.h */; };
 		F5D7BD0A107BF0E2008C5372 /* r5xx_regs.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BCA4107BF0E2008C5372 /* r5xx_regs.h */; };
@@ -109,6 +104,15 @@
 		F5F9C0C61081078E00071706 /* Decoder.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BC9C107BF0E2008C5372 /* Decoder.h */; };
 		F5F9C0C71081078E00071706 /* ObjectID.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BC9D107BF0E2008C5372 /* ObjectID.h */; };
 		F5F9C0C81081078E00071706 /* regsdef.h in Headers */ = {isa = PBXBuildFile; fileRef = F5D7BC9E107BF0E2008C5372 /* regsdef.h */; };
+		F5FD803E1381D22F0021C21F /* RadeonController.h in Headers */ = {isa = PBXBuildFile; fileRef = F5FD803C1381D22F0021C21F /* RadeonController.h */; };
+		F5FD803F1381D22F0021C21F /* RadeonController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5FD803D1381D22F0021C21F /* RadeonController.cpp */; };
+		F5FDC5D91383171F00BA2506 /* logMsg.c in Sources */ = {isa = PBXBuildFile; fileRef = F5FDC5CD1383171F00BA2506 /* logMsg.c */; };
+		F5FDC5DA1383171F00BA2506 /* logMsg.h in Headers */ = {isa = PBXBuildFile; fileRef = F5FDC5CE1383171F00BA2506 /* logMsg.h */; };
+		F5FDC5DD1383171F00BA2506 /* RadeonDump.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5FDC5D11383171F00BA2506 /* RadeonDump.cpp */; };
+		F5FDC5DF1383171F00BA2506 /* RadeonDump.h in Headers */ = {isa = PBXBuildFile; fileRef = F5FDC5D31383171F00BA2506 /* RadeonDump.h */; };
+		F5FDC5E41383171F00BA2506 /* Shared.h in Headers */ = {isa = PBXBuildFile; fileRef = F5FDC5D81383171F00BA2506 /* Shared.h */; };
+		F5FDC62613831B5400BA2506 /* RadeonDumpClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5FDC62413831B5400BA2506 /* RadeonDumpClient.cpp */; };
+		F5FDC62713831B5400BA2506 /* RadeonDumpClient.h in Headers */ = {isa = PBXBuildFile; fileRef = F5FDC62513831B5400BA2506 /* RadeonDumpClient.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -131,11 +135,6 @@
 		F522B2D81210A10D005D74D2 /* IONDRVLibraries.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IONDRVLibraries.h; sourceTree = "<group>"; };
 		F522B2D91210A10D005D74D2 /* IONDRVSupport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IONDRVSupport.h; sourceTree = "<group>"; };
 		F522B2E71210A167005D74D2 /* OS_Version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OS_Version.h; sourceTree = "<group>"; };
-		F5246147108D48DC0091DFC8 /* RadeonDump.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RadeonDump.h; sourceTree = "<group>"; };
-		F5246148108D48DC0091DFC8 /* RadeonDump.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RadeonDump.cpp; sourceTree = "<group>"; };
-		F5D228C0108CCA8C007ABAA9 /* RadeonHDUserClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RadeonHDUserClient.h; sourceTree = "<group>"; };
-		F5D228C1108CCA8C007ABAA9 /* RadeonHDUserClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RadeonHDUserClient.cpp; sourceTree = "<group>"; };
-		F5D228E8108CD887007ABAA9 /* Shared.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Shared.h; sourceTree = "<group>"; };
 		F5D7BC91107BF0E2008C5372 /* CD_Operations.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = CD_Operations.c; sourceTree = "<group>"; };
 		F5D7BC92107BF0E2008C5372 /* Decoder.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Decoder.c; sourceTree = "<group>"; };
 		F5D7BC93107BF0E2008C5372 /* hwserv_drv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hwserv_drv.c; sourceTree = "<group>"; };
@@ -219,6 +218,16 @@
 		F5D7BD71107BF22A008C5372 /* xf86Screens.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = xf86Screens.c; sourceTree = "<group>"; };
 		F5D7BD72107BF22A008C5372 /* xf86str.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xf86str.h; sourceTree = "<group>"; };
 		F5D7BDD1107C062C008C5372 /* xf86_helper.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = xf86_helper.c; sourceTree = "<group>"; };
+		F5FD803C1381D22F0021C21F /* RadeonController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RadeonController.h; sourceTree = "<group>"; };
+		F5FD803D1381D22F0021C21F /* RadeonController.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RadeonController.cpp; sourceTree = "<group>"; };
+		F5FDC5CD1383171F00BA2506 /* logMsg.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = logMsg.c; sourceTree = "<group>"; };
+		F5FDC5CE1383171F00BA2506 /* logMsg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = logMsg.h; sourceTree = "<group>"; };
+		F5FDC5D01383171F00BA2506 /* RadeonDump.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = RadeonDump.c; sourceTree = "<group>"; };
+		F5FDC5D11383171F00BA2506 /* RadeonDump.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RadeonDump.cpp; sourceTree = "<group>"; };
+		F5FDC5D31383171F00BA2506 /* RadeonDump.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RadeonDump.h; sourceTree = "<group>"; };
+		F5FDC5D81383171F00BA2506 /* Shared.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Shared.h; sourceTree = "<group>"; };
+		F5FDC62413831B5400BA2506 /* RadeonDumpClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RadeonDumpClient.cpp; sourceTree = "<group>"; };
+		F5FDC62513831B5400BA2506 /* RadeonDumpClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RadeonDumpClient.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -265,14 +274,12 @@
 			children = (
 				F5D7BC87107BF0E2008C5372 /* IOKit */,
 				F5D7BC8F107BF0E2008C5372 /* rhd */,
+				F5FDC5CC1383171F00BA2506 /* log */,
 				F522B2E71210A167005D74D2 /* OS_Version.h */,
 				1A224C3EFF42367911CA2CB7 /* RadeonHD.h */,
 				1A224C3FFF42367911CA2CB7 /* RadeonHD.cpp */,
-				F5D228E8108CD887007ABAA9 /* Shared.h */,
-				F5246147108D48DC0091DFC8 /* RadeonDump.h */,
-				F5246148108D48DC0091DFC8 /* RadeonDump.cpp */,
-				F5D228C0108CCA8C007ABAA9 /* RadeonHDUserClient.h */,
-				F5D228C1108CCA8C007ABAA9 /* RadeonHDUserClient.cpp */,
+				F5FD803C1381D22F0021C21F /* RadeonController.h */,
+				F5FD803D1381D22F0021C21F /* RadeonController.cpp */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -426,6 +433,21 @@
 			path = xf86;
 			sourceTree = "<group>";
 		};
+		F5FDC5CC1383171F00BA2506 /* log */ = {
+			isa = PBXGroup;
+			children = (
+				F5FDC5CD1383171F00BA2506 /* logMsg.c */,
+				F5FDC5CE1383171F00BA2506 /* logMsg.h */,
+				F5FDC5D01383171F00BA2506 /* RadeonDump.c */,
+				F5FDC5D11383171F00BA2506 /* RadeonDump.cpp */,
+				F5FDC5D31383171F00BA2506 /* RadeonDump.h */,
+				F5FDC62413831B5400BA2506 /* RadeonDumpClient.cpp */,
+				F5FDC62513831B5400BA2506 /* RadeonDumpClient.h */,
+				F5FDC5D81383171F00BA2506 /* Shared.h */,
+			);
+			path = log;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -478,9 +500,6 @@
 				F5F9C0C61081078E00071706 /* Decoder.h in Headers */,
 				F5F9C0C71081078E00071706 /* ObjectID.h in Headers */,
 				F5F9C0C81081078E00071706 /* regsdef.h in Headers */,
-				F5D228C2108CCA8C007ABAA9 /* RadeonHDUserClient.h in Headers */,
-				F5D228E9108CD887007ABAA9 /* Shared.h in Headers */,
-				F5246149108D48DC0091DFC8 /* RadeonDump.h in Headers */,
 				F522B2CD1210A0FB005D74D2 /* IOMacOSTypes.h in Headers */,
 				F522B2CE1210A0FB005D74D2 /* IOMacOSVideo.h in Headers */,
 				F522B2CF1210A0FB005D74D2 /* IONDRV.h in Headers */,
@@ -494,6 +513,11 @@
 				F522B2DE1210A10D005D74D2 /* IONDRVLibraries.h in Headers */,
 				F522B2DF1210A10D005D74D2 /* IONDRVSupport.h in Headers */,
 				F522B2E81210A167005D74D2 /* OS_Version.h in Headers */,
+				F5FD803E1381D22F0021C21F /* RadeonController.h in Headers */,
+				F5FDC5DA1383171F00BA2506 /* logMsg.h in Headers */,
+				F5FDC5DF1383171F00BA2506 /* RadeonDump.h in Headers */,
+				F5FDC5E41383171F00BA2506 /* Shared.h in Headers */,
+				F5FDC62713831B5400BA2506 /* RadeonDumpClient.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -527,7 +551,14 @@
 			isa = PBXProject;
 			buildConfigurationList = 1DEB91DD08733DB10010E9CD /* Build configuration list for PBXProject "RadeonHD" */;
 			compatibilityVersion = "Xcode 3.1";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
 			mainGroup = 089C166AFE841209C02AAC07 /* RadeonHD */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -600,9 +631,11 @@
 				F5F9C0BC1081078E00071706 /* CD_Operations.c in Sources */,
 				F5F9C0BE1081078E00071706 /* hwserv_drv.c in Sources */,
 				F5DABEF610877B0600E72F2B /* xf86Screens.c in Sources */,
-				F5D228C3108CCA8C007ABAA9 /* RadeonHDUserClient.cpp in Sources */,
-				F524614A108D48DC0091DFC8 /* RadeonDump.cpp in Sources */,
 				F533845A10AA20A600E48CFE /* Decoder.c in Sources */,
+				F5FD803F1381D22F0021C21F /* RadeonController.cpp in Sources */,
+				F5FDC5D91383171F00BA2506 /* logMsg.c in Sources */,
+				F5FDC5DD1383171F00BA2506 /* RadeonDump.cpp in Sources */,
+				F5FDC62613831B5400BA2506 /* RadeonDumpClient.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -624,7 +657,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1.0.0d1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -636,7 +669,7 @@
 				MODULE_NAME = com.yourcompany.driver.RadeonHD;
 				MODULE_VERSION = 1.0.0d1;
 				PRODUCT_NAME = RadeonHD;
-				SDKROOT = macosx10.5;
+				SDKROOT = macosx10.6;
 				VALID_ARCHS = "i386 x86_64";
 				WRAPPER_EXTENSION = kext;
 			};

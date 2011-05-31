@@ -492,7 +492,7 @@ Bool RHDConnectorEnableHDMI(struct rhdConnector *Connector)
     RHDFUNC(rhdPtr);
 
     /* check if user forced HDMI on this connector */
-    if (rhdPtr->hdmi) {	//now only one connector (Dong)
+    if (rhdPtr->hdmi) {
 	    LOG("Enabling HDMI on %s because of config option\n", Connector->Name);
 	    return TRUE;
 	}

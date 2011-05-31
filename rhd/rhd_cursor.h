@@ -64,8 +64,8 @@ typedef struct _xf86CursorInfoRec {
     void (*SetCursorColors)(ScrnInfoPtr pScrn, int bg, int fg);
     void (*SetCursorPosition)(ScrnInfoPtr pScrn, int x, int y);
     void (*LoadCursorImage)(ScrnInfoPtr pScrn, unsigned char *bits);
-    void (*HideCursor)(ScrnInfoPtr pScrn);
-    void (*ShowCursor)(ScrnInfoPtr pScrn);
+    void (*HideCursor)(RHDPtr rhdPtr);
+    void (*ShowCursor)(RHDPtr rhdPtr);
     unsigned char* (*RealizeCursor)(struct _xf86CursorInfoRec *, CursorPtr);
     Bool (*UseHWCursor)(struct rhd_Cursor_Bits *);
 	
@@ -102,8 +102,8 @@ struct rhdCursor
 void RHDCursorsInit(RHDPtr rhdPtr);
 void RHDCursorsDestroy(RHDPtr rhdPtr);
 Bool RHDxf86InitCursor(ScrnInfoPtr pScrn);
-void rhdShowCursor(ScrnInfoPtr);
-void rhdHideCursor(ScrnInfoPtr);
+void rhdShowCursor(RHDPtr rhdPtr);
+void rhdHideCursor(RHDPtr rhdPtr);
 void rhdReloadCursor(ScrnInfoPtr pScrn);
 void rhdSaveCursor(ScrnInfoPtr pScrn);
 void rhdRestoreCursor(ScrnInfoPtr pScrn);

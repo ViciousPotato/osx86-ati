@@ -52,6 +52,7 @@ struct rhdCrtc {
 
     Bool Active;
 
+	void *FBPhyAddress;
     int Offset; /* Current offset */
     int bpp;
     int Pitch;

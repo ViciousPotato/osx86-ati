@@ -241,10 +241,7 @@ atomSetBacklightFromBIOSScratch(struct rhdOutput *Output)
 
     RHDFUNC(Output);
 
-	if (Private->BlLevel < 30) {
-		if (xf86Screens[0]->options->BackLightLevel < 30) return;
-		Private->BlLevel = xf86Screens[0]->options->BackLightLevel;
-	}
+	if (Private->BlLevel < 1) return;
 	LOG("%s: trying to set BL_MOD_LEVEL to: %d\n", __func__, Private->BlLevel);
 	
     switch (Output->Id) {

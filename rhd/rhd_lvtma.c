@@ -194,10 +194,7 @@ LVDSSetBacklight(struct rhdOutput *Output)
     int level = Private->BlLevel;
     RHDPtr rhdPtr = RHDPTRI(Output);
 
-	if (level < 30) {
-		if (xf86Screens[0]->options->BackLightLevel < 30) return;
-		level = xf86Screens[0]->options->BackLightLevel;
-	}
+	if (level < 1) return;
 	LOG("%s: trying to set BL_MOD_LEVEL to: %d\n",
 		__func__, level);
 	

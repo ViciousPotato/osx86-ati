@@ -315,8 +315,6 @@ typedef struct _MemoryMap {
 	unsigned long		FbPhysBase;
     unsigned char*		BIOSCopy;
 	int					BIOSLength;
-	unsigned char		*EDID_Block;
-	int					EDID_Length;
 	int					bitsPerPixel;
 	int					bitsPerComponent;
 	int					colorFormat;
@@ -335,6 +333,7 @@ typedef struct {
 } PciChipsets;
 
 	typedef struct {
+		Bool		debugMode;
 		Bool		enableOSXI2C;
 		Bool		enableGammaTable;
 		Bool		setCLUTAtSetEntries;
@@ -347,9 +346,15 @@ typedef struct {
 		Bool        lowPowerMode;
 		int			lowPowerModeEngineClock;
 		int			lowPowerModeMemoryClock;
-		int			BackLightLevel;
 		int			verbosity;
 		char		modeNameByUser[25];	//15 should be enough
+		
+		unsigned char		*EDID_Block[2];
+		int					EDID_Length[2];
+#define outputTypeLength 25
+		char				outputTypes[2][outputTypeLength];
+		bool				outputChecked[2];
+		bool				UseFixedModes[2];
 	} UserOptions;
 	
 /*

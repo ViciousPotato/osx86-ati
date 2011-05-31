@@ -75,7 +75,7 @@ xf86InterpretEDID(int scrnIndex, Uchar *block)
     xf86MonPtr m;
 
     if (!block) return NULL;
-    print_raw_edid(scrnIndex, block);
+    //print_raw_edid(scrnIndex, block);
     if (! (m = IONew(xf86Monitor,1))) return NULL;
 	bzero(m, sizeof(xf86Monitor));
     m->scrnIndex = scrnIndex;
@@ -273,13 +273,17 @@ get_detailed_timing_section(Uchar *c, struct detailed_timings *r)
 static void
 print_raw_edid(int scrnIndex, Uchar *c)
 {
-    int i, j;
     LOGV("Raw EDID data:\n");
-
-    for (i = 0; i < 8; i++) {
-	LOGV("\t");
-	for (j = 0; j < 16; j++)
-		LOGV(" %02x", c[i * 16 + j]);
-	LOGV("\n");
-    }
+	LOGV("%02x: 0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F\n", 0);
+	int index = 0;
+	int i;
+	for (i = 0; i < 8; i++)
+	{
+		LOGV("%02x: %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x\n",
+			 i, c[index], c[index+1], c[index+2], c[index+3]
+			 , c[index+4], c[index+5], c[index+6], c[index+7]
+			 , c[index+8], c[index+9], c[index+10], c[index+11]
+			 , c[index+12], c[index+13], c[index+14], c[index+15]);
+		index += 16;
+	}
 }

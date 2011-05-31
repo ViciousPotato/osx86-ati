@@ -30,6 +30,7 @@
 #include "rhd_connector.h"
 #include "rhd_modes.h"
 #include "rhd_monitor.h"
+#include "rhd_output.h"
 #ifdef ATOM_BIOS
 # include "rhd_atombios.h"
 #endif
@@ -81,7 +82,6 @@ static void
 rhdPanelEDIDModesFilter(struct rhdMonitor *Monitor)
 {
     DisplayModeRec *Best = Monitor->Modes, *Mode;
-	DisplayModePtr Temp;
 
     RHDFUNC(Monitor);
 
@@ -96,14 +96,15 @@ rhdPanelEDIDModesFilter(struct rhdMonitor *Monitor)
 			((Best->HDisplay < Mode->HDisplay) &&
 			 (Best->VDisplay <= Mode->VDisplay)))
 			Best = Mode; */
- 		if (((Best->HDisplay = Mode->HDisplay) &&
+ 		if (((Best->HDisplay == Mode->HDisplay) &&
 			 (Best->VDisplay < Mode->VDisplay)) ||
 			(Best->HDisplay < Mode->HDisplay))
 			Best = Mode;
 	}
 	
     /* kill all other modes */
-	
+	/*
+	 DisplayModePtr Temp;
     Mode = Monitor->Modes;
     while (Mode) {
 	Temp = Mode->next;
@@ -128,6 +129,14 @@ rhdPanelEDIDModesFilter(struct rhdMonitor *Monitor)
 	}
 	
     Monitor->Modes = Monitor->NativeMode;
+	 */
+ 	if (!Monitor->NativeMode) {
+		Best->type |= M_T_PREFERRED;
+		Monitor->NativeMode = Best;
+		LOG("Monitor \"%s\": Using Mode \"%s\""
+			" for native resolution.\n", Monitor->Name, Best->name);
+	}
+	
     Monitor->numHSync = 1;
     Monitor->HSync[0].lo = Best->HSync;
     Monitor->HSync[0].hi = Best->HSync;
@@ -145,17 +154,20 @@ rhdMonitorPrintEDID(struct rhdMonitor *Monitor, xf86MonPtr EDID)
 {
     LOGV("EDID data for %s\n", Monitor->Name);
 	Uchar * block = (Uchar *) EDID->rawData;
-	LOGV("%02x: 0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F", 0);
+	if (!block) return;
+	
+	LOGV("%02x: 0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F\n", 0);
+	int index = 0;
 	int i;
-	for (i = 0; i < 128; i++)
+	for (i = 0; i < 8; i++)
 	{
-		if (0 == (i & 15)) {
-			LOGV("\n");
-			LOGV("%02x: ", i);
-		}
-		LOGV("%02x ", block[i]);
+		LOGV("%02x: %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x\n",
+			 i, block[index], block[index+1], block[index+2], block[index+3]
+			 , block[index+4], block[index+5], block[index+6], block[index+7]
+			 , block[index+8], block[index+9], block[index+10], block[index+11]
+			 , block[index+12], block[index+13], block[index+14], block[index+15]);
+		index += 16;
 	}
-	LOGV("\n");
 }
 
 /*
@@ -167,9 +179,7 @@ static struct rhdMonitor *
 rhdMonitorPanel(struct rhdConnector *Connector)
 {
     struct rhdMonitor *Monitor;
-#ifdef ATOM_BIOS
     DisplayModeRec *Mode = NULL;
-#endif
     xf86MonPtr EDID = NULL;
 
     RHDFUNC(Connector);
@@ -201,31 +211,27 @@ rhdMonitorPanel(struct rhdConnector *Connector)
     }
 #endif
 
-	if (!EDID && xf86Screens[Connector->scrnIndex]->memoryMap->EDID_Block)	//user provided EDID as last resort
-		EDID = xf86InterpretEDID(Connector->scrnIndex, xf86Screens[Connector->scrnIndex]->memoryMap->EDID_Block);
-	
     Monitor = IONew(struct rhdMonitor, 1);
 	if (!Monitor) {
 		if (EDID) IODelete(EDID, xf86MonPtr, 1);
 		return NULL;
 	}
 	bzero(Monitor, sizeof(struct rhdMonitor));
-
+	
     Monitor->scrnIndex = Connector->scrnIndex;
     Monitor->EDID      = EDID;
-
-#ifdef ATOM_BIOS
+	
     if (Mode) {
-			snprintf(Monitor->Name, MONITOR_NAME_SIZE, "LVDS Panel");
-			Monitor->Modes = RHDModesAdd(Monitor->Modes, Mode);
-			Monitor->NativeMode = Mode;
-			Monitor->numHSync = 1;
-			Monitor->HSync[0].lo = Mode->HSync;
-			Monitor->HSync[0].hi = Mode->HSync;
-			Monitor->numVRefresh = 1;
-			Monitor->VRefresh[0].lo = Mode->VRefresh;
-			Monitor->VRefresh[0].hi = Mode->VRefresh;
-			Monitor->Bandwidth = Mode->SynthClock;
+		snprintf(Monitor->Name, MONITOR_NAME_SIZE, "LVDS Panel");
+		Monitor->Modes = RHDModesAdd(Monitor->Modes, Mode);
+		Monitor->NativeMode = Mode;
+		Monitor->numHSync = 1;
+		Monitor->HSync[0].lo = Mode->HSync;
+		Monitor->HSync[0].hi = Mode->HSync;
+		Monitor->numVRefresh = 1;
+		Monitor->VRefresh[0].lo = Mode->VRefresh;
+		Monitor->VRefresh[0].hi = Mode->VRefresh;
+		Monitor->Bandwidth = Mode->SynthClock;
 		if (EDID) {
 			/* Clueless atombios does give us a mode, but doesn't give us a
 			 * DPI or a size. It is just perfect, right? */
@@ -234,16 +240,14 @@ rhdMonitorPanel(struct rhdConnector *Connector)
 			if (EDID->features.vsize)
 				Monitor->yDpi = (Mode->VDisplay * 2.54) / ((float) EDID->features.vsize) + 0.5;
 		}
-    } else
-#endif
-	if (EDID) {
+    } else if (EDID) {
 		RHDMonitorEDIDSet(Monitor, EDID);
 		rhdPanelEDIDModesFilter(Monitor);
-    } else {
+	} else {
 		LOG("%s: No panel mode information found.\n", __func__);
 		IODelete(Monitor, struct rhdMonitor, 1);
 		return NULL;
-    }
+	}
 	
     /* Fixup some broken modes - if we can do so, otherwise we might have no
      * chance of driving the panel at all */
@@ -254,15 +258,15 @@ rhdMonitorPanel(struct rhdConnector *Connector)
 			Monitor->NativeMode->HTotal =  Monitor->NativeMode->CrtcHTotal = Monitor->NativeMode->HSyncEnd + 1;
 		if (Monitor->NativeMode->VTotal <= Monitor->NativeMode->VSyncEnd)
 			Monitor->NativeMode->VTotal =  Monitor->NativeMode->CrtcVTotal = Monitor->NativeMode->VSyncEnd + 1;
-		/*	Crtc values are not initialized yet, below codes should be moved to other place
-		 if (Monitor->NativeMode->CrtcHBlankEnd <= Monitor->NativeMode->CrtcHSyncEnd)
-		 Monitor->NativeMode->CrtcHBlankEnd  = Monitor->NativeMode->CrtcHSyncEnd + 1;
-		 if (Monitor->NativeMode->CrtcVBlankEnd <= Monitor->NativeMode->CrtcVSyncEnd)
-		 Monitor->NativeMode->CrtcVBlankEnd =  Monitor->NativeMode->CrtcVSyncEnd + 1;
-		 */
+		
+		rhdModeFillOutCrtcValues(Monitor->NativeMode);
+		if (Monitor->NativeMode->CrtcHBlankEnd <= Monitor->NativeMode->CrtcHSyncEnd)
+			Monitor->NativeMode->CrtcHBlankEnd  = Monitor->NativeMode->CrtcHSyncEnd + 1;
+		if (Monitor->NativeMode->CrtcVBlankEnd <= Monitor->NativeMode->CrtcVSyncEnd)
+			Monitor->NativeMode->CrtcVBlankEnd =  Monitor->NativeMode->CrtcVSyncEnd + 1;
 		
 		//Let's add some established modes, thus provide user some choices (Dong)
-		RHDSynthModes(Connector->scrnIndex, Monitor->Modes, Monitor->NativeMode);
+		RHDSynthModes(Monitor->Modes, Monitor->NativeMode);
     }
 	
     /* panel should be driven at native resolution only. */
@@ -329,42 +333,163 @@ rhdMonitorTV(struct rhdConnector *Connector)
     return Monitor;
 }
 
-/*
- *
- */
+static Bool isSameOutputType(char *t1, enum rhdOutputType t2) {
+	const struct {
+		char type1[outputTypeLength];
+		enum rhdOutputType type2;
+	} types[] = {
+		{"DACA", RHD_OUTPUT_DACA}, 
+		{"DACB", RHD_OUTPUT_DACB},
+		{"TMDSA", RHD_OUTPUT_TMDSA},
+		{"TMDSB", RHD_OUTPUT_LVTMA},
+		{"LVDS", RHD_OUTPUT_LVTMA},
+		{"LVTMA", RHD_OUTPUT_LVTMA},
+		{"DDIA", RHD_OUTPUT_DVO},
+		{"UNIPHY_KLDSKP_LVTMA", RHD_OUTPUT_KLDSKP_LVTMA},
+		{"UNIPHYA", RHD_OUTPUT_UNIPHYA},
+		{"UNIPHYB", RHD_OUTPUT_UNIPHYB},
+		{"UNIPHYC", RHD_OUTPUT_UNIPHYC},
+		{"UNIPHYD", RHD_OUTPUT_UNIPHYD},
+		{"UNIPHYE", RHD_OUTPUT_UNIPHYE},
+		{"UNIPHYF", RHD_OUTPUT_UNIPHYF},
+		
+		{"AtomOutput DACA", RHD_OUTPUT_DACA},
+	    {"AtomOutput DACB", RHD_OUTPUT_DACB},
+	    {"AtomOutput TMDSA", RHD_OUTPUT_TMDSA},
+	    {"AtomOutput LVTMA", RHD_OUTPUT_LVTMA},
+	    {"AtomOutput DVO", RHD_OUTPUT_DVO},
+	    {"AtomOutput KldskpLvtma", RHD_OUTPUT_KLDSKP_LVTMA},
+	    {"AtomOutput UniphyA", RHD_OUTPUT_UNIPHYA},
+	    {"AtomOutput UniphyB", RHD_OUTPUT_UNIPHYB},
+	    {"AtomOutput UniphyC", RHD_OUTPUT_UNIPHYC},
+	    {"AtomOutput UniphyD", RHD_OUTPUT_UNIPHYD},
+	    {"AtomOutput UniphyE", RHD_OUTPUT_UNIPHYE},
+	    {"AtomOutput UniphyF", RHD_OUTPUT_UNIPHYF}
+	};
+	
+	if (!t1) return FALSE;
+	int i;
+	for (i = 0;i < 5;i++)
+		if ((t2 == types[i].type2) && !strncmp(t1, types[i].type1, strlen(types[i].type1))) break;
+	if (i < 5) return TRUE;
+	else return FALSE;
+}
+
 struct rhdMonitor *
-RHDMonitorInit(struct rhdConnector *Connector)
+RHDMonitorInit(struct rhdOutput *Output)
 {
+	ScrnInfoPtr pScrn = xf86Screens[0];
+	struct rhdConnector *Connector = Output->Connector;
     struct rhdMonitor *Monitor = NULL;
-
+	int i;
+	
     RHDFUNC(Connector);
-
+	
     if (Connector->Type == RHD_CONNECTOR_PANEL)
 		Monitor = rhdMonitorPanel(Connector);
     else if (Connector->Type == RHD_CONNECTOR_TV)
 		Monitor = rhdMonitorTV(Connector);
     else if (Connector->DDC) {
 		xf86MonPtr EDID = xf86DoEDID_DDC2(Connector->scrnIndex, Connector->DDC);
-		if (!EDID && xf86Screens[Connector->scrnIndex]->memoryMap->EDID_Block)	//user provided EDID as last resort
-			EDID = xf86InterpretEDID(Connector->scrnIndex, xf86Screens[Connector->scrnIndex]->memoryMap->EDID_Block);
 		if (EDID) {
 			Monitor = IONew(struct rhdMonitor, 1);
-			if (!Monitor) {
-				IODelete(EDID, xf86MonPtr, 1);
-				return NULL;
+			if (Monitor) {
+				bzero(Monitor, sizeof(struct rhdMonitor));
+				Monitor->scrnIndex = Connector->scrnIndex;
+				Monitor->EDID      = EDID;
+				Monitor->NativeMode = NULL;
+				
+				RHDMonitorEDIDSet(Monitor, EDID);
+				rhdMonitorPrintEDID(Monitor, EDID);
+				/*
+				for (i = 0;i < 2;i++)
+					if (isSameOutputType(pScrn->options->outputTypes[i], Output->Id) && pScrn->options->UseFixedModes[i] || TRUE) {
+						rhdPanelEDIDModesFilter(Monitor);
+						RHDSynthModes(Monitor->Modes, Monitor->NativeMode);
+						Monitor->UseFixedModes = TRUE;
+						break;
+					}
+				 */
 			}
-			bzero(Monitor, sizeof(struct rhdMonitor));
-			Monitor->scrnIndex = Connector->scrnIndex;
-			Monitor->EDID      = EDID;
-			Monitor->NativeMode = NULL;
-			
-			RHDMonitorEDIDSet(Monitor, EDID);
-			rhdMonitorPrintEDID(Monitor, EDID);
 		}
     }
 	
+	// user provided EDID as last resort
+	if (!Monitor) {
+		for (i = 0;i < 2;i++) {
+			if (pScrn->options->outputChecked[i]) continue;
+			if (!isSameOutputType(pScrn->options->outputTypes[i], Output->Id)) continue;
+			if (!pScrn->options->EDID_Block[i] || !pScrn->options->EDID_Length[i]) continue;
+			Monitor = IONew(struct rhdMonitor, 1);
+			if (!Monitor) continue;
+			UInt8 *rawData = (UInt8 *)IOMalloc(pScrn->options->EDID_Length[i]);
+			if (!rawData) {
+				IODelete(Monitor, struct rhdMonitor, 1);
+				Monitor = NULL;
+				continue;
+			}
+			
+			bcopy(pScrn->options->EDID_Block[i], rawData, pScrn->options->EDID_Length[i]);
+			bzero(Monitor, sizeof(struct rhdMonitor));
+			Monitor->scrnIndex = Connector->scrnIndex;
+			Monitor->EDID = xf86InterpretEDID(Connector->scrnIndex, rawData);
+			Monitor->NativeMode = NULL;
+			
+			RHDMonitorEDIDSet(Monitor, Monitor->EDID);
+			rhdMonitorPrintEDID(Monitor, Monitor->EDID);
+			if ((Connector->Type == RHD_CONNECTOR_PANEL) || pScrn->options->UseFixedModes[i]) {
+				rhdPanelEDIDModesFilter(Monitor);
+				if (Monitor->NativeMode) {
+					
+					/* Some Panels have H or VSyncEnd values greater than H or VTotal. */
+					if (Monitor->NativeMode->HTotal <= Monitor->NativeMode->HSyncEnd)
+						Monitor->NativeMode->HTotal =  Monitor->NativeMode->CrtcHTotal = Monitor->NativeMode->HSyncEnd + 1;
+					if (Monitor->NativeMode->VTotal <= Monitor->NativeMode->VSyncEnd)
+						Monitor->NativeMode->VTotal =  Monitor->NativeMode->CrtcVTotal = Monitor->NativeMode->VSyncEnd + 1;
+					
+					rhdModeFillOutCrtcValues(Monitor->NativeMode);
+					if (Monitor->NativeMode->CrtcHBlankEnd <= Monitor->NativeMode->CrtcHSyncEnd)
+						Monitor->NativeMode->CrtcHBlankEnd  = Monitor->NativeMode->CrtcHSyncEnd + 1;
+					if (Monitor->NativeMode->CrtcVBlankEnd <= Monitor->NativeMode->CrtcVSyncEnd)
+						Monitor->NativeMode->CrtcVBlankEnd =  Monitor->NativeMode->CrtcVSyncEnd + 1;
+					
+					//Let's add some established modes, thus provide user some choices (Dong)
+					RHDSynthModes(Monitor->Modes, Monitor->NativeMode);
+				}
+				
+				/* panel should be driven at native resolution only. */
+				Monitor->UseFixedModes = TRUE;
+				if (Connector->Type == RHD_CONNECTOR_PANEL) Monitor->ReducedAllowed = TRUE;
+			}
+			pScrn->options->outputChecked[i] = true;	// already used
+		}
+	}
+	
+	// fill in Crtc values
+	if (Monitor) {
+		DisplayModePtr Mode = Monitor->Modes;
+		while (Mode) {
+			rhdModeFillOutCrtcValues(Mode);
+			Mode = Mode->next;
+		}
+		// put NativeMode as the first, 2nd condition is important, otherwise will create a infinite loop by the code
+		if (Monitor->NativeMode && (Monitor->NativeMode != Monitor->Modes)) {
+			Mode = Monitor->NativeMode->prev;
+			if (Mode != NULL)
+				Mode->next = Monitor->NativeMode->next;
+			Mode = Monitor->NativeMode->next;
+			if (Mode != NULL)
+				Mode->prev = Monitor->NativeMode->prev;
+			Monitor->NativeMode->prev = NULL;
+			Monitor->NativeMode->next = Monitor->Modes;
+			
+			Monitor->Modes = Monitor->NativeMode;
+		}
+	}
+	
     return Monitor;
 }
+
 
 /*
  *

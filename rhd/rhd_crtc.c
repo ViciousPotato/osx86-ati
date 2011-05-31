@@ -474,7 +474,7 @@ DxModeSet(struct rhdCrtc *Crtc, DisplayModePtr Mode)
     /* set D1CRTC_HORZ_COUNT_BY2_EN to 0; should only be set to 1 on 30bpp DVI modes */
     RHDRegMask(Crtc, RegOff + D1CRTC_COUNT_CONTROL, 0x0, 0x1);
 
-    Crtc->CurrentMode = Mode;
+    //Crtc->CurrentMode = Mode;
 }
 
 /*
@@ -1458,6 +1458,18 @@ RHDCrtcsDestroy(RHDPtr rhdPtr)
 	    if (Crtc->ModeDestroy)
 		Crtc->ModeDestroy(Crtc);
 
+		if (Crtc->Modes) {
+			DisplayModePtr Mode, next;
+			Mode = Crtc->Modes;
+			while (Mode) {
+				next = Mode->next;
+				IODelete(Mode, DisplayModeRec, 1);
+				Mode = next;
+			}
+			Crtc->Modes = NULL;
+			Crtc->CurrentMode = NULL;
+		}
+		
 	    IODelete(Crtc, struct rhdCrtc, 1);
 	    rhdPtr->Crtc[i] = NULL;
 	}

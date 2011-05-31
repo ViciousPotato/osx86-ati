@@ -11,13 +11,21 @@
 #define _RADEONHD_H
 
 #include <IOKit/ndrvsupport/IONDRVFramebuffer.h>
-#include "OS_Version.h"
-#ifdef MACOSX_10_5
-#include "IOKit/10.5/IONDRV.h"
-#else
-#include "IOKit/10.6/IONDRV.h"
-#endif
 #include "xf86str.h"
+
+class IONDRV : public OSObject
+{
+    OSDeclareAbstractStructors(IONDRV)
+	
+public:
+    virtual IOReturn getSymbol( const char * symbolName,
+							   IOLogicalAddress * address ) = 0;
+	
+    virtual const char * driverName( void ) = 0;
+	
+    virtual IOReturn doDriverIO( UInt32 commandID, void * contents,
+								UInt32 commandCode, UInt32 commandKind ) = 0;
+};
 
 class NDRVHD : public IONDRV
 {
@@ -30,7 +38,6 @@ private:
 	IODisplayModeID					*modeIDs;
 	IODetailedTimingInformationV2	*modeTimings;
 	Fixed							*refreshRates;
-	DisplayModePtr					startMode;
 	
     void *	fAddress;
     UInt32	fRowBytes;
@@ -45,22 +52,15 @@ private:
 	
 	GammaTbl		*gTable;
 	
-	IOService		*fNub;
-    IOMemoryMap		*IOMap;
-    IOMemoryMap		*FBMap;
-	RegEntryID		pciTag;
-	pciVideoRec		PciInfo;
+	int				nubIndex;
 	bool			RHDReady;
-	UserOptions		options;
-	RHDMemoryMap	memoryMap;
-	bool			debugMode;
+	UserOptions		*options;
 	
 	UInt32			fLastPowerState;
-	UInt32			fLastBacklightLevel;
 	
 public:
 	
-    static IONDRV * fromRegistryEntry( IORegistryEntry * regEntry, IOService * provider );
+    static IONDRV * fromRegistryEntry( IOService * nub );
 	
     virtual void free( void );
 	
@@ -71,7 +71,11 @@ public:
 	
     virtual IOReturn doDriverIO( UInt32 commandID, void * contents,
 								UInt32 commandCode, UInt32 commandKind );
-	
+/*
+	bool hasDDCConnect( void );
+	UInt8 *getDDCBlock( void );
+	bool isInternalDisplay(void);
+*/
 private:
 	
     static bool getUInt32Property( IORegistryEntry * regEntry, const char * name,
@@ -82,19 +86,14 @@ private:
 };
 
 
-enum {
-	cscSetBackLightLevel = 100
-};
-
-enum {
-	cscGetBackLightLevel = 100
-};
-
 class RadeonHD : public IONDRVFramebuffer
 {
     OSDeclareDefaultStructors(RadeonHD)
 	
 protected:
+
+private:
+	
 
 public:
 	/*! @function setCursorImage
@@ -118,6 +117,9 @@ public:
     //virtual IOReturn setCursorState( SInt32 x, SInt32 y, bool visible );
 	
     // Controller attributes
+	
+    virtual IOService * probe(  IOService *     provider,
+							  SInt32 *        score );
 	
     virtual IOReturn setAttribute( IOSelect attribute, uintptr_t value );
     virtual IOReturn getAttribute( IOSelect attribute, uintptr_t * value );
@@ -149,6 +151,19 @@ public:
 	
     virtual IOReturn getAttributeForConnection( IOIndex connectIndex,
 											   IOSelect attribute, uintptr_t  * value );
+	
+    virtual IOReturn setDisplayMode( IODisplayModeID displayMode,
+									IOIndex depth );
+/*	
+    virtual bool hasDDCConnect( IOIndex connectIndex );
+	
+	virtual IOReturn getDDCBlock( IOIndex, // connectIndex
+								 UInt32 blockNumber,
+								 IOSelect blockType,
+								 IOOptionBits options,
+								 UInt8 * data, IOByteCount * length );
+*/ 
+	
 };
 
 #endif /* ! _RADEONHD_H */

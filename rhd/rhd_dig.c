@@ -153,10 +153,7 @@ LVDSSetBacklight(struct rhdOutput *Output)
 
     RHDFUNC(Output);
 
-	if (level < 30) {
-		if (xf86Screens[0]->options->BackLightLevel < 30) return;
-		level = xf86Screens[0]->options->BackLightLevel;
-	}
+	if (level < 1) return;
 	LOG("%s: trying to set BL_MOD_LEVEL to: %d\n", __func__, level);
 	RHDRegMask(Output, RV620_LVTMA_PWRSEQ_REF_DIV,
 			   0x144 << LVTMA_BL_MOD_REF_DI_SHIFT,
